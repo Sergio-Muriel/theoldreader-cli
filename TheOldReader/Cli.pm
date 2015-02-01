@@ -287,4 +287,15 @@ sub mark_read()
     }
 }
 
+sub watch()
+{
+    my ($self, @params) = @_;
+    while(1)
+    {
+        $self->unread();
+        $self->output_string("Wait for ".TheOldReader::Constants::WAIT_WATCH);
+        sleep(TheOldReader::Constants::WAIT_WATCH);
+    }
+}
+
 1;

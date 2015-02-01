@@ -75,6 +75,13 @@ You can use the 'last' or 'unread' commands, followed by the label to display on
 
     $ ./reader.pl last user/-/label/news-big
 
+### Watch / Wait for new items
+
+You can wait for new items to by using the 'watch' command. Basically it is loop that never ends, until you press CTRL+C.
+
+    $ ./reader.pl watch
+    ... unread items  displayed as they arrived
+
 ### List unread feeds
 
 To display the name of the feeds that have unread items:

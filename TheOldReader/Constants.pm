@@ -8,6 +8,7 @@ use parent qw(Exporter);
 use constant DEFAULT_MAX => 10;
 use constant DEFAULT_HOST => 'http://theoldreader.com';
 use constant DEFAULT_CONFIG => 'global.conf';
+use constant WAIT_WATCH => 120;
 
 use constant LOGIN_PATH => '/accounts/ClientLogin';
 use constant STATUS => '/reader/api/0/status?output=json';
