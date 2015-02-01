@@ -41,7 +41,7 @@ sub new
 sub help()
 {
     my ($self) = @_;
-    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds ]");
+    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch ]");
     $self->output_string("");
 
     $self->output_string("Available commands:");
@@ -53,6 +53,7 @@ sub help()
         "mark_read [item/feed/label]:\tMark as read an item",
         "subscription_list:\tList of subscribed urls",
         "unread_feeds\tList feed names with unread items",
+        "watch\tDisplay unread items when they arrive, until CTRl+C is pressed",
     );
     $self->output_list(@list);
     $self->output_string("");
