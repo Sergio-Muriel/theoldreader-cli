@@ -1,18 +1,18 @@
 package TheOldReader::Cli;
 
 use Exporter;
+use Storable;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-use Data::Dumper;
 use IO::Prompt;
 
 $VERSION     = 1.00;
-@ISA         = qw(Exporter);
+@ISA         = qw(Exporter TheOldReader::Config);
 @EXPORT      = ();
 
 use strict;
 use warnings;
+use TheOldReader::Config;
 use TheOldReader::Api;
-use TheOldReader::Gui;
 use Carp qw(croak);
 use Data::Dumper;
 
@@ -47,7 +47,7 @@ sub help()
 
     $self->output_string("Available commands:");
     my @list= (
-        "create_config\t\tPrompt for username and password to get auth token",
+        "create_config:\tPrompt for username and password to get auth token",
         "unread [feed_id]:\tDisplay unread items (of the feed or all)",
         "last [feed_id]:\tDisplay last items (of the feed, or all)",
         "labels:\tDisplay labels",
@@ -87,26 +87,6 @@ sub create_config()
     $self->output_string("File ".$self->{'config'}." created.");
 }
 
-sub read_config()
-{
-    my ($self) = @_;
-    # Read configuration
-    if(!-f $self->{'config'})
-    {
-        return $self->output_error("Error: configuration file ".$self->{'config'}."  not found.");
-    }
-    if(!-r $self->{'config'})
-    {
-        return $self->output_error("Error: cannot read file ".$self->{'config'});
-    }
-    open(CONFIG, $self->{'config'});
-    while(<CONFIG>)
-    {
-        /^token:(.*)$/ and $self->{'token'}=$1;
-        /^max_items_displayed:(\d+)$/ and $self->{'max_items_displayed'}=$1;
-    }
-    close(CONFIG);
-}
 
 sub output_list()
 {
@@ -127,14 +107,29 @@ sub output_string()
     print $string."\n";
 }
 
+sub subscription_list()
+{
+    my ($self) = @_;
+
+    my $list =  $self->{'reader'}->subscription_list();
+    my @urls = ();
+    foreach my $ref(keys %{$list})
+    {
+        push(@urls, $$list{$ref}{'url'});
+    }
+    $self->output_string("Feed urls:");
+    $self->output_list(@urls);
+    $self->save_cache("subscription_list",$list);
+    return $list;
+}
+
 sub unread_feeds()
 {
     my ($self) = @_;
     my $list =  $self->{'reader'}->unread_feeds();
     my $unread_counts =  $$list{'unreadcounts'};
     my @list = ();
-
-    my $subscription_list = $self->{'reader'}->subscription_list();
+    my $subscription_list = $self->subscription_list();
     foreach my $ref(@{$unread_counts})
     {
         my $id = $$ref{'id'};
@@ -215,19 +210,6 @@ sub ask_mark_read()
 }
 
 
-sub subscription_list()
-{
-    my ($self) = @_;
-
-    my $list =  $self->{'reader'}->subscription_list();
-    my @urls = ();
-    foreach my $ref(keys %{$list})
-    {
-        push(@urls, $$list{$ref}{'url'});
-    }
-    $self->output_string("Feed urls:");
-    $self->output_list(@urls);
-}
 
 sub labels()
 {
@@ -242,6 +224,7 @@ sub labels()
     }
     $self->output_list(@labels);
     $self->output_string("");
+    $self->save_cache("labels",$list);
 }
 
 sub last()
@@ -308,11 +291,6 @@ sub watch()
     }
 }
 
-sub gui
-{
-    my ($self, @params) = @_;
-    $self->{'gui'} = new TheOldReader::Gui();
-    $self->{'gui'}->loop();
-}
+
 
 1;

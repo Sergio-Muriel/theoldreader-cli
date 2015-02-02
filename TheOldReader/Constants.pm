@@ -6,6 +6,7 @@ use parent qw(Exporter);
 
 
 use constant DEFAULT_MAX => 10;
+use constant CACHE_DIR => './cache/';
 use constant DEFAULT_HOST => 'http://theoldreader.com';
 use constant DEFAULT_CONFIG => 'global.conf';
 use constant WAIT_WATCH => 120;
