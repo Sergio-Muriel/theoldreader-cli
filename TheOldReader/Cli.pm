@@ -12,6 +12,7 @@ $VERSION     = 1.00;
 use strict;
 use warnings;
 use TheOldReader::Api;
+use TheOldReader::Gui;
 use Carp qw(croak);
 use Data::Dumper;
 
@@ -305,6 +306,13 @@ sub watch()
             sleep(TheOldReader::Constants::WAIT_WATCH);
         }
     }
+}
+
+sub gui
+{
+    my ($self, @params) = @_;
+    $self->{'gui'} = new TheOldReader::Gui();
+    $self->{'gui'}->loop();
 }
 
 1;

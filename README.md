@@ -9,10 +9,11 @@ The following modules are used by the package:
 * JSON
 * LWP::UserAgent
 * IO::Prompt
+* Curses::UI
 
 On debian you can install the packages using the apt command:
 
-    $ apt-get install libjson-perl libwww-perl libio-prompt-perl
+    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl
 
 ## First use
 
