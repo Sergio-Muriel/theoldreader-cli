@@ -252,14 +252,7 @@ sub mark_read()
 {
     my ($self,$ids_ref) = @_;
     my @ids;
-    if(ref($ids_ref) eq 'Array')
-    {
-        @ids = @{$ids_ref};
-    }
-    else
-    {
-        @ids = ($ids_ref);
-    }
+    @ids = @{$ids_ref};
 
     my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
     my %form = ();

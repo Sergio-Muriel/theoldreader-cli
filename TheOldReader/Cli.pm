@@ -276,7 +276,7 @@ sub mark_read()
     my ($self, @params) = @_;
     my $ids_ref = shift(@params);
     my @ids;
-    if(ref($ids_ref) eq 'Array')
+    if(ref($ids_ref) eq 'ARRAY')
     {
         @ids = @{$ids_ref};
     }
