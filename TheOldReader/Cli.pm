@@ -174,7 +174,6 @@ sub unread()
     {
         $id="user/-/state/com.google/read";
         $mark_read_id ="user/-/state/com.google/reading-list";
-
     }
     my $items = $self->{'reader'}->unread($id, $self->{'max_items_displayed'});
     my @hash_ids = @{$$items{'itemRefs'}};
@@ -190,25 +189,27 @@ sub unread()
         {
             $self->display_feed($_);
         }
-        $self->ask_mark_read($mark_read_id);
+        return $self->ask_mark_read(\@ids);
     }
+    return 0;
 }
 
 sub ask_mark_read()
 {
     my ($self, @params) = @_;
-    my $id = shift(@params);
+    my $ids_ref = shift(@params);
+    my @ids = @{$ids_ref};
 
     my $mark_read;
     
     do 
     {
-        $mark_read = prompt('Mark items as read? [O/n]: ');
+        $mark_read = prompt('Mark '.@{$ids_ref}.' items as read? [O/n]: ');
     } while ($mark_read !~ /^[On]?$/i);
 
     if($mark_read=~ /^O?$/i)
     {
-        return $self->mark_read($id);
+        return $self->mark_read($ids_ref);
     }
 }
 
@@ -272,19 +273,25 @@ sub last()
 sub mark_read()
 {
     my ($self, @params) = @_;
-    my $id = shift(@params);
-    if(!$id)
+    my $ids_ref = shift(@params);
+    my @ids;
+    if(ref($ids_ref) eq 'Array')
     {
-        return 0;
-    }
-    my $content = $self->{'reader'}->mark_read($id);
-    if($content eq "OK")
-    {
-        $self->output_string("Feed $id marked as read.");
+        @ids = @{$ids_ref};
     }
     else
     {
-        $self->output_error("Error marking feed $id as read.");
+        @ids = ($ids_ref);
+    }
+
+    my $content = $self->{'reader'}->mark_read($ids_ref);
+    if($content eq "OK")
+    {
+        $self->output_string("Feed(s) marked as read.");
+    }
+    else
+    {
+        $self->output_error("Error marking feed(s) as read.");
     }
 }
 
@@ -293,8 +300,10 @@ sub watch()
     my ($self, @params) = @_;
     while(1)
     {
-        $self->unread();
-        sleep(TheOldReader::Constants::WAIT_WATCH);
+        if(!$self->unread())
+        {
+            sleep(TheOldReader::Constants::WAIT_WATCH);
+        }
     }
 }
 

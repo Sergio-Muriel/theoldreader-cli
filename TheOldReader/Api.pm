@@ -250,17 +250,26 @@ sub labels()
 # Get last items
 sub mark_read()
 {
-    my ($self,$item) = @_;
+    my ($self,$ids_ref) = @_;
+    my @ids;
+    if(ref($ids_ref) eq 'Array')
+    {
+        @ids = @{$ids_ref};
+    }
+    else
+    {
+        @ids = ($ids_ref);
+    }
 
-    my $url = $self->{'host'}.TheOldReader::Constants::MARK_ALL;
-    return $self->req(
-        POST($url,
-            {
-                's' => $item,
-                'a' => 'user/-/state/com.google/read'
-            }),
-        'raw_result'
-    );
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
+    my %form = ();
+    $form{'a'} = 'user/-/state/com.google/read';
+    $form{'i'} = ();
+    foreach(@ids)
+    {
+        push(@{$form{'i'}}, $_);
+    }
+    return $self->req(POST($url, \%form), 'raw_result');
 }
 
 
