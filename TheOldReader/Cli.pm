@@ -13,6 +13,7 @@ use strict;
 use warnings;
 use TheOldReader::Config;
 use TheOldReader::Api;
+use TheOldReader::Cache;
 use Carp qw(croak);
 use Data::Dumper;
 
@@ -31,6 +32,8 @@ sub new
     }
 
     $self->read_config();
+
+    $self->{'cache'} = TheOldReader::Cache->new();
 
     $self->{'reader'} = TheOldReader::Api->new(
        'host' => TheOldReader::Constants::DEFAULT_HOST,
@@ -112,6 +115,10 @@ sub subscription_list()
     my ($self) = @_;
 
     my $list =  $self->{'reader'}->subscription_list();
+    if(!$list)
+    {
+        return $self->output_error("Cannot get subscription list. Check out configuration.");
+    }
     my @urls = ();
     foreach my $ref(keys %{$list})
     {
@@ -119,7 +126,7 @@ sub subscription_list()
     }
     $self->output_string("Feed urls:");
     $self->output_list(@urls);
-    $self->save_cache("subscription_list",$list);
+    $self->{'cache'}->save_cache("subscription_list",$list);
     return $list;
 }
 
@@ -127,6 +134,10 @@ sub unread_feeds()
 {
     my ($self) = @_;
     my $list =  $self->{'reader'}->unread_feeds();
+    if(!$list)
+    {
+        return $self->output_error("Cannot get unread feeds. Check out configuration.");
+    }
     my $unread_counts =  $$list{'unreadcounts'};
     my @list = ();
     my $subscription_list = $self->subscription_list();
@@ -172,6 +183,10 @@ sub unread()
         $mark_read_id ="user/-/state/com.google/reading-list";
     }
     my $items = $self->{'reader'}->unread($id, $self->{'max_items_displayed'});
+    if(!$items)
+    {
+        return $self->output_error("Cannot get unread items. Check out configuration.");
+    }
     my @hash_ids = @{$$items{'itemRefs'}};
     my @ids = ();
     foreach(@hash_ids)
@@ -215,6 +230,10 @@ sub labels()
 {
     my ($self) = @_;
     my $list =  $self->{'reader'}->labels();
+    if(!$list)
+    {
+        return $self->output_error("Cannot get labels. Check out configuration.");
+    }
     $self->output_string("List of labels:");
     my @labels = ();
 
@@ -238,6 +257,10 @@ sub last()
     }
 
     my $items = $self->{'reader'}->last($id, $self->{'max_items_displayed'});
+    if(!$items)
+    {
+        return $self->output_error("Cannot get last items. Check out configuration.");
+    }
     my @hash_ids = @{$$items{'itemRefs'}};
     my @ids = ();
     foreach(@hash_ids)

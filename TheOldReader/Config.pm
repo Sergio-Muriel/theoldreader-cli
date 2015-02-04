@@ -36,15 +36,5 @@ sub read_config()
     close(CONFIG);
 }
 
-sub save_cache()
-{
-    my ($self,$name,$hash_ref) = @_;
-    if(!-d TheOldReader::Constants::CACHE_DIR)
-    {
-        mkdir(TheOldReader::Constants::CACHE_DIR);
-    }
-    store($hash_ref, TheOldReader::Constants::CACHE_DIR.$name);
-    #$hashref = retrieve('file');
-}
 
 1;

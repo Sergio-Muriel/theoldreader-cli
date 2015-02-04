@@ -14,6 +14,7 @@ use Carp qw(croak);
 use TheOldReader::Config;
 use TheOldReader::Api;
 use TheOldReader::Constants;
+use TheOldReader::Cache;
 
 use Curses::UI;
 use Data::Dumper;
@@ -34,6 +35,7 @@ sub new
     }
 
     $self->read_config();
+    $self->{'cache'} = TheOldReader::Cache->new();
 
     $self->{'reader'} = TheOldReader::Api->new(
        'host' => TheOldReader::Constants::DEFAULT_HOST,
@@ -42,10 +44,23 @@ sub new
     return $self;
 }
 
-sub labels()
+sub error()
+{
+    my ($self, $message) = @_;
+    print STDERR "Error: $message\n";
+}
+
+sub fetch_labels()
 {
     my ($self) = @_;
+    print "Fetching labels from server...\n";
+
     my $list =  $self->{'reader'}->labels();
+    if(!$list)
+    {
+        $self->error("Cannot get labels from server. Check configuration.");
+        exit();
+    }
     my %return = (
         'labels' => {},
         'values' => []
@@ -54,18 +69,28 @@ sub labels()
     foreach my $ref(keys %{$list})
     {
         $return{'labels'}{$ref} = $$list{$ref};
-        push($return{'values'}, $ref);
+        push(@{$return{'values'}}, $ref);
     }
-    $self->save_cache("labels",$list);
-    return %return;
+    $self->{'cache'}->save_cache("labels",$list);
+    $self->{'labels'} = \%return;
 }
 
+sub update_labels()
+{
+    my ($self, @params) = @_;
+    my %labels = %{$self->{'labels'}};
+
+    $self->{'left_container'}->labels($labels{'labels'});
+    $self->{'left_container'}->values($labels{'values'});
+    $self->{'cui'}->draw();
+}
 
 
 sub loop
 {
     my ($self, @params) = @_;
-    my %labels = $self->labels();
+
+    $self->fetch_labels();
 
     $self->{'cui'} =new Curses::UI(
         -color_support => 1,
@@ -90,32 +115,39 @@ sub loop
         -text => 'The Old Reader - GUI'
     );
 
-    $self->{'bottombar'} = $self->{'window'}->add(
-        'bottombar',
-        'Dialog::Status',
-        -message => 'test'
+
+    $self->{'container'} = $self->{'window'}->add(
+        'container',
+        'Container',
+        -border => 1,
+        -y    => 1,
+        -bfg  => 'white',
+        -values => [ 1 ],
+        -labels => { 1 => 'Loading...'}
     );
 
-    $self->{'left_container'} = $self->{'window'}->add(
+    $self->{'left_container'} = $self->{'container'}->add(
         'left_container',
         'Listbox',
-        -width => 20,
-        -border => 1,
-        -y    => 1,
+        -width => 30,
+        -y    => 0,
         -bfg  => 'white',
-        -labels => $labels{'labels'},
-        -values => $labels{'values'}
+        -values => [ 1 ],
+        -labels => { 1 => 'Loading...'}
     );
 
-    $self->{'right_container'} = $self->{'window'}->add(
+    $self->update_labels();
+
+    #$self->{'cui'}->set_timer('update_time', sub { $self->update_labels(); } );
+
+    $self->{'right_container'} = $self->{'container'}->add(
         'right_container',
         'Listbox',
-        -border => 1,
-        -y    => 1,
-        -x => 20,
-        -bg => 'black',
+        -border => 0,
+        -y    => 0,
+        -x => 30,
+        -bg => 'blue',
         -fg => 'white',
-        -bfg  => 'white',
         -labels => {
                 1 => 'one',
                 2 => 'two',
