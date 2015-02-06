@@ -12,6 +12,7 @@ use LWP::UserAgent;
 use JSON;
 use Carp qw(croak);
 use TheOldReader::Constants;
+use TheOldReader::Cache;
 
 use Data::Dumper;
 use URI;
@@ -25,6 +26,8 @@ sub new
 {
     my ($class, %params) = @_;
     my $self = bless { %params }, $class;
+
+    $self->{'cache'} = TheOldReader::Cache->new();
 
     my $ua = LWP::UserAgent->new;
     $ua->agent("irssi-theoldreader/0.1");
@@ -243,6 +246,7 @@ sub labels()
                 $self->{'labels'}{${$_}{'id'}} = ${$_}{'label'};
             }
         }
+        $self->{'cache'}->save_cache('labels', $self->{'labels'});
     }
     return $self->{'labels'};
 }

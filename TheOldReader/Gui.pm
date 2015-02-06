@@ -17,7 +17,7 @@ use TheOldReader::Constants;
 use TheOldReader::Cache;
 
 use threads;
-use Curses::UI;
+use Curses::UI::POE;
 use Data::Dumper;
 
 # Create new instance
@@ -113,10 +113,25 @@ sub init
 sub build_gui()
 {
     my ($self, @params) = @_;
-    $self->{'cui'} =new Curses::UI(
+
+    $self->{'cui'} = new Curses::UI::POE(
         -color_support => 1,
+        inline_states => {
+            _start => sub {
+                $_[HEAP]->{next_alarm_time} = int(time()) + 1;
+                $_[KERNEL]->alarm(tick => $_[HEAP]->{next_alarm_time});
+            },
+            tick => sub{
+                $self->loop_event();
+                $_[HEAP]->{next_alarm_time}++;
+                $_[KERNEL]->alarm(tick => $_[HEAP]->{next_alarm_time});
+            },
+
+            _stop => sub {
+                #$_[HEAP]->dialog("Good bye!");
+            },
+        }
     );
-    # $self->{'share'}->set('cui', $self->{'cui'});
 
     $self->{'window'} = $self->{'cui'}->add(
         'win1', 'Window',
@@ -191,9 +206,8 @@ sub build_gui()
     $self->{'bottombar'}->focus();
     $self->{'left_container'}->focus();
     $self->{'right_container'}->draw();
-
-    $self->{'cui'}->set_timer('timer',sub{ $self->loop_event()});
 }
+
 sub run_gui()
 {
     my ($self) = @_;
@@ -210,6 +224,7 @@ sub add_background_job()
 }
 
 
+# Runned every 1 second to check if there is something from background job to run
 sub loop_event()
 {
     my ($self, @params) = @_;
