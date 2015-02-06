@@ -16,6 +16,7 @@ use TheOldReader::Api;
 use TheOldReader::Constants;
 use TheOldReader::Cache;
 
+use threads;
 use Curses::UI;
 use Data::Dumper;
 
@@ -36,6 +37,7 @@ sub new
 
     $self->read_config();
     $self->{'cache'} = TheOldReader::Cache->new();
+    $self->{'share'} = $params{'share'};
 
     $self->{'reader'} = TheOldReader::Api->new(
        'host' => TheOldReader::Constants::DEFAULT_HOST,
@@ -50,51 +52,71 @@ sub error()
     print STDERR "Error: $message\n";
 }
 
-sub fetch_labels()
-{
-    my ($self) = @_;
-    print "Fetching labels from server...\n";
-
-    my $list =  $self->{'reader'}->labels();
-    if(!$list)
-    {
-        $self->error("Cannot get labels from server. Check configuration.");
-        exit();
-    }
-    my %return = (
-        'labels' => {},
-        'values' => []
-    );
-
-    foreach my $ref(keys %{$list})
-    {
-        $return{'labels'}{$ref} = $$list{$ref};
-        push(@{$return{'values'}}, $ref);
-    }
-    $self->{'cache'}->save_cache("labels",$list);
-    $self->{'labels'} = \%return;
-}
 
 sub update_labels()
 {
     my ($self, @params) = @_;
+    $self->{'labels'} = $self->{'cache'}->load_cache('labels');
+    if(!$self->{'labels'})
+    {
+        return;
+    }
     my %labels = %{$self->{'labels'}};
 
-    $self->{'left_container'}->labels($labels{'labels'});
-    $self->{'left_container'}->values($labels{'values'});
-    $self->{'cui'}->draw();
+    my %gui_labels = (
+        'labels' => {},
+        'values' => []
+    );
+
+    foreach my $ref(keys %labels)
+    {
+        $gui_labels{'labels'}{$ref} = $labels{$ref};
+        push(@{$gui_labels{'values'}}, $ref);
+    }
+
+    $self->{'left_container'}->labels($gui_labels{'labels'});
+    $self->{'left_container'}->values($gui_labels{'values'});
+    $self->{'statusbar'}->text("Labels updated.");
+
+    $self->log("Update gui?");
+    $self->{'statusbar'}->text("OK!");
+
+    $self->{'container'}->draw();
+    #$self->{'bottombar'}->focus();
+    #$self->{'left_container'}->focus();
+    $self->{'cui'}->draw(1);
+    $self->log("Final!");
+}
+sub nada
+{
+    my ($self, @params) = @_;
 }
 
 
-sub loop
+sub init
 {
     my ($self, @params) = @_;
 
-    $self->fetch_labels();
 
+    # Build gui
+    $self->build_gui();
+
+    # Run background jobs
+    $self->add_background_job("labels", "Updating labels...");
+
+
+    # Loo gui
+    $self->run_gui();
+
+}
+
+sub build_gui()
+{
+    my ($self, @params) = @_;
     $self->{'cui'} =new Curses::UI(
         -color_support => 1,
     );
+    # $self->{'share'}->set('cui', $self->{'cui'});
 
     $self->{'window'} = $self->{'cui'}->add(
         'win1', 'Window',
@@ -120,31 +142,24 @@ sub loop
         'container',
         'Container',
         -border => 1,
+        -height => $ENV{'LINES'} - 2,
         -y    => 1,
-        -bfg  => 'white',
-        -values => [ 1 ],
-        -labels => { 1 => 'Loading...'}
+        -bfg  => 'white'
     );
 
     $self->{'left_container'} = $self->{'container'}->add(
         'left_container',
         'Listbox',
         -width => 30,
-        -y    => 0,
         -bfg  => 'white',
-        -values => [ 1 ],
-        -labels => { 1 => 'Loading...'}
+        -values => [ 1,2 ],
+        -labels => { 1 => 'Loading...', 2 => ''}
     );
-
-    $self->update_labels();
-
-    #$self->{'cui'}->set_timer('update_time', sub { $self->update_labels(); } );
 
     $self->{'right_container'} = $self->{'container'}->add(
         'right_container',
         'Listbox',
         -border => 0,
-        -y    => 0,
         -x => 30,
         -bg => 'blue',
         -fg => 'white',
@@ -155,10 +170,74 @@ sub loop
         -values => [ 1, 2 ]
     );
 
+    # FOOTER
+    $self->{'bottombar'} = $self->{'window'}->add(
+        'bottombar',
+        'Container',
+        -width => $ENV{'COLS'},
+        -y    => $ENV{'LINES'}-1,
+        -height => 1,
+        -bg => 'black',
+        -fg => 'white'
+    );
+    $self->{'statusbar'} = $self->{'bottombar'}->add(
+        'text',
+        'Label',
+        -bold => 1,
+        -text => 'Loading...'
+    );
+
     $self->bind_keys();
+    $self->{'bottombar'}->focus();
     $self->{'left_container'}->focus();
     $self->{'right_container'}->draw();
+
+    $self->{'cui'}->set_timer('timer',sub{ $self->loop_event()});
+}
+sub run_gui()
+{
+    my ($self) = @_;
     $self->{'cui'}->mainloop();
+}
+
+sub add_background_job()
+{
+    my ($self, $job, $status_txt) = @_;
+    $self->log($self->{'share'}),
+    $self->{'statusbar'}->text($status_txt);
+
+    $self->{'share'}->add("background_job", $job);
+}
+
+
+sub loop_event()
+{
+    my ($self, @params) = @_;
+    $self->log("in loop event");
+    
+    my $command = $self->{'share'}->shift('gui_job');
+    if($command)
+    {
+        $self->log("received command $command");
+        if($self->can($command))
+        {
+            $self->log("Running command $command");
+            $self->$command;
+            $self->log("Command $command done.");
+        }
+        else
+        {
+            $self->log("FATAL ERROR: unknown command $command");
+        }
+    }
+}
+
+sub log()
+{
+    my ($self, $command) = @_;
+    open(WRITE,">>log"),
+    print WRITE "GUI: $command\n";
+    close WRITE;
 }
 
 sub bind_keys()
@@ -167,6 +246,7 @@ sub bind_keys()
     my $exit_ref = sub { $self->exit_dialog(); };
 
     $self->{'cui'}->set_binding($exit_ref, "\cC");
+    $self->{'cui'}->set_binding($exit_ref, "q");
     $self->{'cui'}->set_binding($exit_ref, "\cQ");
 }
 sub exit_dialog()

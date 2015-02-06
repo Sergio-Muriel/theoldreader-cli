@@ -4,7 +4,11 @@ use warnings;
 use Getopt::Long;
 use Data::Dumper;
 use Carp qw(croak);
+use TheOldReader::GuiShared;
+use TheOldReader::GuiBackground;
 use TheOldReader::Gui;
+use threads;
+use threads::shared;
 
 
 my $config;
@@ -30,8 +34,15 @@ sub params
     }
 }
 
-my $client = TheOldReader::Gui->new(
-   'config' => $config,
+my $obj = TheOldReader::GuiShared->new(
+        'background_job' => [],
+        'gui_job' => []
 );
-$client->loop();
+
+my $client = TheOldReader::Gui->new( 'config' => $config, 'share' => $obj);
+my $background = TheOldReader::GuiBackground->new( 'config' => $config, 'share' => $obj);
+
+$background->init();
+$client->init();
+
 
