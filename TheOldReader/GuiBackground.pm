@@ -62,6 +62,14 @@ sub init
     $trd->detach();
 }
 
+sub unread_feeds()
+{
+    my ($self, @params) = @_;
+    # Init labels
+    $self->{'reader'}->unread_feeds();
+    $self->{'share'}->add('gui_job','update_count');
+}
+
 sub labels()
 {
     my ($self, @params) = @_;

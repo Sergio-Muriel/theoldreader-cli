@@ -53,43 +53,102 @@ sub error()
 }
 
 
-sub update_labels()
+sub call_count
 {
     my ($self, @params) = @_;
-    $self->{'labels'} = $self->{'cache'}->load_cache('labels');
-    if(!$self->{'labels'})
+    $self->add_background_job("unread_feeds", "Updating count...");
+}
+
+sub update_count()
+{
+    my ($self, @params) = @_;
+
+    my $labels = $self->{'labels'};
+    if(!$labels)
     {
         return;
     }
-    my %labels = %{$self->{'labels'}};
+    my %counts= ();
+    if($self->{'counts'})
+    {
+        %counts = %{$self->{'counts'}};
+    }
 
+    my $cache_unread_feeds = $self->{'cache'}->load_cache('unread_feeds');
+    if(!$cache_unread_feeds)
+    {
+        return;
+    }
+
+    my $update=0;
+    foreach my $ref(@{$$cache_unread_feeds{'unreadcounts'}})
+    {
+        my $id = $$ref{'id'};
+        my $count = $$ref{'count'};
+        if(!$counts{$id} or $counts{$id} !=$count)
+        {
+            $counts{$id} = $count;
+            $update=1;
+        }
+    }
+    foreach my $ref(keys %{$labels->{'labels'}})
+    {
+        my $length = length($labels->{'labels'}{$ref});
+        if(!$counts{$ref})
+        {
+            $counts{$ref}=0;
+        }
+        my $num = " (".$counts{$ref}.")";
+        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length($labels->{'original_labels'}{$ref})-length($num));
+        $labels->{'labels'}{$ref} = substr($labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
+    }
+
+    if($update)
+    {
+        $self->{'left_container'}->labels($labels->{'labels'});
+        $self->{'container'}->draw();
+        $self->{'cui'}->draw(1);
+        $self->{'counts'} = \%counts;
+    }
+}
+
+sub update_labels()
+{
+    my ($self, @params) = @_;
+
+    my $labels = $self->{'cache'}->load_cache('labels');
+    if(!$labels)
+    {
+        return;
+    }
+
+    my %labels = %{$labels};
+    my %counts = ();
     my %gui_labels = (
         'labels' => {},
+        'original_labels' => {},
         'values' => []
     );
 
     foreach my $ref(keys %labels)
     {
-        $gui_labels{'labels'}{$ref} = $labels{$ref};
+        $gui_labels{'labels'}{$ref} = $labels->{$ref};
+        $gui_labels{'original_labels'}{$ref} = $labels->{$ref};
+
         push(@{$gui_labels{'values'}}, $ref);
     }
 
-    $self->{'left_container'}->labels($gui_labels{'labels'});
+    $self->{'labels'} = \%gui_labels;
+
+
     $self->{'left_container'}->values($gui_labels{'values'});
+    $self->{'left_container'}->labels($gui_labels{'labels'});
+
+    $self->{'labels'} = \%gui_labels;
     $self->{'statusbar'}->text("Labels updated.");
 
-    $self->log("Update gui?");
-    $self->{'statusbar'}->text("OK!");
-
     $self->{'container'}->draw();
-    #$self->{'bottombar'}->focus();
-    #$self->{'left_container'}->focus();
     $self->{'cui'}->draw(1);
-    $self->log("Final!");
-}
-sub nada
-{
-    my ($self, @params) = @_;
 }
 
 
@@ -118,13 +177,23 @@ sub build_gui()
         -color_support => 1,
         inline_states => {
             _start => sub {
-                $_[HEAP]->{next_alarm_time} = int(time()) + 1;
-                $_[KERNEL]->alarm(tick => $_[HEAP]->{next_alarm_time});
+                $_[HEAP]->{next_loop_event} = int(time()) + 1;
+                $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
+
+                $_[HEAP]->{next_count_event} = int(time()) + 3;
+                $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
             },
-            tick => sub{
+
+            loop_event_tick => sub{
                 $self->loop_event();
-                $_[HEAP]->{next_alarm_time}++;
-                $_[KERNEL]->alarm(tick => $_[HEAP]->{next_alarm_time});
+                $_[HEAP]->{next_loop_event}++;
+                $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
+            },
+
+            count_event_tick => sub{
+                $self->call_count();
+                $_[HEAP]->{next_count_event}+=TheOldReader::Constants::GUI_UPDATE;
+                $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
             },
 
             _stop => sub {
@@ -165,7 +234,7 @@ sub build_gui()
     $self->{'left_container'} = $self->{'container'}->add(
         'left_container',
         'Listbox',
-        -width => 30,
+        -width => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -bfg  => 'white',
         -values => [ 1,2 ],
         -labels => { 1 => 'Loading...', 2 => ''}
@@ -175,7 +244,7 @@ sub build_gui()
         'right_container',
         'Listbox',
         -border => 0,
-        -x => 30,
+        -x => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -bg => 'blue',
         -fg => 'white',
         -labels => {
@@ -217,7 +286,7 @@ sub run_gui()
 sub add_background_job()
 {
     my ($self, $job, $status_txt) = @_;
-    $self->log($self->{'share'}),
+    $self->log("Add job to bg: $job");
     $self->{'statusbar'}->text($status_txt);
 
     $self->{'share'}->add("background_job", $job);
@@ -228,12 +297,10 @@ sub add_background_job()
 sub loop_event()
 {
     my ($self, @params) = @_;
-    $self->log("in loop event");
     
     my $command = $self->{'share'}->shift('gui_job');
     if($command)
     {
-        $self->log("received command $command");
         if($self->can($command))
         {
             $self->log("Running command $command");
