@@ -79,34 +79,89 @@ sub labels()
 
 }
 
+sub last()
+{
+    my ($self, @params) = @_;
+    my $params = shift(@params);
+
+    my ($id, $only_unread) = ($params =~ /^(\S+)\s+(.*)$/);
+    if(!$id)
+    {
+        $id=TheOldReader::Constants::FOLDER_ALL;
+    }
+
+    my $items;
+    if($only_unread)
+    {
+        $items = $self->{'reader'}->unread($id, $self->{'max_items_displayed'});
+    }
+    else
+    {
+        $items = $self->{'reader'}->last($id, $self->{'max_items_displayed'});
+    }
+
+    $self->{'cache'}->save_cache("last $id", $items);
+    if(!$items)
+    {
+        return $self->output_error("Cannot get last items. Check out configuration.");
+    }
+    my @hash_ids = @{$$items{'itemRefs'}};
+    my @ids = ();
+    foreach(@hash_ids)
+    {
+        my $id= $_->{'id'};
+        push(@ids, $id);
+    }
+
+    # Get content of uncached items
+    if(@hash_ids)
+    {
+        my $contents = $self->{'reader'}->contents(@ids);
+        if($contents)
+        {
+            foreach(@{$$contents{'items'}})
+            {
+                $self->{'cache'}->save_cache("item ".$_->{'id'}, $_);
+            }
+        }
+    }
+
+    # Dont wait for content items to load list
+    $self->{'share'}->add('gui_job','update_last '.$id);
+}
+
+
 sub add_gui_job()
 {
     my ($self, $job) = @_;
-    $self->log($self->{'share'}),
     $self->{'share'}->add("gui_job", $job);
 }
 
 sub thread_init()
 {
-    my ($self, @params) = @_;
+    my ($self) = @_;
 
     while(1)
     {
-        my $command = $self->{'share'}->shift('background_job');
-        if($command)
+        my $received = $self->{'share'}->shift('background_job');
+        if($received)
         {
+            my ($command, $params)  = ($received=~ /^(\S+)(?:$|\s(.*)$)/);
             if($self->can($command))
             {
-                $self->log("Running command $command");
-                $self->$command;
-                $self->log("Command $command done.");
+                #$self->log("Running command $received");
+                $self->$command($params);
+                #$self->log("Command $received done.");
             }
             else
             {
                 $self->log("FATAL ERROR: unknown command $command");
             }
         }
-        select(undef,undef,undef,0.5);
+        else
+        {
+            select(undef,undef,undef,0.2);
+        }
     }
 }
 

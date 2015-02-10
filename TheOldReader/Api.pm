@@ -131,7 +131,9 @@ sub status_result()
 sub unread_feeds()
 {
     my ($self) = @_;
-    $self->req(GET($self->{'host'}.TheOldReader::Constants::UNREAD_COUNTS), 'json_result');
+    my $list = $self->req(GET($self->{'host'}.TheOldReader::Constants::UNREAD_COUNTS), 'json_result');
+    $self->{'cache'}->save_cache('unread_feeds', $list);
+    return $list;
 }
 
 
@@ -188,20 +190,6 @@ sub user_info()
 }
 
 
-# Get last unread items
-sub unread()
-{
-    my ($self,$item, $max) = @_;
-
-    if(!$max)
-    {
-        $max=TheOldReader::Constants::DEFAULT_MAX;
-    }
-
-    my $url = $self->{'host'}.TheOldReader::Constants::ITEMS;
-    $url.= "&s=".$item."&n=$max&xt=user/-/state/com.google/read";
-    $self->req(GET($url), 'json_result');
-}
 
 # Get last items
 sub last()
@@ -218,16 +206,44 @@ sub last()
     $self->req(GET($url), 'json_result');
 }
 
+sub unread()
+{
+    my ($self,$item, $max) = @_;
+
+    if(!$max)
+    {
+        $max=TheOldReader::Constants::DEFAULT_MAX;
+    }
+
+    my $url = $self->{'host'}.TheOldReader::Constants::ITEMS;
+    $url.= "&s=".$item."&n=$max";
+    $url.="&xt=user/-/state/com.google/read";
+    $self->req(GET($url), 'json_result');
+}
+
 
 sub contents()
 {
     my ($self,@items)=  @_;
     my $url = $self->{'host'}.TheOldReader::Constants::CONTENTS;
+
+    my %form = ();
+    $form{'i'} = ();
+    $form{'i'} = ();
     foreach(@items)
     {
-        $url.= "&i=".$_;
+        push(@{$form{'i'}}, $_);
     }
-    $self->req(GET($url), 'json_result');
+    my $content = $self->req(POST($url, \%form), 'json_result');
+    return $content;
+}
+
+sub log()
+{
+    my ($self, $command) = @_;
+    open(WRITE,">>log"),
+    print WRITE "API $command\n";
+    close WRITE;
 }
 
 sub labels()

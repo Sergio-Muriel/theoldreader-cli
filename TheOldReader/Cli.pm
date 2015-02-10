@@ -82,11 +82,10 @@ sub create_config()
     }
 
     my $max_items_displayed = prompt('Max items displayed: ');
+    $self->{'token'} = $token;
+    $self->{'max_items_displayed'} = $max_items_displayed;
 
-    open(WRITE, ">".$self->{'config'});
-    print WRITE "token:$token\n";
-    print WRITE "max_items_displayed:$max_items_displayed\n";
-    close WRITE;
+    $self->save_config();
     $self->output_string("File ".$self->{'config'}." created.");
 }
 
@@ -180,7 +179,7 @@ sub unread()
     if(!$id)
     {
         $id="user/-/state/com.google/read";
-        $mark_read_id ="user/-/state/com.google/reading-list";
+        $mark_read_id = TheOldReader::Constants::FOLDER_ALL;
     }
     my $items = $self->{'reader'}->unread($id, $self->{'max_items_displayed'});
     if(!$items)
@@ -243,7 +242,6 @@ sub labels()
     }
     $self->output_list(@labels);
     $self->output_string("");
-    $self->save_cache("labels",$list);
 }
 
 sub last()

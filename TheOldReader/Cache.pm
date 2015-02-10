@@ -34,16 +34,36 @@ sub save_cache()
 {
     my ($self,$name,$hash_ref) = @_;
 
+    $name =~ s/\//_/g;
+
     store($hash_ref, $self->{'dir'}.$name);
 }
+sub check_cache()
+{
+    my ($self,$name) = @_;
+    $name =~ s/\//_/g;
+    return(-f $self->{'dir'}.$name);
+}
+
 sub load_cache()
 {
     my ($self,$name) = @_;
+
+    $name =~ s/\//_/g;
+
     if(-f $self->{'dir'}.$name)
     {
         return retrieve($self->{'dir'}.$name);
     }
     return undef;
+}
+
+sub log()
+{
+    my ($self, $command) = @_;
+    open(WRITE,">>log"),
+    print WRITE "CACHE $command\n";
+    close WRITE;
 }
 
 1;

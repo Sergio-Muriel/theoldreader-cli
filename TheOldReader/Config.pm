@@ -32,8 +32,26 @@ sub read_config()
     {
         /^token:(.*)$/ and $self->{'token'}=$1;
         /^max_items_displayed:(\d+)$/ and $self->{'max_items_displayed'}=$1;
+        /^only_unread:(\d*)$/ and $self->{'only_unread'}=$1;
     }
     close(CONFIG);
+}
+sub save_config()
+{
+    my ($self) = @_;
+    open(WRITE, ">".$self->{'config'});
+    print WRITE "token:".$self->{'token'}."\n";
+    print WRITE "max_items_displayed:".$self->{'max_items_displayed'}."\n";
+
+    if($self->{'only_unread'})
+    {
+        print WRITE "only_unread:".$self->{'only_unread'}."\n";
+    }
+    else
+    {
+        print WRITE "only_unread:0\n";
+    }
+    close WRITE;
 }
 
 
