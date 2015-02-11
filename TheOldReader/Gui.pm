@@ -115,7 +115,7 @@ sub update_count()
 {
     my ($self, @params) = @_;
 
-    $self->{'statusbar'}->text("Count updated");
+    $self->update_status("Count updated");
 
     my $labels = $self->{'labels'};
     if(!$labels)
@@ -153,14 +153,13 @@ sub update_count()
             $counts{$ref}=0;
         }
         my $num = " (".$counts{$ref}.")";
-        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length($labels->{'original_labels'}{$ref})-length($num));
-        $labels->{'labels'}{$ref} = substr($labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
+        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length("> ".$labels->{'original_labels'}{$ref})-length($num));
+        $labels->{'labels'}{$ref} = substr("> ".$labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
     }
 
     if($update)
     {
         $self->{'left_container'}->labels($labels->{'labels'});
-        $self->{'container'}->draw();
         $self->{'cui'}->draw(1);
         $self->{'counts'} = \%counts;
     }
@@ -207,7 +206,7 @@ sub update_labels()
     foreach my $ref(keys %labels)
     {
         $gui_labels{'labels'}{$ref} = "> ".$labels->{$ref};
-        $gui_labels{'original_labels'}{$ref} = "> ".$labels->{$ref};
+        $gui_labels{'original_labels'}{$ref} = $labels->{$ref};
 
         push(@{$gui_labels{'values'}}, $ref);
     }
@@ -225,12 +224,16 @@ sub update_labels()
     }
 
     $self->{'labels'} = \%gui_labels;
-    $self->{'statusbar'}->text("Labels updated.");
+    $self->update_status("Labels updated.");
 
-    $self->{'container'}->draw();
     $self->{'cui'}->draw(1);
+}
 
-    $self->{'left_data'} = \%gui_labels;
+sub update_status()
+{
+    my ($self, $text) = @_;
+    $self->{'statusbar'}->text("Labels updated.");
+    $self->{'content_statusbar'}->text("Labels updated.");
 }
 
 
@@ -413,19 +416,65 @@ sub build_content()
         -text => 'The Old Reader - Content of ...'
     );
 
+    $self->{'content_container'} = $self->{'content'}->add(
+        'content_container',
+        'Container',
+        -border => 1,
+        -height => $ENV{'LINES'} - 3,
+        -y    => 1,
+        -bfg  => 'white'
+    );
 
-    $self->{'content'} = $self->{'content'}->add(
+
+    $self->{'content_text'} = $self->{'content_container'}->add(
         'content_text',
         'TextViewer',
         -focusable => 1,
         -border => 0,
         -x => 0,
-        -y => 1,
-        -height => $ENV{'LINES'} - 3,
         -text => 'bla bla bla',
         -bg => 'blue',
         -fg => 'white',
         -text => 'My content'
+    );
+
+    # HELP Bar
+    $self->{'content_helpbar'} = $self->{'content'}->add(
+        'content_helpbar',
+        'Container',
+        -width => $ENV{'COLS'},
+        -y    => $ENV{'LINES'}-2,
+        -height => 1,
+        -bg => 'red',
+        -fg => 'white'
+    );
+
+    $self->{'content_helptext'} = $self->{'content_helpbar'}->add(
+        'content_helptext',
+        'Label',
+        -width => $ENV{'COLS'},
+        -bold => 1,
+        -fg => 'yellow',
+        -bg => 'blue',
+        -text => 'q:back n:next p:previous s:star/untar l:like/unlike'
+    );
+
+    # FOOTER
+    $self->{'content_bottombar'} = $self->{'content'}->add(
+        'content_bottombar',
+        'Container',
+        -width => $ENV{'COLS'},
+        -y    => $ENV{'LINES'}-1,
+        -height => 1,
+        -bg => 'black',
+        -fg => 'white'
+    );
+    $self->{'content_statusbar'} = $self->{'content_bottombar'}->add(
+        'content_statusbar',
+        'Label',
+        -width => $ENV{'COLS'},
+        -bold => 1,
+        -text => 'Loading...'
     );
 }
 
@@ -438,7 +487,7 @@ sub run_gui()
 sub add_background_job()
 {
     my ($self, $job, $status_txt) = @_;
-    $self->{'statusbar'}->text($status_txt);
+    $self->update_status($status_txt);
 
     $self->{'share'}->add("background_job", $job);
 }
@@ -463,7 +512,6 @@ sub update_list()
     $self->{'right_container'}->labels($gui_labels{'labels'});
 
     $self->{'list_data'} = \%gui_labels;
-    $self->{'container'}->draw();
     $self->{'cui'}->draw(1);
 
     $self->log("call last $id");
@@ -486,9 +534,147 @@ sub right_container_onchange()
 {
     my ($self) = @_;
 
-    # Check if need to load more (last selected)
-    $self->{'content'}->draw();
-    $self->{'content'}->focus();
+    my $id = $self->{'right_container'}->get_active_value();
+    $self->log("display item $id");
+    if($id)
+    {
+        # Check if need to load more (last selected)
+        $self->{'content'}->draw();
+        $self->{'content'}->focus();
+        $self->display_item($id);
+        $self->{'item_idx'} = $self->{'right_container'}->get_active_id();
+        $self->display_item($id);
+    }
+}
+sub display_item()
+{
+    my ($self,$id) = @_;
+
+    my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+    my $text="";
+    if($item)
+    {
+        # Date
+        my ($S,$M,$H,$d,$m,$Y) = localtime($$item{'published'});
+        $m += 1;
+        $Y += 1900;
+        my $dt = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $Y,$m,$d, $H,$M,$S);
+
+        # Labels
+        my @labels=();
+        foreach(@{$item->{'categories'}})
+        {
+            if(!$self->{'labels'}{'original_labels'}{$_})
+            {
+                $self->log("Not defined $_");
+            }
+            else
+            {
+                push(@labels,$self->{'labels'}{'original_labels'}{$_});
+            }
+        }
+
+        # Content
+        my $content=$$item{'summary'}{'content'};
+        my @urls=();
+        my @images=();
+
+        my $img=0;
+        while($content=~ /(<img([^>]+)>)/g)
+        {
+            $img++;
+            my $original = $1;
+            my $origin_attr = $2;
+
+            my ($link) = ($origin_attr =~ /src=['"](.*?)['"]/);
+
+            my ($alt) = ($origin_attr =~ /alt=['"](.*?)['"]/);
+            if(!$alt) { $alt=""; }
+
+            $original=~ s/([^\w])/\\$1/g;
+
+            $content =~ s/$original/ $alt \[IMAGE$img\]/g;
+            push(@images, $link);
+        }
+
+        my $num=0;
+        while($content=~ /(<a([^>]+)>(.*?)<\/a>)/g)
+        {
+            $num++;
+            my $original = $1;
+            my $title = $3;
+            my ($link) = ($2 =~ /href=['"](.*?)['"]/);
+
+            $original=~ s/([^\w])/\\$1/g;
+
+            $content =~ s/$original/$title\[$num\]/g;
+            push(@urls, $link);
+        }
+        $content =~ s/<p[^>]+>(.*)?<\/p>/$1\n/g;
+
+        $text ="Feed: ".$$item{'origin'}{'title'}."\n";
+        $text.="Title: ".$$item{'title'}."\n";
+        $text.="Author: ".$$item{'author'}."\n";
+        $text.="Date: ".$dt."\n";
+        $text.="Labels: ".join(", ",@labels)."\n";
+        $text.="\n";
+        $text.=$content."\n";
+        $text.="\n";
+        if(@urls)
+        {
+            $num=0;
+            $text.="Links:\n";
+            foreach(@urls)
+            {
+                $num++;
+                $text.="\t[$num] $_\n";
+            }
+        }
+        if(@images)
+        {
+            $num=0;
+            $text.="Images\n";
+            foreach(@images)
+            {
+                $num++;
+                $text.="\t[$num] $_\n";
+            }
+        }
+
+    }
+    else
+    {
+        $text="Error getting feed information $id";
+    }
+    $self->log($text);
+    $self->{'content_text'}->text($text);
+}
+
+sub prev_item()
+{
+    my ($self,$id) = @_;
+    my @items = @{$self->{'right_container'}->values()};
+    my $prev = $self->{'item_idx'}-1;
+    if($prev>=0 && $items[$prev])
+    {
+        $self->{'right_container'}->set_selection(($prev));
+        $self->display_item($items[$prev]);
+        $self->{'item_idx'}= $prev;
+    }
+}
+
+sub next_item()
+{
+    my ($self,$id) = @_;
+    my @items = @{$self->{'right_container'}->values()};
+    my $next = $self->{'item_idx'}+1;
+    if($items[$next])
+    {
+        $self->{'right_container'}->set_selection(($next));
+        $self->display_item($items[$next]);
+        $self->{'item_idx'}= $next;
+    }
+
 }
 
 
@@ -547,8 +733,11 @@ sub bind_keys()
 
     $self->{'window'}->set_binding(sub { $self->update_list(); }, "u");
     $self->{'window'}->set_binding(sub { $self->switch_unread_all(); }, "x");
+    $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, "<enter>");
 
     $self->{'content'}->set_binding(sub { $self->close_content(); }, "q");
+    $self->{'content'}->set_binding(sub { $self->next_item(); }, "n");
+    $self->{'content'}->set_binding(sub { $self->prev_item(); }, "p");
 
     $self->{'window'}->set_binding($exit_ref, "q");
     $self->{'cui'}->set_binding($exit_ref, "\cC");
