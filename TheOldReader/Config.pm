@@ -33,6 +33,7 @@ sub read_config()
         /^token:(.*)$/ and $self->{'token'}=$1;
         /^max_items_displayed:(\d+)$/ and $self->{'max_items_displayed'}=$1;
         /^only_unread:(\d*)$/ and $self->{'only_unread'}=$1;
+        /^browser:(.*)$/ and $self->{'browser'}=$1;
     }
     close(CONFIG);
 }
@@ -50,6 +51,14 @@ sub save_config()
     else
     {
         print WRITE "only_unread:0\n";
+    }
+    if($self->{'browser'})
+    {
+        print WRITE "browser:".$self->{'browser'}."\n";
+    }
+    else
+    {
+        print WRITE "browser:x-www-browser\n";
     }
     close WRITE;
 }

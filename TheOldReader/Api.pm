@@ -75,6 +75,7 @@ sub raw_result()
     {
         return $res->content;
     }
+    return undef;
 }
 
 
@@ -228,8 +229,6 @@ sub contents()
     my $url = $self->{'host'}.TheOldReader::Constants::CONTENTS;
 
     my %form = ();
-    $form{'i'} = ();
-    $form{'i'} = ();
     foreach(@items)
     {
         push(@{$form{'i'}}, $_);
@@ -277,6 +276,65 @@ sub mark_read()
     my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
     my %form = ();
     $form{'a'} = 'user/-/state/com.google/read';
+    $form{'i'} = ();
+    foreach(@ids)
+    {
+        $self->log("Add read : $_");
+        push(@{$form{'i'}}, $_);
+    }
+    return $self->req(POST($url, \%form), 'raw_result');
+}
+
+# Get last items
+sub mark_unread()
+{
+    my ($self,$ids_ref) = @_;
+    my @ids;
+    @ids = @{$ids_ref};
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
+    my %form = ();
+    $form{'r'} = 'user/-/state/com.google/read';
+    $form{'i'} = ();
+    foreach(@ids)
+    {
+        $self->log("Add unread : $_");
+        push(@{$form{'i'}}, $_);
+    }
+    return $self->req(POST($url, \%form), 'raw_result');
+}
+
+# Mark starred
+sub mark_starred()
+{
+    my ($self,$ids_ref) = @_;
+    my @ids;
+    @ids = ($ids_ref);
+    $self->log("Mark starred");
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
+    my %form = ();
+    $form{'a'} = 'user/-/state/com.google/starred';
+    $form{'i'} = ();
+    foreach(@ids)
+    {
+        push(@{$form{'i'}}, $_);
+        $self->log("Mark starred $_");
+    }
+
+    return $self->req(POST($url, \%form), 'raw_result');
+}
+
+# UnMark starred
+sub unmark_starred()
+{
+    my ($self,$ids_ref) = @_;
+    my @ids;
+    @ids = ($ids_ref);
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
+    my %form = ();
+    $form{'r'} = 'user/-/state/com.google/starred';
     $form{'i'} = ();
     foreach(@ids)
     {

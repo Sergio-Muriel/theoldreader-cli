@@ -82,7 +82,9 @@ sub create_config()
     }
 
     my $max_items_displayed = prompt('Max items displayed: ');
+    my $browser = prompt('Default browser [x-www-browser]:');
     $self->{'token'} = $token;
+    $self->{'browser'} = $browser;
     $self->{'max_items_displayed'} = $max_items_displayed;
 
     $self->save_config();

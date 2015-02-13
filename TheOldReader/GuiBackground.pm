@@ -67,7 +67,7 @@ sub unread_feeds()
     my ($self, @params) = @_;
     # Init labels
     $self->{'reader'}->unread_feeds();
-    $self->{'share'}->add('gui_job','update_count');
+    $self->add_gui_job("update_count");
 }
 
 sub labels()
@@ -75,16 +75,87 @@ sub labels()
     my ($self, @params) = @_;
     # Init labels
     $self->{'reader'}->labels();
-    $self->{'share'}->add('gui_job','update_labels');
+    $self->add_gui_job("update_labels");
 
 }
+
+sub mark_starred()
+{
+    my ($self, $id) = @_;
+    my @ids = ($id);
+    $self->log("Mark $id as starred");
+    my $result = $self->{'reader'}->mark_starred(@ids);
+    my $contents = $self->{'reader'}->contents(@ids);
+    if($contents)
+    {
+        foreach(@{$$contents{'items'}})
+        {
+            $self->{'cache'}->save_cache("item ".$_->{'id'}, $_);
+            $self->log("Save item ".$_->{'id'});
+        }
+    }
+    $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
+    $self->add_gui_job("last_status $id");
+}
+
+sub unmark_starred()
+{
+    my ($self, $id) = @_;
+    my @ids = ($id);
+    $self->log("Unmark $id as starred");
+    my $result = $self->{'reader'}->unmark_starred(@ids);
+    my $contents = $self->{'reader'}->contents(@ids);
+    if($contents)
+    {
+        foreach(@{$$contents{'items'}})
+        {
+            $self->{'cache'}->save_cache("item ".$_->{'id'}, $_);
+        }
+    }
+    $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
+    $self->add_gui_job("last_status $id");
+}
+
+sub mark_read()
+{
+    my ($self, $id) = @_;
+    my @ids = ($id);
+    $self->log("Mark $id as read");
+    my $result = $self->{'reader'}->mark_read(\@ids);
+    my $contents = $self->{'reader'}->contents(@ids);
+    if($contents)
+    {
+        foreach(@{$$contents{'items'}})
+        {
+            $self->{'cache'}->save_cache("item ".$_->{'id'}, $_);
+        }
+    }
+    $self->add_gui_job("last_status $id");
+}
+sub mark_unread()
+{
+    my ($self, $id) = @_;
+    my @ids = ($id);
+    $self->log("Mark $id as unread");
+    my $result = $self->{'reader'}->mark_unread(\@ids);
+    my $contents = $self->{'reader'}->contents(@ids);
+    if($contents)
+    {
+        foreach(@{$$contents{'items'}})
+        {
+            $self->{'cache'}->save_cache("item ".$_->{'id'}, $_);
+        }
+    }
+    $self->add_gui_job("last_status $id");
+}
+
 
 sub last()
 {
     my ($self, @params) = @_;
     my $params = shift(@params);
 
-    my ($id, $only_unread) = ($params =~ /^(\S+)\s+(.*)$/);
+    my ($clear,$id, $only_unread) = split(/\s+/,$params);
     if(!$id)
     {
         $id=TheOldReader::Constants::FOLDER_ALL;
@@ -127,14 +198,33 @@ sub last()
     }
 
     # Dont wait for content items to load list
-    $self->{'share'}->add('gui_job','update_last '.$id);
+    $self->add_gui_job("display_list $clear $id");
 }
 
 
 sub add_gui_job()
 {
     my ($self, $job) = @_;
+    $self->log("Add job:  $job");
     $self->{'share'}->add("gui_job", $job);
+}
+
+sub thread_command()
+{
+    my ($self) = @_;
+    my $received = $self->{'share'}->shift('background_job');
+    if($received)
+    {
+        my ($command, $params)  = ($received=~ /^(\S+)(?:$|\s(.*)$)/);
+        if($self->can($command))
+        {
+            $self->$command($params);
+        }
+        else
+        {
+            $self->log("FATAL ERROR: unknown command $command");
+        }
+    }
 }
 
 sub thread_init()
@@ -143,25 +233,9 @@ sub thread_init()
 
     while(1)
     {
-        my $received = $self->{'share'}->shift('background_job');
-        if($received)
-        {
-            my ($command, $params)  = ($received=~ /^(\S+)(?:$|\s(.*)$)/);
-            if($self->can($command))
-            {
-                #$self->log("Running command $received");
-                $self->$command($params);
-                #$self->log("Command $received done.");
-            }
-            else
-            {
-                $self->log("FATAL ERROR: unknown command $command");
-            }
-        }
-        else
-        {
-            select(undef,undef,undef,0.2);
-        }
+        my $trd = threads->create(sub { $self->thread_command(); });
+        $trd->detach();
+        select(undef,undef,undef,0.1);
     }
 }
 

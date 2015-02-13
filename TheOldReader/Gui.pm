@@ -1,6 +1,7 @@
 package TheOldReader::Gui;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use Text::Iconv;
 
 $VERSION     = 1.00;
 @ISA         = qw(Exporter TheOldReader::Config);
@@ -38,6 +39,7 @@ sub new
     $self->read_config();
     $self->{'cache'} = TheOldReader::Cache->new();
     $self->{'share'} = $params{'share'};
+    $self->{'converter'} = Text::Iconv->new("utf8","latin1");
 
     $self->{'reader'} = TheOldReader::Api->new(
        'host' => TheOldReader::Constants::DEFAULT_HOST,
@@ -57,11 +59,16 @@ sub call_count
 {
     my ($self, @params) = @_;
     $self->add_background_job("unread_feeds", "Updating count...");
+    $self->update_list();
 }
 
-sub update_last()
+sub display_list()
 {
-    my ($self, $id) = @_;
+    my ($self, $params) = @_;
+    my ($clear, $id) = split(/\s+/, $params);
+
+    $self->{'cat_id'} = $id;
+    $self->log("Update list $id");
 
     my $last = $self->{'cache'}->load_cache("last ".$id);
     if(!$last)
@@ -69,45 +76,109 @@ sub update_last()
         return;
     }
 
-    my %gui_labels = (
+    my $gui_labels = {
         'labels' => {},
         'values' => []
-    );
+    };
+    $self->log("CLEAR: $clear");
+    if($clear ne 'clear' and $self->{'list_data'})
+    {
+        $gui_labels = $self->{'list_data'};
+    }
+    else
+    {
+        $self->{'list_data'} = $gui_labels;
+    }
 
 
     my @hash_ids = @{$$last{'itemRefs'}};
+    my @new_values= ();
     foreach(@hash_ids)
     {
         my $id = $_->{'id'};
-        my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
-        if(!$feed)
+        if(!grep(/$id/,@{$gui_labels->{'values'}}))
         {
-            $self->log("Error fetch catch $id");
+            push(@new_values, $id);
+            push(@{$gui_labels->{'values'}}, $id);
         }
-        else
-        {
-            my $title="";
-            my $starred="";
-            $gui_labels{'labels'}{$id} = $feed->{'title'};
-
-            if(grep(/user\/-\/state\/com.google\/fresh/,@{$feed->{'categories'}}))
-            {
-                $title="N";
-            }
-            else
-            {
-                $title=" ";
-            }
-            $gui_labels{'labels'}{$id} = " ".$title.$starred." ".$feed->{'title'};
-            push(@{$gui_labels{'values'}}, $id);
-        }
+        $self->last_status($id);
     }
-    $self->{'right_container'}->values($gui_labels{'values'});
-    $self->{'right_container'}->labels($gui_labels{'labels'});
+
+    if($clear ne 'clear')
+    {
+        $self->{'right_container'}->insert_at(0, \@new_values);
+    }
+    else
+    {
+        $self->{'right_container'}->values(@{$gui_labels->{'values'}});
+    }
+
+    $self->{'right_container'}->labels($gui_labels->{'labels'});
 
     $self->{'container'}->draw();
     $self->{'cui'}->draw(1);
-    $self->{'list_data'} = \%gui_labels;
+}
+
+sub update_loading_list()
+{
+    my ($self, $id) = @_;
+
+    my %gui_labels = %{$self->{'list_data'}};
+    my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+    my $title="@";
+    my $starred="@";
+    if(!$feed)
+    {
+        $self->log("ERROR: cannot find feed $id");
+        return;
+    }
+
+    $gui_labels{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred." ".$feed->{'title'});
+    $self->{'right_container'}->labels($gui_labels{'labels'});
+
+    if(!$self->{'item_displayed'})
+    {
+        $self->{'container'}->draw();
+    }
+}
+
+sub last_status()
+{
+    my ($self, $id) = @_;
+
+    my $gui_labels = $self->{'list_data'};
+    my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+    my $title;
+    my $starred;
+    if(!$feed)
+    {
+        $self->log("ERROR: cannot find feed $id");
+        return;
+    }
+
+    if(grep(/user\/-\/state\/com.google\/fresh/,@{$feed->{'categories'}}))
+    {
+        $title="N";
+    }
+    else
+    {
+        $title=" ";
+    }
+    if(grep(/user\/-\/state\/com.google\/starred/,@{$feed->{'categories'}}))
+    {
+        $starred="*";
+    }
+    else
+    {
+        $starred=" ";
+    }
+    $gui_labels->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred." ".$feed->{'title'});
+    $self->{'right_container'}->labels($gui_labels->{'labels'});
+
+    if(!$self->{'item_displayed'})
+    {
+        $self->{'container'}->draw();
+    }
 }
 
 
@@ -153,11 +224,11 @@ sub update_count()
             $counts{$ref}=0;
         }
         my $num = " (".$counts{$ref}.")";
-        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length("> ".$labels->{'original_labels'}{$ref})-length($num));
-        $labels->{'labels'}{$ref} = substr("> ".$labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
+        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length($labels->{'original_labels'}{$ref})-length($num));
+        $labels->{'labels'}{$ref} = substr($labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
     }
 
-    if($update)
+    if($update && !$self->{'item_displayed'})
     {
         $self->{'left_container'}->labels($labels->{'labels'});
         $self->{'cui'}->draw(1);
@@ -178,14 +249,19 @@ sub update_labels()
     my %labels = %{$labels};
     my %counts = ();
 
-    my %gui_labels = ();
-    %gui_labels = (
+    my $gui_labels = {};
+    $gui_labels = {
         'labels' => {
             'user/-/state/com.google/reading-list' => 'All items',
             'user/-/state/com.google/starred' => 'Starred',
             'user/-/state/com.google/like' => 'Liked',
             'user/-/state/com.google/broadcast' => 'Shared',
             'user/-/state/com.google/read' => 'Read',
+        },
+        'display_labels' => {
+            'user/-/state/com.google/starred' => 'Starred',
+            'user/-/state/com.google/like' => 'Liked',
+            'user/-/state/com.google/broadcast' => 'Shared'
         },
         'original_labels' => {
             'user/-/state/com.google/reading-list' => 'All items',
@@ -201,21 +277,22 @@ sub update_labels()
             'user/-/state/com.google/broadcast',
             'user/-/state/com.google/read',
         ]
-    );
+    };
 
     foreach my $ref(keys %labels)
     {
-        $gui_labels{'labels'}{$ref} = "> ".$labels->{$ref};
-        $gui_labels{'original_labels'}{$ref} = $labels->{$ref};
+        $gui_labels->{'display_labels'}{$ref} = $self->{'converter'}->convert($labels->{$ref});
+        $gui_labels->{'labels'}{$ref} = "> ".$self->{'converter'}->convert($labels->{$ref});
+        $gui_labels->{'original_labels'}{$ref} = "> ".$self->{'converter'}->convert($labels->{$ref});
 
-        push(@{$gui_labels{'values'}}, $ref);
+        push(@{$gui_labels->{'values'}}, $ref);
     }
 
-    $self->{'labels'} = \%gui_labels;
+    $self->{'labels'} = $gui_labels;
 
 
-    $self->{'left_container'}->values($gui_labels{'values'});
-    $self->{'left_container'}->labels($gui_labels{'labels'});
+    $self->{'left_container'}->values(@{$gui_labels->{'values'}});
+    $self->{'left_container'}->labels($gui_labels->{'labels'});
 
     if(!defined($self->{'left_container'}->get()))
     {
@@ -223,10 +300,13 @@ sub update_labels()
         $self->{'left_container'}->set_selection((0));
     }
 
-    $self->{'labels'} = \%gui_labels;
     $self->update_status("Labels updated.");
 
-    $self->{'cui'}->draw(1);
+    if(!$self->{'item_displayed'})
+    {
+        $self->{'left_container'}->draw(1);
+        $self->{'cui'}->draw(1);
+    }
 }
 
 sub update_status()
@@ -264,10 +344,10 @@ sub build_gui()
         -color_support => 1,
         inline_states => {
             _start => sub {
-                $_[HEAP]->{next_loop_event} = int(time()) + 1;
+                $_[HEAP]->{next_loop_event} = int(time());
                 $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
 
-                $_[HEAP]->{next_count_event} = int(time()) + 3;
+                $_[HEAP]->{next_count_event} = int(time()) + 1;
                 $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
             },
 
@@ -327,7 +407,7 @@ sub build_gui()
         -values => [ 1 ],
         -labels => { 1 => 'Loading...'},
         -onchange => sub {
-            $self->update_list();
+            $self->update_list('clear');
             $self->{'right_container'}->focus();
         },
     );
@@ -365,7 +445,7 @@ sub build_gui()
         -bold => 1,
         -fg => 'yellow',
         -bg => 'blue',
-        -text => 'x:Display only unread/All  u:Update'
+        -text => 'x:Display only unread/All  u:Update  s:star/unstar  r:mark as read  R:unmark as read Enter:read summary'
     );
 
     # FOOTER
@@ -413,7 +493,7 @@ sub build_content()
         'content_top',
         'Label',
         -bold => 1,
-        -text => 'The Old Reader - Content of ...'
+        -text => 'The Old Reader - GUI'
     );
 
     $self->{'content_container'} = $self->{'content'}->add(
@@ -422,6 +502,8 @@ sub build_content()
         -border => 1,
         -height => $ENV{'LINES'} - 3,
         -y    => 1,
+        -bg => 'blue',
+        -fg => 'white',
         -bfg  => 'white'
     );
 
@@ -429,13 +511,13 @@ sub build_content()
     $self->{'content_text'} = $self->{'content_container'}->add(
         'content_text',
         'TextViewer',
+        -padleft => 1,
+        -padright => 1,
+        -vscrollbar => 1,
+        -wrapping => 1,
         -focusable => 1,
         -border => 0,
-        -x => 0,
-        -text => 'bla bla bla',
-        -bg => 'blue',
-        -fg => 'white',
-        -text => 'My content'
+        -x => 0
     );
 
     # HELP Bar
@@ -456,7 +538,7 @@ sub build_content()
         -bold => 1,
         -fg => 'yellow',
         -bg => 'blue',
-        -text => 'q:back n:next p:previous s:star/untar l:like/unlike'
+        -text => 'q:back  n:next   p:previous  s:star/untar r:mark as read  R:unmark as read  o:open in browser'
     );
 
     # FOOTER
@@ -494,29 +576,30 @@ sub add_background_job()
 
 sub update_list()
 {
-    my ($self, $id) = @_;
+    my ($self, $clear) = @_;
 
-    if(!$id)
+    my $id = $self->{'left_container'}->get_active_value();
+    if($clear and $clear eq 'clear')
     {
-        $id = $self->{'left_container'}->get_active_value();
+        # Clear list
+        my $gui_labels = {
+            'labels' => {
+                1 => ' Loading ...',
+            },
+            'values' => [ 1]
+        };
+        $self->{'right_container'}->values(@{$gui_labels->{'values'}});
+        $self->{'right_container'}->labels($gui_labels->{'labels'});
+        $self->{'list_data'} = $gui_labels;
+    }
+    else
+    {
+        $clear='noclear';
     }
 
-    # Clear list
-    my %gui_labels = (
-        'labels' => {
-            1 => ' Loading ...',
-        },
-        'values' => [ 1]
-    );
-    $self->{'right_container'}->values($gui_labels{'values'});
-    $self->{'right_container'}->labels($gui_labels{'labels'});
-
-    $self->{'list_data'} = \%gui_labels;
     $self->{'cui'}->draw(1);
 
-    $self->log("call last $id");
-    $self->add_background_job("last $id ".$self->{'only_unread'}, "Fetching last items from $id");
-
+    $self->add_background_job("last $clear $id ".$self->{'only_unread'}, "Fetching last items from $id");
 }
 
 sub right_container_onselchange()
@@ -541,19 +624,24 @@ sub right_container_onchange()
         # Check if need to load more (last selected)
         $self->{'content'}->draw();
         $self->{'content'}->focus();
+        $self->{'content_container'}->focus();
         $self->display_item($id);
         $self->{'item_idx'} = $self->{'right_container'}->get_active_id();
         $self->display_item($id);
     }
 }
+
 sub display_item()
 {
     my ($self,$id) = @_;
+    $self->{'item_displayed'}=1;
 
     my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
     my $text="";
     if($item)
     {
+        $self->add_background_job("mark_read ".$id, "Mark as read");
+
         # Date
         my ($S,$M,$H,$d,$m,$Y) = localtime($$item{'published'});
         $m += 1;
@@ -564,13 +652,13 @@ sub display_item()
         my @labels=();
         foreach(@{$item->{'categories'}})
         {
-            if(!$self->{'labels'}{'original_labels'}{$_})
+            if(!$self->{'labels'}{'display_labels'}{$_})
             {
                 $self->log("Not defined $_");
             }
             else
             {
-                push(@labels,$self->{'labels'}{'original_labels'}{$_});
+                push(@labels,$self->{'labels'}{'display_labels'}{$_});
             }
         }
 
@@ -610,13 +698,32 @@ sub display_item()
             $content =~ s/$original/$title\[$num\]/g;
             push(@urls, $link);
         }
-        $content =~ s/<p[^>]+>(.*)?<\/p>/$1\n/g;
 
-        $text ="Feed: ".$$item{'origin'}{'title'}."\n";
-        $text.="Title: ".$$item{'title'}."\n";
-        $text.="Author: ".$$item{'author'}."\n";
-        $text.="Date: ".$dt."\n";
-        $text.="Labels: ".join(", ",@labels)."\n";
+        # List tags
+        while($content =~ /<(ol|li)[^>]*>(.*)?<\/\1>/is)
+        {
+            $content =~ s/<(ol|li)[^>]*>(.*)?<\/\1>/\t- $2\n/isg;
+        }
+
+        # Block tags
+        $content =~ s/<br\s*\/?>/\n/g;
+        while($content =~ /<(h\d|p|div|ul)[^>]*>(.*)?<\/\1>/is)
+        {
+            $content =~ s/<(h\d|p|div|ul)[^>]*>(.*)?<\/\1>/$2\n/isg;
+        }
+
+        # Inline tags and unclosed block tags
+        $content =~ s/<\/?(?:span|strong|b|i|em|div|ul|p|h\d)[^>]*>//isg;
+
+        # Get url
+        my @canonical = @{$item->{'canonical'}};
+
+        $text ="Feed:\t".$$item{'origin'}{'title'}."\n";
+        $text.="Title:\t".$$item{'title'}."\n";
+        $text.="Author:\t".$$item{'author'}."\n";
+        $text.="Date:\t".$dt."\n";
+        $text.="Labels:\t".join(", ",@labels)."\n";
+        $text.="Url:\t".$canonical[0]{'href'}."\n";
         $text.="\n";
         $text.=$content."\n";
         $text.="\n";
@@ -627,7 +734,7 @@ sub display_item()
             foreach(@urls)
             {
                 $num++;
-                $text.="\t[$num] $_\n";
+                $text.="\t[$num]: $_\n";
             }
         }
         if(@images)
@@ -637,7 +744,7 @@ sub display_item()
             foreach(@images)
             {
                 $num++;
-                $text.="\t[$num] $_\n";
+                $text.="\t[$num]: $_\n";
             }
         }
 
@@ -646,7 +753,8 @@ sub display_item()
     {
         $text="Error getting feed information $id";
     }
-    $self->log($text);
+
+    $text = $self->{'converter'}->convert($text);
     $self->{'content_text'}->text($text);
 }
 
@@ -660,6 +768,30 @@ sub prev_item()
         $self->{'right_container'}->set_selection(($prev));
         $self->display_item($items[$prev]);
         $self->{'item_idx'}= $prev;
+    }
+}
+sub open_item()
+{
+    my ($self) = @_;
+    my @items = @{$self->{'right_container'}->values()};
+    my $id;
+    if($self->{'item_displayed'})
+    {
+        $id  = $items[$self->{'item_idx'}];
+    }
+    else
+    {
+        $id = $self->{'right_container'}->get_active_value();
+    }
+
+    my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+    if($item)
+    {
+        my @canonical = @{$item->{'canonical'}};
+        $self->log("Open ".$self->{'browser'});
+        open CMD, "| ".$self->{'browser'}." '".$canonical[0]{'href'}."' 2>/dev/null";
+        close CMD;
+        #system(("x-www-browser",$canonical[0]{'href'}));
     }
 }
 
@@ -686,7 +818,7 @@ sub loop_event()
     my $received = $self->{'share'}->shift('gui_job');
     if($received)
     {
-        my ($command, $params)  = ($received=~ /^(\S+)\s*(\S*?)$/);
+        my ($command, $params)  = ($received=~ /^(\S+)\s*(.*?)$/);
         if($command)
         {
             if($self->can($command))
@@ -719,9 +851,55 @@ sub switch_unread_all()
 sub close_content()
 {
     my ($self) = @_;
+    $self->{'item_displayed'}=0;
+
+    $self->{'item_idx'}=undef;
     $self->{'window'}->focus();
     $self->{'window'}->draw();
+    $self->{'container'}->draw();
     $self->{'cui'}->draw(1);
+}
+
+sub right_container_star()
+{
+    my ($self) = @_;
+    my $id = $self->{'right_container'}->get_active_value();
+    my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+
+    $self->update_loading_list($id);
+    if($feed)
+    {
+        if(!grep(/user\/-\/state\/com.google\/starred/,@{$feed->{'categories'}}))
+        {
+            $self->add_background_job("mark_starred ".$feed->{'id'}, "Mark starred");
+        }
+        else
+        {
+            $self->add_background_job("unmark_starred ".$feed->{'id'}, "Unmark Starred");
+        }
+    }
+    else
+    {
+        $self->log("Feed not ready! $id");
+    }
+}
+
+sub right_container_read()
+{
+    my ($self) = @_;
+    my $id = $self->{'right_container'}->get_active_value();
+
+    $self->add_background_job("mark_read ".$id, "Mark as read");
+    $self->update_loading_list($id);
+}
+
+sub right_container_unread()
+{
+    my ($self) = @_;
+    my $id = $self->{'right_container'}->get_active_value();
+
+    $self->add_background_job("mark_unread ".$id, "Unmark as read");
+    $self->update_loading_list($id);
 }
 
 sub bind_keys()
@@ -735,9 +913,18 @@ sub bind_keys()
     $self->{'window'}->set_binding(sub { $self->switch_unread_all(); }, "x");
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, "<enter>");
 
+    $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
+    $self->{'right_container'}->set_binding(sub { $self->right_container_read(); }, "r");
+    $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
+    $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");
+
+    $self->{'content'}->set_binding(sub { $self->right_container_read(); }, "r");
+    $self->{'content'}->set_binding(sub { $self->right_container_unread(); }, "R");
+
     $self->{'content'}->set_binding(sub { $self->close_content(); }, "q");
     $self->{'content'}->set_binding(sub { $self->next_item(); }, "n");
     $self->{'content'}->set_binding(sub { $self->prev_item(); }, "p");
+    $self->{'content'}->set_binding(sub { $self->open_item(); }, "o");
 
     $self->{'window'}->set_binding($exit_ref, "q");
     $self->{'cui'}->set_binding($exit_ref, "\cC");
