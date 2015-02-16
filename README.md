@@ -1,7 +1,10 @@
-# The Old Reader Perl Tools
+# The Old Reader Cli (Client)
 
-## Unofficial api
-This is an unofficial perl api  based on the documentation found at https://github.com/theoldreader/api
+![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader_gui2.png)
+
+## Unofficial program
+This is an unofficial perl client/gui  based on the documentation found at https://github.com/theoldreader/api.
+
 
 ## Dependencies
 The following modules are used by the package:
@@ -17,11 +20,12 @@ On debian you can install the packages using the apt command:
 
     $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl
 
-### If you don't want the gui
+### If you don't want the gui, just install
 
     $ apt-get install libjson-perl libwww-perl libio-prompt-perl
 
-## First use
+
+## Create configuration file
 
 Use reader.pl script to create a configuration that contains the auth token. No username/password will be stored.
 
@@ -32,9 +36,37 @@ Use reader.pl script to create a configuration that contains the auth token. No 
     Max items displayed: 10
     File global.conf created.
 
-## Commands
+## GUI
 
-Once you have configured the script, you can use one of the following commands:
+### Run the GUI
+
+To run the gui, run the gui.pl script
+
+    $ ./gui.pl
+
+When loaded, you will find a list of labels (on the left), and a list of associated items, on the right.
+
+![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader_gui2.png)
+
+Use tab to switch between windows, and press enter to select an item.
+
+You can also press:
+
+- x: to switch from all items to only unread items
+- u: to update the right column items
+- s: to switch the star flag of the current selected item
+- r: to mark the item as read
+- R: to unmark the item as read
+- Enter: to display the summary
+
+![The Old Reader Content](http://tfeserver.be/dl/theoldreader_client/theoldreader_content.png)
+
+
+### Commands
+
+## Console client
+
+Once you have created the configuration file, you can use one of the following commands:
 
 ### Help
 
