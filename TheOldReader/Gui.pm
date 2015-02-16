@@ -356,7 +356,7 @@ sub build_gui()
                 $_[HEAP]->{next_loop_event} = int(time());
                 $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
 
-                $_[HEAP]->{next_count_event} = int(time()) + 300;
+                $_[HEAP]->{next_count_event} = int(time()) + 1;
                 $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
             },
 
