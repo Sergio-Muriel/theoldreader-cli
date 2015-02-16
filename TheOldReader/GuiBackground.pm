@@ -209,8 +209,7 @@ sub add_gui_job()
 
 sub thread_command()
 {
-    my ($self) = @_;
-    my $received = $self->{'share'}->shift('background_job');
+    my ($self, $received) = @_;
     if($received)
     {
         my ($command, $params)  = ($received=~ /^(\S+)(?:$|\s(.*)$)/);
@@ -231,9 +230,13 @@ sub thread_init()
 
     while(1)
     {
-        my $trd = threads->create(sub { $self->thread_command(); });
-        $trd->detach();
-        select(undef,undef,undef,0.4);
+        my $received;
+        while($received = $self->{'share'}->shift('background_job'))
+        {
+            my $trd = threads->create(sub { $self->thread_command($received); });
+            $trd->detach();
+        }
+        select(undef,undef,undef,0.5);
     }
 }
 
