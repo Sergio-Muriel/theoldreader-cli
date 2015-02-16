@@ -24,6 +24,10 @@ On debian you can install the packages using the apt command:
 
     $ apt-get install libjson-perl libwww-perl libio-prompt-perl
 
+### For OS X (using Homebrew/cpanm)
+
+    $ brew install cpanm
+    $ sudo perl -MCPAN -e 'install JSON,LWP::UserAgent,IO::Prompt,Curses::UI,Curses::UI::POE,Text::Iconv,Mozilla::CA'
 
 ## Create configuration file
 
@@ -86,8 +90,8 @@ To display last unread items, just use the unread command:
     tag:google.com,2005:reader/item/54ce6c62b88035d71a002a63
     "Amigos del @ppmadrid. Lo de la foto no es Auschwitz, es Burgos. Me parece que os queda más cerca"
     http://meneame.feedsportal.com/c/34737/f/639540/s/42ed29b3/sc/7/l/0M0Smeneame0Bnet0Cstory0Camigos0Eppmadrid0Efoto0Eno0Eauschwitz0Eburgos0Eparece0Eos0Equeda0Emas/story01.htm
-    
-    Mark items as read? [O/n]: 
+
+    Mark items as read? [O/n]:
 
 When displaying unread items, you will be asked if you want to mark them as read.
 
@@ -106,8 +110,8 @@ Just use the 'labels' command to get a list of the categories you have:
 
     $ ./reader.pl labels
     List of labels:
-     - user/-/label/web dev : web dev 
-     - user/-/label/news-big : news-big 
+     - user/-/label/web dev : web dev
+     - user/-/label/news-big : news-big
      - ...
 
 You can use the 'last' or 'unread' commands, followed by the label to display only the items of that label:
@@ -127,12 +131,7 @@ To display the name of the feeds that have unread items:
 
     ./reader.pl unread_feeds
     Unread items:
-      - feed/52e1659d091452dd37000e44 : Menme: publicadas (1) 
+      - feed/52e1659d091452dd37000e44 : Menme: publicadas (1)
 
-    ./reader.pl unread feed/52e1659d091452dd37000e44 
+    ./reader.pl unread feed/52e1659d091452dd37000e44
     ...
-
-
-
-
-
