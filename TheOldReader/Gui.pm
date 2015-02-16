@@ -966,6 +966,12 @@ sub exit_dialog()
     # exit(0);
 }
 
+sub output_error()
+{
+    my ($self, $error) = @_;
+    print STDERR $error."\n";
+}
+
 
 1;
 

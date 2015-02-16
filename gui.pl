@@ -34,6 +34,16 @@ sub params
     }
 }
 
+if(!$config)
+{
+    $config = TheOldReader::Constants::DEFAULT_CONFIG;
+}
+
+if(!-f $config)
+{
+    croak("No configuration file found. Run ./reader.pl create_config to create one.");
+}
+
 my $obj = TheOldReader::GuiShared->new(
         'background_job' => [],
         'gui_job' => []

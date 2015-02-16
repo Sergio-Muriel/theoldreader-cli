@@ -245,6 +245,12 @@ sub log()
     close WRITE;
 }
 
+sub output_error()
+{
+    my ($self, $error) = @_;
+    print STDERR $error."\n";
+}
+
 
 1;
 
