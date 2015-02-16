@@ -5,7 +5,7 @@ use warnings;
 use parent qw(Exporter);
 
 use constant GUI_CATEGORIES_WIDTH => 30;
-use constant GUI_UPDATE => 20;
+use constant GUI_UPDATE => 120;
 
 use constant DEFAULT_MAX => 10;
 use constant WAIT_WATCH => 10;
