@@ -83,7 +83,6 @@ sub mark_starred()
 {
     my ($self, $id) = @_;
     my @ids = ($id);
-    $self->log("Mark $id as starred");
     my $result = $self->{'reader'}->mark_starred(@ids);
     my $contents = $self->{'reader'}->contents(@ids);
     if($contents)
@@ -91,7 +90,6 @@ sub mark_starred()
         foreach(@{$$contents{'items'}})
         {
             $self->{'cache'}->save_cache("item ".$_->{'id'}, $_);
-            $self->log("Save item ".$_->{'id'});
         }
     }
     $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
@@ -102,7 +100,6 @@ sub unmark_starred()
 {
     my ($self, $id) = @_;
     my @ids = ($id);
-    $self->log("Unmark $id as starred");
     my $result = $self->{'reader'}->unmark_starred(@ids);
     my $contents = $self->{'reader'}->contents(@ids);
     if($contents)
@@ -120,7 +117,6 @@ sub mark_read()
 {
     my ($self, $id) = @_;
     my @ids = ($id);
-    $self->log("Mark $id as read");
     my $result = $self->{'reader'}->mark_read(\@ids);
     my $contents = $self->{'reader'}->contents(@ids);
     if($contents)
@@ -136,7 +132,6 @@ sub mark_unread()
 {
     my ($self, $id) = @_;
     my @ids = ($id);
-    $self->log("Mark $id as unread");
     my $result = $self->{'reader'}->mark_unread(\@ids);
     my $contents = $self->{'reader'}->contents(@ids);
     if($contents)
@@ -155,20 +150,24 @@ sub last()
     my ($self, @params) = @_;
     my $params = shift(@params);
 
-    my ($clear,$id, $only_unread) = split(/\s+/,$params);
+    my ($clear,$id, $only_unread, $next_id) = split(/\s+/,$params);
     if(!$id)
     {
         $id=TheOldReader::Constants::FOLDER_ALL;
+    }
+    if(!$next_id)
+    {
+        $next_id="";
     }
 
     my $items;
     if($only_unread)
     {
-        $items = $self->{'reader'}->unread($id, $self->{'max_items_displayed'});
+        $items = $self->{'reader'}->unread($id, $self->{'max_items_displayed'}, $next_id);
     }
     else
     {
-        $items = $self->{'reader'}->last($id, $self->{'max_items_displayed'});
+        $items = $self->{'reader'}->last($id, $self->{'max_items_displayed'}, $next_id);
     }
 
     $self->{'cache'}->save_cache("last $id", $items);
@@ -205,7 +204,6 @@ sub last()
 sub add_gui_job()
 {
     my ($self, $job) = @_;
-    $self->log("Add job:  $job");
     $self->{'share'}->add("gui_job", $job);
 }
 
@@ -235,7 +233,7 @@ sub thread_init()
     {
         my $trd = threads->create(sub { $self->thread_command(); });
         $trd->detach();
-        select(undef,undef,undef,0.1);
+        select(undef,undef,undef,0.4);
     }
 }
 

@@ -81,8 +81,8 @@ sub create_config()
         return $self->output_error("Error: invalid username / password.");
     }
 
-    my $max_items_displayed = prompt('Max items displayed: ');
-    my $browser = prompt('Default browser [x-www-browser]:');
+    my $max_items_displayed = 20;
+    my $browser = prompt('Default browser [x-www-browser]:') || 'x-www-browser';
     $self->{'token'} = $token;
     $self->{'browser'} = $browser;
     $self->{'max_items_displayed'} = $max_items_displayed;
@@ -312,6 +312,14 @@ sub watch()
             sleep(TheOldReader::Constants::WAIT_WATCH);
         }
     }
+}
+
+sub log()
+{
+    my ($self, $command) = @_;
+    open(WRITE,">>log"),
+    print WRITE "GUI: $command\n";
+    close WRITE;
 }
 
 

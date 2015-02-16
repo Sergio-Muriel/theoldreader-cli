@@ -195,7 +195,7 @@ sub user_info()
 # Get last items
 sub last()
 {
-    my ($self,$item, $max) = @_;
+    my ($self,$item, $max, $next_id) = @_;
 
     if(!$max)
     {
@@ -204,12 +204,16 @@ sub last()
 
     my $url = $self->{'host'}.TheOldReader::Constants::ITEMS;
     $url.= "&s=".$item."&n=$max";
+    if($next_id)
+    {
+        $url.="&c=$next_id";
+    }
     $self->req(GET($url), 'json_result');
 }
 
 sub unread()
 {
-    my ($self,$item, $max) = @_;
+    my ($self,$item, $max, $next_id) = @_;
 
     if(!$max)
     {
@@ -219,6 +223,10 @@ sub unread()
     my $url = $self->{'host'}.TheOldReader::Constants::ITEMS;
     $url.= "&s=".$item."&n=$max";
     $url.="&xt=user/-/state/com.google/read";
+    if($next_id)
+    {
+        $url.="&c=$next_id";
+    }
     $self->req(GET($url), 'json_result');
 }
 
@@ -279,7 +287,6 @@ sub mark_read()
     $form{'i'} = ();
     foreach(@ids)
     {
-        $self->log("Add read : $_");
         push(@{$form{'i'}}, $_);
     }
     return $self->req(POST($url, \%form), 'raw_result');
@@ -298,7 +305,6 @@ sub mark_unread()
     $form{'i'} = ();
     foreach(@ids)
     {
-        $self->log("Add unread : $_");
         push(@{$form{'i'}}, $_);
     }
     return $self->req(POST($url, \%form), 'raw_result');
@@ -310,7 +316,6 @@ sub mark_starred()
     my ($self,$ids_ref) = @_;
     my @ids;
     @ids = ($ids_ref);
-    $self->log("Mark starred");
 
     my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
     my %form = ();
@@ -319,7 +324,6 @@ sub mark_starred()
     foreach(@ids)
     {
         push(@{$form{'i'}}, $_);
-        $self->log("Mark starred $_");
     }
 
     return $self->req(POST($url, \%form), 'raw_result');

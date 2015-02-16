@@ -68,38 +68,40 @@ sub display_list()
     my ($clear, $id) = split(/\s+/, $params);
 
     $self->{'cat_id'} = $id;
-    $self->log("Update list $id");
 
     my $last = $self->{'cache'}->load_cache("last ".$id);
     if(!$last)
     {
         return;
     }
+    $self->{'next_list'} = $$last{'continuation'};
 
-    my $gui_labels = {
-        'labels' => {},
+    my $gui_list = {
+        'labels' => {
+            1 => ' Loading ...'
+        },
         'values' => []
     };
-    $self->log("CLEAR: $clear");
     if($clear ne 'clear' and $self->{'list_data'})
     {
-        $gui_labels = $self->{'list_data'};
+        $gui_list = $self->{'list_data'};
     }
     else
     {
-        $self->{'list_data'} = $gui_labels;
+        $self->{'list_data'} = $gui_list;
     }
 
+    $gui_list->{'labels'}{'load_more'} = '    [ Select to load more ]';
 
     my @hash_ids = @{$$last{'itemRefs'}};
     my @new_values= ();
     foreach(@hash_ids)
     {
         my $id = $_->{'id'};
-        if(!grep(/$id/,@{$gui_labels->{'values'}}))
+        if(!grep(/$id/,@{$gui_list->{'values'}}))
         {
             push(@new_values, $id);
-            push(@{$gui_labels->{'values'}}, $id);
+            push(@{$gui_list->{'values'}}, $id);
         }
         $self->last_status($id);
     }
@@ -110,20 +112,27 @@ sub display_list()
     }
     else
     {
-        $self->{'right_container'}->values(@{$gui_labels->{'values'}});
+        if($self->{'next_list'})
+        {
+            push(@{$gui_list->{'values'}}, 'load_more');
+        }
+        $self->{'right_container'}->values(@{$gui_list->{'values'}});
     }
 
-    $self->{'right_container'}->labels($gui_labels->{'labels'});
+    $self->{'right_container'}->labels($gui_list->{'labels'});
 
-    $self->{'container'}->draw();
-    $self->{'cui'}->draw(1);
+    if(!$self->{'item_displayed'})
+    {
+        $self->{'container'}->draw();
+        $self->{'cui'}->draw(1);
+    }
 }
 
 sub update_loading_list()
 {
     my ($self, $id) = @_;
 
-    my %gui_labels = %{$self->{'list_data'}};
+    my %gui_list = %{$self->{'list_data'}};
     my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
     my $title="@";
     my $starred="@";
@@ -133,8 +142,8 @@ sub update_loading_list()
         return;
     }
 
-    $gui_labels{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred." ".$feed->{'title'});
-    $self->{'right_container'}->labels($gui_labels{'labels'});
+    $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred." ".$feed->{'title'});
+    $self->{'right_container'}->labels($gui_list{'labels'});
 
     if(!$self->{'item_displayed'})
     {
@@ -146,7 +155,7 @@ sub last_status()
 {
     my ($self, $id) = @_;
 
-    my $gui_labels = $self->{'list_data'};
+    my $gui_list = $self->{'list_data'};
     my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
     my $title;
     my $starred;
@@ -172,8 +181,8 @@ sub last_status()
     {
         $starred=" ";
     }
-    $gui_labels->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred." ".$feed->{'title'});
-    $self->{'right_container'}->labels($gui_labels->{'labels'});
+    $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred." ".$feed->{'title'});
+    $self->{'right_container'}->labels($gui_list->{'labels'});
 
     if(!$self->{'item_displayed'})
     {
@@ -347,7 +356,7 @@ sub build_gui()
                 $_[HEAP]->{next_loop_event} = int(time());
                 $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
 
-                $_[HEAP]->{next_count_event} = int(time()) + 1;
+                $_[HEAP]->{next_count_event} = int(time()) + 300;
                 $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
             },
 
@@ -394,7 +403,7 @@ sub build_gui()
         'container',
         'Container',
         -border => 1,
-        -height => $ENV{'LINES'} - 3,
+        -padBottom => 2,
         -y    => 1,
         -bfg  => 'white'
     );
@@ -405,7 +414,7 @@ sub build_gui()
         -width => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -bfg  => 'white',
         -values => [ 1 ],
-        -labels => { 1 => 'Loading...'},
+        -labels => { 1 => ' Loading...'},
         -onchange => sub {
             $self->update_list('clear');
             $self->{'right_container'}->focus();
@@ -419,7 +428,7 @@ sub build_gui()
         -x => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -y => 0,
         -values => [ 1 ],
-        -labels => { 1 => '' },
+        -labels => { 1 => ' Loading ...' },
         -bg => 'blue',
         -fg => 'white',
         -onselchange => sub { $self->right_container_onselchange(); },
@@ -431,7 +440,6 @@ sub build_gui()
     $self->{'helpbar'} = $self->{'window'}->add(
         'helpbar',
         'Container',
-        -width => $ENV{'COLS'},
         -y    => $ENV{'LINES'}-2,
         -height => 1,
         -bg => 'red',
@@ -441,18 +449,16 @@ sub build_gui()
     $self->{'helptext'} = $self->{'helpbar'}->add(
         'helptext',
         'Label',
-        -width => $ENV{'COLS'},
         -bold => 1,
         -fg => 'yellow',
         -bg => 'blue',
-        -text => 'x:Display only unread/All  u:Update  s:star/unstar  r:mark as read  R:unmark as read Enter:read summary'
+        -text => 'x:Display only unread/All  u:Update  s:star/unstar  r:mark as read  R:unmark as read  Enter:read summary  o:open in browser'
     );
 
     # FOOTER
     $self->{'bottombar'} = $self->{'window'}->add(
         'bottombar',
         'Container',
-        -width => $ENV{'COLS'},
         -y    => $ENV{'LINES'}-1,
         -height => 1,
         -bg => 'black',
@@ -461,9 +467,9 @@ sub build_gui()
     $self->{'statusbar'} = $self->{'bottombar'}->add(
         'statusbar',
         'Label',
-        -width => $ENV{'COLS'},
         -bold => 1,
-        -text => 'Loading...'
+        -width => $ENV{'COLS'}
+        -text => ' Loading...'
     );
 
     $self->{'bottombar'}->focus();
@@ -524,7 +530,6 @@ sub build_content()
     $self->{'content_helpbar'} = $self->{'content'}->add(
         'content_helpbar',
         'Container',
-        -width => $ENV{'COLS'},
         -y    => $ENV{'LINES'}-2,
         -height => 1,
         -bg => 'red',
@@ -534,7 +539,6 @@ sub build_content()
     $self->{'content_helptext'} = $self->{'content_helpbar'}->add(
         'content_helptext',
         'Label',
-        -width => $ENV{'COLS'},
         -bold => 1,
         -fg => 'yellow',
         -bg => 'blue',
@@ -545,7 +549,6 @@ sub build_content()
     $self->{'content_bottombar'} = $self->{'content'}->add(
         'content_bottombar',
         'Container',
-        -width => $ENV{'COLS'},
         -y    => $ENV{'LINES'}-1,
         -height => 1,
         -bg => 'black',
@@ -554,9 +557,9 @@ sub build_content()
     $self->{'content_statusbar'} = $self->{'content_bottombar'}->add(
         'content_statusbar',
         'Label',
-        -width => $ENV{'COLS'},
         -bold => 1,
-        -text => 'Loading...'
+        -width => $ENV{'COLS'}
+        -text => ' Loading...'
     );
 }
 
@@ -576,21 +579,24 @@ sub add_background_job()
 
 sub update_list()
 {
-    my ($self, $clear) = @_;
+    my ($self, $clear, $next_list) = @_;
+    if(!$next_list) {
+        $next_list="";
+    }
 
     my $id = $self->{'left_container'}->get_active_value();
     if($clear and $clear eq 'clear')
     {
         # Clear list
-        my $gui_labels = {
+        my $gui_list = {
             'labels' => {
                 1 => ' Loading ...',
             },
             'values' => [ 1]
         };
-        $self->{'right_container'}->values(@{$gui_labels->{'values'}});
-        $self->{'right_container'}->labels($gui_labels->{'labels'});
-        $self->{'list_data'} = $gui_labels;
+        $self->{'right_container'}->values(@{$gui_list->{'values'}});
+        $self->{'right_container'}->labels($gui_list->{'labels'});
+        $self->{'list_data'} = $gui_list;
     }
     else
     {
@@ -599,7 +605,7 @@ sub update_list()
 
     $self->{'cui'}->draw(1);
 
-    $self->add_background_job("last $clear $id ".$self->{'only_unread'}, "Fetching last items from $id");
+    $self->add_background_job("last $clear $id ".($self->{'only_unread'} || "0")." ".$next_list, "Fetching last items from $id");
 }
 
 sub right_container_onselchange()
@@ -607,10 +613,19 @@ sub right_container_onselchange()
     my ($self) = @_;
 
     # Check if need to load more (last selected)
-    my @items = @{$self->{'right_container'}->values()};
-    if($#items>1 && $#items == $self->{'right_container'}{'-ypos'})
+    my $id = $self->{'right_container'}->get_active_value();
+    if($id and $id eq 'load_more')
     {
-        $self->log("LAST SELECTED!");
+        if($self->{'next_list'})
+        {
+            my $gui_list = $self->{'list_data'};
+            $gui_list->{'labels'}{'load_more'} = '    [ Loading ...]';
+            $self->update_list("noclear",$self->{'next_list'});
+        }
+        else
+        {
+            $self->log("No next item id to load next list.");
+        }
     }
 }
 sub right_container_onchange()
@@ -618,7 +633,6 @@ sub right_container_onchange()
     my ($self) = @_;
 
     my $id = $self->{'right_container'}->get_active_value();
-    $self->log("display item $id");
     if($id)
     {
         # Check if need to load more (last selected)
@@ -635,6 +649,11 @@ sub display_item()
 {
     my ($self,$id) = @_;
     $self->{'item_displayed'}=1;
+    if($id eq 'load_more' and $id != 1)
+    {
+        $self->update_list("noclear",$self->{'next_list'});
+        return $self->close_content();
+    }
 
     my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
     my $text="";
@@ -652,11 +671,7 @@ sub display_item()
         my @labels=();
         foreach(@{$item->{'categories'}})
         {
-            if(!$self->{'labels'}{'display_labels'}{$_})
-            {
-                $self->log("Not defined $_");
-            }
-            else
+            if($self->{'labels'}{'display_labels'}{$_})
             {
                 push(@labels,$self->{'labels'}{'display_labels'}{$_});
             }
@@ -788,10 +803,9 @@ sub open_item()
     if($item)
     {
         my @canonical = @{$item->{'canonical'}};
-        $self->log("Open ".$self->{'browser'});
-        open CMD, "| ".$self->{'browser'}." '".$canonical[0]{'href'}."' 2>/dev/null";
+        open CMD, "| ".($self->{'browser'}||"x-www-browser") ." '".$canonical[0]{'href'}."' 2>/dev/null";
         close CMD;
-        #system(("x-www-browser",$canonical[0]{'href'}));
+        $self->right_container_read();
     }
 }
 
@@ -846,7 +860,7 @@ sub switch_unread_all()
     my ($self) = @_;
     $self->{'only_unread'} = !$self->{'only_unread'};
     $self->save_config();
-    $self->update_list();
+    $self->update_list("clear");
 }
 sub close_content()
 {
@@ -891,6 +905,18 @@ sub right_container_read()
 
     $self->add_background_job("mark_read ".$id, "Mark as read");
     $self->update_loading_list($id);
+    $self->goto_next();
+}
+
+sub goto_next()
+{
+    my ($self) = @_;
+    my $idx = $self->{'right_container'}{'-ypos'};
+    $self->{'right_container'}{'-ypos'} = $idx+1;
+    if(!$self->{'item_displayed'})
+    {
+        $self->{'right_container'}->draw(1);
+    }
 }
 
 sub right_container_unread()
@@ -909,7 +935,7 @@ sub bind_keys()
         $self->exit_dialog();
     };
 
-    $self->{'window'}->set_binding(sub { $self->update_list(); }, "u");
+    $self->{'window'}->set_binding(sub { $self->update_list("clear"); }, "u");
     $self->{'window'}->set_binding(sub { $self->switch_unread_all(); }, "x");
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, "<enter>");
 
