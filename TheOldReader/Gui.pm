@@ -649,7 +649,7 @@ sub display_item()
 {
     my ($self,$id) = @_;
     $self->{'item_displayed'}=1;
-    if($id eq 'load_more' and $id != 1)
+    if($id eq 'load_more' and $id ne "1")
     {
         $self->update_list("noclear",$self->{'next_list'});
         return $self->close_content();
