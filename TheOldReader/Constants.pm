@@ -10,7 +10,7 @@ use constant GUI_UPDATE => 120;
 use constant DEFAULT_MAX => 10;
 use constant WAIT_WATCH => 10;
 use constant CACHE_DIR => './cache/';
-use constant DEFAULT_HOST => 'http://theoldreader.com';
+use constant DEFAULT_HOST => 'https://theoldreader.com';
 use constant DEFAULT_CONFIG => 'global.conf';
 
 use constant LOGIN_PATH => '/accounts/ClientLogin';
