@@ -18,11 +18,13 @@ On debian you can install the packages using the apt command:
 
 ### If you want the gui
 
-    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl
+    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl libtext-iconv-perl
+
+    $ cpan -i Curses::UI::POE 
 
 ### If you don't want the gui, just install
 
-    $ apt-get install libjson-perl libwww-perl libio-prompt-perl
+    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libtext-iconv-perl
 
 ### For OS X (using Homebrew/cpanm)
 
