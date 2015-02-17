@@ -271,12 +271,14 @@ sub update_labels()
     my ($self, @params) = @_;
 
     my $labels = $self->{'cache'}->load_cache('labels');
-    if(!$labels)
+    my $friends = $self->{'cache'}->load_cache('friends');
+    if(!$labels || !$friends)
     {
         return;
     }
 
     my %labels = %{$labels};
+    my @friends = @{$friends};
     my %counts = ();
 
     my $gui_labels = {};
@@ -309,6 +311,15 @@ sub update_labels()
         ]
     };
 
+    foreach my $ref(@friends)
+    {
+        my $key = $ref->{'stream'};
+        $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert($ref->{'displayName'});
+        $gui_labels->{'labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+        $gui_labels->{'original_labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+
+        push(@{$gui_labels->{'values'}}, $ref->{'stream'});
+    }
     foreach my $ref(keys %labels)
     {
         $gui_labels->{'display_labels'}{$ref} = $self->{'converter'}->convert($labels->{$ref});
@@ -487,11 +498,12 @@ sub build_gui()
         -bg => 'black',
         -fg => 'white'
     );
+
     $self->{'statusbar'} = $self->{'bottombar'}->add(
         'statusbar',
         'Label',
         -bold => 1,
-        -width => $ENV{'COLS'}
+        -width => $ENV{'COLS'},
         -text => ' Loading...'
     );
 
@@ -577,11 +589,12 @@ sub build_content()
         -bg => 'black',
         -fg => 'white'
     );
+
     $self->{'content_statusbar'} = $self->{'content_bottombar'}->add(
         'content_statusbar',
         'Label',
         -bold => 1,
-        -width => $ENV{'COLS'}
+        -width => $ENV{'COLS'},
         -text => ' Loading...'
     );
 }

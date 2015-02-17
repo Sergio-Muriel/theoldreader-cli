@@ -416,6 +416,7 @@ sub friends()
             push(@list, $_->{'displayName'}." : ".$_->{'stream'});
         }
         $self->output_list(@list);
+        $self->{'cache'}->save_cache('friends', $content->{'friends'});
     }
 }
 

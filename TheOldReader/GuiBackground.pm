@@ -75,6 +75,7 @@ sub labels()
     my ($self, @params) = @_;
     # Init labels
     $self->{'reader'}->labels();
+    $self->{'reader'}->friends();
     $self->add_gui_job("update_labels");
 
 }
