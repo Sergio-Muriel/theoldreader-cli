@@ -78,7 +78,7 @@ sub display_list()
 
     my $gui_list = {
         'labels' => {
-            1 => ' Loading ...'
+            'loading' => ' Loading ...'
         },
         'values' => []
     };
@@ -356,7 +356,7 @@ sub build_gui()
                 $_[HEAP]->{next_loop_event} = int(time());
                 $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
 
-                $_[HEAP]->{next_count_event} = int(time()) + 3;
+                $_[HEAP]->{next_count_event} = int(time()) + 1;
                 $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
             },
 
@@ -413,8 +413,8 @@ sub build_gui()
         'Listbox',
         -width => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -bfg  => 'white',
-        -values => [ 1 ],
-        -labels => { 1 => ' Loading...'},
+        -values => [ 'loading' ],
+        -labels => { 'loading' => ' Loading...'},
         -onchange => sub {
             $self->update_list('clear');
             $self->{'right_container'}->focus();
@@ -427,8 +427,8 @@ sub build_gui()
         -border => 0,
         -x => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -y => 0,
-        -values => [ 1 ],
-        -labels => { 1 => ' Loading ...' },
+        -values => [ 'loading' ],
+        -labels => { 'loading' => ' Loading ...' },
         -bg => 'blue',
         -fg => 'white',
         -onselchange => sub { $self->right_container_onselchange(); },
@@ -590,9 +590,9 @@ sub update_list()
         # Clear list
         my $gui_list = {
             'labels' => {
-                1 => ' Loading ...',
+                'loading' => ' Loading ...',
             },
-            'values' => [ 1]
+            'values' => [ 'loading' ]
         };
         $self->{'right_container'}->values(@{$gui_list->{'values'}});
         $self->{'right_container'}->labels($gui_list->{'labels'});
@@ -649,7 +649,7 @@ sub display_item()
 {
     my ($self,$id) = @_;
     $self->{'item_displayed'}=1;
-    if($id eq 'load_more' and $id ne "1")
+    if($id eq 'load_more' or $id eq "loading")
     {
         $self->update_list("noclear",$self->{'next_list'});
         return $self->close_content();
