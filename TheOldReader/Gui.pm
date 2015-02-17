@@ -136,13 +136,14 @@ sub update_loading_list()
     my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
     my $title="@";
     my $starred="@";
+    my $like="@";
     if(!$feed)
     {
         $self->log("ERROR: cannot find feed $id");
         return;
     }
 
-    $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred." ".$feed->{'title'});
+    $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like." ".$feed->{'title'});
     $self->{'right_container'}->labels($gui_list{'labels'});
 
     if(!$self->{'item_displayed'})
@@ -159,6 +160,7 @@ sub last_status()
     my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
     my $title;
     my $starred;
+    my $like;
     if(!$feed)
     {
         $self->log("ERROR: cannot find feed $id");
@@ -181,7 +183,15 @@ sub last_status()
     {
         $starred=" ";
     }
-    $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred." ".$feed->{'title'});
+    if(grep(/user\/-\/state\/com.google\/like/,@{$feed->{'categories'}}))
+    {
+        $like="L";
+    }
+    else
+    {
+        $like=" ";
+    }
+    $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like." ".$feed->{'title'});
     $self->{'right_container'}->labels($gui_list->{'labels'});
 
     if(!$self->{'item_displayed'})
@@ -452,7 +462,7 @@ sub build_gui()
         -bold => 1,
         -fg => 'yellow',
         -bg => 'blue',
-        -text => 'x:Display only unread/All  u:Update  s:star/unstar  r:mark as read  R:unmark as read  Enter:read summary  o:open in browser'
+        -text => 'x:Display only unread/All  u:Update  s:star/unstar  r:mark read  R:unread l:like/unlike  Enter:read summary  o:open in browser'
     );
 
     # FOOTER
@@ -897,6 +907,29 @@ sub right_container_star()
         $self->log("Feed not ready! $id");
     }
 }
+sub right_container_like()
+{
+    my ($self) = @_;
+    my $id = $self->{'right_container'}->get_active_value();
+    my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+
+    $self->update_loading_list($id);
+    if($feed)
+    {
+        if(!grep(/user\/-\/state\/com.google\/like/,@{$feed->{'categories'}}))
+        {
+            $self->add_background_job("mark_liked ".$feed->{'id'}, "Mark liked");
+        }
+        else
+        {
+            $self->add_background_job("unmark_liked ".$feed->{'id'}, "Unmark liked");
+        }
+    }
+    else
+    {
+        $self->log("Feed not ready! $id");
+    }
+}
 
 sub right_container_read()
 {
@@ -940,6 +973,7 @@ sub bind_keys()
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, "<enter>");
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
+    $self->{'right_container'}->set_binding(sub { $self->right_container_like(); }, "l");
     $self->{'right_container'}->set_binding(sub { $self->right_container_read(); }, "r");
     $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
     $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");

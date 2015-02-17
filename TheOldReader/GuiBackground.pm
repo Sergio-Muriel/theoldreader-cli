@@ -113,6 +113,40 @@ sub unmark_starred()
     $self->add_gui_job("last_status $id");
 }
 
+sub mark_liked()
+{
+    my ($self, $id) = @_;
+    my @ids = ($id);
+    my $result = $self->{'reader'}->mark_like(\@ids);
+    my $contents = $self->{'reader'}->contents(@ids);
+    if($contents)
+    {
+        foreach(@{$$contents{'items'}})
+        {
+            $self->{'cache'}->save_cache("item ".$_->{'id'}, $_);
+        }
+    }
+    $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
+    $self->add_gui_job("last_status $id");
+}
+
+sub unmark_liked()
+{
+    my ($self, $id) = @_;
+    my @ids = ($id);
+    my $result = $self->{'reader'}->unmark_like(\@ids);
+    my $contents = $self->{'reader'}->contents(@ids);
+    if($contents)
+    {
+        foreach(@{$$contents{'items'}})
+        {
+            $self->{'cache'}->save_cache("item ".$_->{'id'}, $_);
+        }
+    }
+    $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
+    $self->add_gui_job("last_status $id");
+}
+
 sub mark_read()
 {
     my ($self, $id) = @_;
