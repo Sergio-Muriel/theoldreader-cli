@@ -310,6 +310,24 @@ sub mark_like()
     return $self->req(POST($url, \%form), 'raw_result');
 }
 
+# UnMark as liked
+sub unmark_like()
+{
+    my ($self,$ids_ref) = @_;
+    my @ids;
+    @ids = @{$ids_ref};
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
+    my %form = ();
+    $form{'r'} = TheOldReader::Constants::STATE_LIKE;
+    $form{'i'} = ();
+    foreach(@ids)
+    {
+        push(@{$form{'i'}}, $_);
+    }
+    return $self->req(POST($url, \%form), 'raw_result');
+}
+
 # Get last items
 sub mark_unread()
 {

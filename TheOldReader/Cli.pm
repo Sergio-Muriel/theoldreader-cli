@@ -45,7 +45,7 @@ sub new
 sub help()
 {
     my ($self) = @_;
-    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch ]");
+    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like ]");
     $self->output_string("");
 
     $self->output_string("Available commands:");
@@ -314,7 +314,7 @@ sub watch()
     }
 }
 
-sub like()
+sub mark_like()
 {
     my ($self, @params) = @_;
     my $ids_ref = shift(@params);
@@ -328,14 +328,39 @@ sub like()
         @ids = ($ids_ref);
     }
 
-    my $content = $self->{'reader'}->like($ids_ref);
+    my $content = $self->{'reader'}->mark_like(\@ids);
     if($content eq "OK")
     {
-        $self->output_string("Feed(s) marked as read.");
+        $self->output_string("Feed(s) marked as liked.");
     }
     else
     {
-        $self->output_error("Error marking feed(s) as read.");
+        $self->output_error("Error marking feed(s) as liked.");
+    }
+}
+
+sub unmark_like()
+{
+    my ($self, @params) = @_;
+    my $ids_ref = shift(@params);
+    my @ids;
+    if(ref($ids_ref) eq 'ARRAY')
+    {
+        @ids = @{$ids_ref};
+    }
+    else
+    {
+        @ids = ($ids_ref);
+    }
+
+    my $content = $self->{'reader'}->unmark_like(\@ids);
+    if($content eq "OK")
+    {
+        $self->output_string("Feed(s) unmarked as liked.");
+    }
+    else
+    {
+        $self->output_error("Error unmarking feed(s) as liked.");
     }
 }
 

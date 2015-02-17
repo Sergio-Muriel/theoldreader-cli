@@ -135,3 +135,10 @@ To display the name of the feeds that have unread items:
 
     ./reader.pl unread feed/52e1659d091452dd37000e44
     ...
+
+### Mark and unmark like flag
+
+    ./reader mark_like tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
+    ./reader unmark_like tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
+
+
