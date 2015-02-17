@@ -411,6 +411,14 @@ sub unmark_starred()
     return $self->req(POST($url, \%form), 'raw_result');
 }
 
+sub friends()
+{
+    my ($self) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::FRIENDS;
+    return $self->req(GET($url), 'json_result');
+}
+
 
 
 
