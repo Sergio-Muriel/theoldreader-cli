@@ -37,12 +37,7 @@ sub new
 
     $self->read_config();
     $self->{'share'} = $params{'share'};
-    $self->{'cache'} = TheOldReader::Cache->new();
 
-    $self->{'reader'} = TheOldReader::Api->new(
-       'host' => TheOldReader::Constants::DEFAULT_HOST,
-       'token' => $self->{'token'},
-    );
     return $self;
 }
 
@@ -278,6 +273,12 @@ sub add_gui_job()
 sub thread_command()
 {
     my ($self, $received) = @_;
+
+    $self->{'cache'} = TheOldReader::Cache->new();
+    $self->{'reader'} = TheOldReader::Api->new(
+       'host' => TheOldReader::Constants::DEFAULT_HOST,
+       'token' => $self->{'token'},
+    );
     if($received)
     {
         my ($command, $params)  = ($received=~ /^(\S+)(?:$|\s(.*)$)/);
