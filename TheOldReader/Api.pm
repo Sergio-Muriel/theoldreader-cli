@@ -222,7 +222,7 @@ sub unread()
 
     my $url = $self->{'host'}.TheOldReader::Constants::ITEMS;
     $url.= "&s=".$item."&n=$max";
-    $url.="&xt=user/-/state/com.google/read";
+    $url.="&xt=".TheOldReader::Constants::STATE_READ;
     if($next_id)
     {
         $url.="&c=$next_id";
@@ -283,7 +283,25 @@ sub mark_read()
 
     my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
     my %form = ();
-    $form{'a'} = 'user/-/state/com.google/read';
+    $form{'a'} = TheOldReader::Constants::STATE_READ;
+    $form{'i'} = ();
+    foreach(@ids)
+    {
+        push(@{$form{'i'}}, $_);
+    }
+    return $self->req(POST($url, \%form), 'raw_result');
+}
+
+# Mark as liked
+sub mark_like()
+{
+    my ($self,$ids_ref) = @_;
+    my @ids;
+    @ids = @{$ids_ref};
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
+    my %form = ();
+    $form{'a'} = TheOldReader::Constants::STATE_LIKE;
     $form{'i'} = ();
     foreach(@ids)
     {
@@ -301,7 +319,7 @@ sub mark_unread()
 
     my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
     my %form = ();
-    $form{'r'} = 'user/-/state/com.google/read';
+    $form{'r'} = TheOldReader::Constants::STATE_READ;
     $form{'i'} = ();
     foreach(@ids)
     {
@@ -319,7 +337,7 @@ sub mark_starred()
 
     my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
     my %form = ();
-    $form{'a'} = 'user/-/state/com.google/starred';
+    $form{'a'} = TheOldReader::Constants::STATE_STARRED;
     $form{'i'} = ();
     foreach(@ids)
     {
@@ -338,7 +356,7 @@ sub unmark_starred()
 
     my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
     my %form = ();
-    $form{'r'} = 'user/-/state/com.google/starred';
+    $form{'r'} = TheOldReader::Constants::STATE_STARRED;
     $form{'i'} = ();
     foreach(@ids)
     {

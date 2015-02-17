@@ -180,8 +180,8 @@ sub unread()
     my $mark_read_id = $id;
     if(!$id)
     {
-        $id="user/-/state/com.google/read";
-        $mark_read_id = TheOldReader::Constants::FOLDER_ALL;
+        $id= TheOldReader::Constants::STATE_READ;
+        $mark_read_id = TheOldReader::Constants::STATE_ALL;
     }
     my $items = $self->{'reader'}->unread($id, $self->{'max_items_displayed'});
     if(!$items)
@@ -252,7 +252,7 @@ sub last()
     my $id = shift(@params);
     if(!$id)
     {
-        $id="user/-/state/com.google/read";
+        $id= TheOldReader::Constants::STATE_READ;
 
     }
 
@@ -314,6 +314,31 @@ sub watch()
     }
 }
 
+sub like()
+{
+    my ($self, @params) = @_;
+    my $ids_ref = shift(@params);
+    my @ids;
+    if(ref($ids_ref) eq 'ARRAY')
+    {
+        @ids = @{$ids_ref};
+    }
+    else
+    {
+        @ids = ($ids_ref);
+    }
+
+    my $content = $self->{'reader'}->like($ids_ref);
+    if($content eq "OK")
+    {
+        $self->output_string("Feed(s) marked as read.");
+    }
+    else
+    {
+        $self->output_error("Error marking feed(s) as read.");
+    }
+}
+
 sub log()
 {
     my ($self, $command) = @_;
@@ -321,6 +346,8 @@ sub log()
     print WRITE "GUI: $command\n";
     close WRITE;
 }
+
+
 
 
 

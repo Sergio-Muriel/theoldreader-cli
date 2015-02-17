@@ -261,30 +261,30 @@ sub update_labels()
     my $gui_labels = {};
     $gui_labels = {
         'labels' => {
-            'user/-/state/com.google/reading-list' => 'All items',
-            'user/-/state/com.google/starred' => 'Starred',
-            'user/-/state/com.google/like' => 'Liked',
-            'user/-/state/com.google/broadcast' => 'Shared',
-            'user/-/state/com.google/read' => 'Read',
+            TheOldReader::Constants::STATE_ALL => 'All items',
+            TheOldReader::Constants::STATE_STARRED=> 'Starred',
+            TheOldReader::Constants::STATE_LIKE=> 'Liked',
+            TheOldReader::Constants::STATE_BROADCAST=> 'Shared',
+            TheOldReader::Constants::STATE_READ=> 'Read',
         },
         'display_labels' => {
-            'user/-/state/com.google/starred' => 'Starred',
-            'user/-/state/com.google/like' => 'Liked',
-            'user/-/state/com.google/broadcast' => 'Shared'
+            TheOldReader::Constants::STATE_STARRED=> 'Starred',
+            TheOldReader::Constants::STATE_LIKE=> 'Liked',
+            TheOldReader::Constants::STATE_BROADCAST=> 'Shared'
         },
         'original_labels' => {
-            'user/-/state/com.google/reading-list' => 'All items',
-            'user/-/state/com.google/starred' => 'Starred',
-            'user/-/state/com.google/like' => 'Liked',
-            'user/-/state/com.google/broadcast' => 'Shared',
-            'user/-/state/com.google/read' => 'Read',
+            TheOldReader::Constants::STATE_ALL=> 'All items',
+            TheOldReader::Constants::STATE_STARRED=> 'Starred',
+            TheOldReader::Constants::STATE_LIKE=> 'Liked',
+            TheOldReader::Constants::STATE_BROADCAST=> 'Shared',
+            TheOldReader::Constants::STATE_READ=> 'Read',
         },
         'values' => [
-            'user/-/state/com.google/reading-list',
-            'user/-/state/com.google/starred',
-            'user/-/state/com.google/like',
-            'user/-/state/com.google/broadcast',
-            'user/-/state/com.google/read',
+            TheOldReader::Constants::STATE_ALL,
+            TheOldReader::Constants::STATE_STARRED,
+            TheOldReader::Constants::STATE_LIKE,
+            TheOldReader::Constants::STATE_BROADCAST,
+            TheOldReader::Constants::STATE_READ,
         ]
     };
 

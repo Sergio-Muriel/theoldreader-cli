@@ -153,7 +153,7 @@ sub last()
     my ($clear,$id, $only_unread, $next_id) = split(/\s+/,$params);
     if(!$id)
     {
-        $id=TheOldReader::Constants::FOLDER_ALL;
+        $id=TheOldReader::Constants::STATE_ALL;
     }
     if(!$next_id)
     {
