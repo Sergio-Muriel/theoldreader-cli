@@ -45,7 +45,7 @@ sub new
 sub help()
 {
     my ($self) = @_;
-    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like ]");
+    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast ]");
     $self->output_string("");
 
     $self->output_string("Available commands:");
@@ -361,6 +361,38 @@ sub unmark_like()
     else
     {
         $self->output_error("Error unmarking feed(s) as liked.");
+    }
+}
+
+sub mark_broadcast()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+    my $annotation = shift(@params);
+
+    my $content = $self->{'reader'}->mark_broadcast($id, $annotation);
+    if($content eq "OK")
+    {
+        $self->output_string("Feed(s) marked as broadcast.");
+    }
+    else
+    {
+        $self->output_error("Error marking feed(s) as broadcast.");
+    }
+}
+sub unmark_broadcast()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+
+    my $content = $self->{'reader'}->unmark_broadcast($id);
+    if($content eq "OK")
+    {
+        $self->output_string("Feed(s) unmarked as broadcast.");
+    }
+    else
+    {
+        $self->output_error("Error unmarking feed(s) as broadcast.");
     }
 }
 

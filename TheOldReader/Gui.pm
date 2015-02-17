@@ -19,6 +19,7 @@ use TheOldReader::Cache;
 
 use threads;
 use Curses::UI::POE;
+use Curses::Forms::Dialog::Input;
 use Data::Dumper;
 
 # Create new instance
@@ -137,13 +138,14 @@ sub update_loading_list()
     my $title="@";
     my $starred="@";
     my $like="@";
+    my $broadcast="@";
     if(!$feed)
     {
         $self->log("ERROR: cannot find feed $id");
         return;
     }
 
-    $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like." ".$feed->{'title'});
+    $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like.$broadcast." ".$feed->{'title'});
     $self->{'right_container'}->labels($gui_list{'labels'});
 
     if(!$self->{'item_displayed'})
@@ -161,6 +163,7 @@ sub last_status()
     my $title;
     my $starred;
     my $like;
+    my $broadcast;
     if(!$feed)
     {
         $self->log("ERROR: cannot find feed $id");
@@ -191,7 +194,15 @@ sub last_status()
     {
         $like=" ";
     }
-    $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like." ".$feed->{'title'});
+    if(grep(/user\/-\/state\/com.google\/broadcast/,@{$feed->{'categories'}}))
+    {
+        $broadcast="B";
+    }
+    else
+    {
+        $broadcast=" ";
+    }
+    $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like.$broadcast." ".$feed->{'title'});
     $self->{'right_container'}->labels($gui_list->{'labels'});
 
     if(!$self->{'item_displayed'})
@@ -462,7 +473,9 @@ sub build_gui()
         -bold => 1,
         -fg => 'yellow',
         -bg => 'blue',
-        -text => 'x:Display only unread/All  u:Update  s:star/unstar  r:mark read  R:unread l:like/unlike  Enter:read summary  o:open in browser'
+        -bold => 1,
+        -width => $ENV{'COLS'},
+        -text => 'x:Display only unread/All  u:Update  s:star/unstar  r:mark read  R:unread l:like/unlike b:share  Enter:read summary  o:open in browser'
     );
 
     # FOOTER
@@ -918,11 +931,39 @@ sub right_container_like()
     {
         if(!grep(/user\/-\/state\/com.google\/like/,@{$feed->{'categories'}}))
         {
-            $self->add_background_job("mark_liked ".$feed->{'id'}, "Mark liked");
+            $self->add_background_job("mark_like ".$feed->{'id'}, "Mark liked");
         }
         else
         {
-            $self->add_background_job("unmark_liked ".$feed->{'id'}, "Unmark liked");
+            $self->add_background_job("unmark_like ".$feed->{'id'}, "Unmark liked");
+        }
+    }
+    else
+    {
+        $self->log("Feed not ready! $id");
+    }
+}
+sub right_container_broadcast()
+{
+    my ($self) = @_;
+    my $id = $self->{'right_container'}->get_active_value();
+    my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+
+    $self->update_loading_list($id);
+    if($feed)
+    {
+        if(!grep(/user\/-\/state\/com.google\/broadcast/,@{$feed->{'categories'}}))
+        {
+            #my ($rv, $text) = input('Input Parameter!', BTN_OK | BTN_CANCEL, 'Search String', 20, qw(white black yellow));
+            my ($rv, $text) = input('Input Parameter!', BTN_OK | BTN_CANCEL, 'Search String', 20, qw(white blue yellow));
+            if(!$rv)
+            {
+                $self->add_background_job("mark_broadcast ".$feed->{'id'}." $text", "Mark liked");
+            }
+        }
+        else
+        {
+            $self->add_background_job("unmark_broadcast ".$feed->{'id'}, "Unmark liked");
         }
     }
     else
@@ -974,6 +1015,7 @@ sub bind_keys()
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
     $self->{'right_container'}->set_binding(sub { $self->right_container_like(); }, "l");
+    $self->{'right_container'}->set_binding(sub { $self->right_container_broadcast(); }, "b");
     $self->{'right_container'}->set_binding(sub { $self->right_container_read(); }, "r");
     $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
     $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");

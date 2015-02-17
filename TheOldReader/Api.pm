@@ -328,6 +328,34 @@ sub unmark_like()
     return $self->req(POST($url, \%form), 'raw_result');
 }
 
+# Mark as broadcast
+sub mark_broadcast()
+{
+    my ($self,$id, $annotation) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
+    my %form = ();
+    $form{'a'} = TheOldReader::Constants::STATE_BROADCAST;
+    $form{'i'} = ();
+    $form{'annotation'} = $annotation;
+    push(@{$form{'i'}}, $id);
+    return $self->req(POST($url, \%form), 'raw_result');
+}
+
+# UnMark as broadcast
+sub unmark_broadcast()
+{
+    my ($self,$id) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT;
+    my %form = ();
+    $form{'r'} = TheOldReader::Constants::STATE_BROADCAST;
+    $form{'i'} = ();
+    push(@{$form{'i'}}, $id);
+
+    return $self->req(POST($url, \%form), 'raw_result');
+}
+
 # Get last items
 sub mark_unread()
 {

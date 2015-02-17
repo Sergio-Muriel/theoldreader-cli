@@ -20,7 +20,7 @@ On debian you can install the packages using the apt command:
 
     $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl libtext-iconv-perl
 
-    $ cpan -i Curses::UI::POE 
+    $ cpan -i Curses::UI::POE Curses::Forms::Dialog
 
 ### If you don't want the gui, just install
 
@@ -29,7 +29,7 @@ On debian you can install the packages using the apt command:
 ### For OS X (using Homebrew/cpanm)
 
     $ brew install cpanm
-    $ sudo perl -MCPAN -e 'install JSON,LWP::UserAgent,IO::Prompt,Curses::UI,Curses::UI::POE,Text::Iconv,Mozilla::CA'
+    $ sudo perl -MCPAN -e 'install JSON,LWP::UserAgent,IO::Prompt,Curses::UI,Curses::UI::POE,Text::Iconv,Mozilla::CA,Curses::Forms::Dialog'
 
 ## Create configuration file
 
@@ -142,5 +142,11 @@ To display the name of the feeds that have unread items:
 
     ./reader mark_like tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
     ./reader unmark_like tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
+
+### Mark and unmark broadcast flag
+
+    ./reader mark_broadcast tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d mymessage
+    ./reader unmark_broadcast tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
+
 
 
