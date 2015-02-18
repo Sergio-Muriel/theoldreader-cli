@@ -23,7 +23,8 @@ use constant USER_INFO => '/reader/api/0/user-info?output=json';
 use constant EDIT => '/reader/api/0/edit-tag?output=json';
 use constant FRIENDS => '/reader/api/0/friend/list?output=json';
 use constant EDIT_FRIEND => '/reader/api/0/friends/edit';
-use constant ADD => '/reader/api/0/subscription/quickadd';
+use constant ADD_FEED => '/reader/api/0/subscription/quickadd';
+use constant EDIT_FEED => '/reader/api/0/subscription/edit';
 
 
 use constant STATE_ALL => 'user/-/state/com.google/reading-list';

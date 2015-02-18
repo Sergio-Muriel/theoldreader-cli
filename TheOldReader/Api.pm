@@ -21,6 +21,23 @@ use URI::QueryParam;
 use HTTP::Request::Common qw(GET POST);
 
 
+=head1 TheOldReader API
+
+To use the API:
+
+    use TheOldReader::API;
+
+=cut
+
+=head1 Constructor
+
+    my $read = TheOldReader::Api->new(
+       'host' => TheOldReader::Constants::DEFAULT_HOST,
+       'token' => $self->{'token'},
+    );
+
+=cut
+
 # Create new instance
 sub new
 {
@@ -37,6 +54,15 @@ sub new
     return $self;
 }
 
+=head2 Methods 
+
+Private methods
+
+=cut
+
+
+=head3 req($request,$callback)
+=cut
 # Create request and run fallback
 sub req()
 {
@@ -58,7 +84,10 @@ sub req()
     return $self->$result_func($res);
 }
 
-# Commong result conversion, parse json
+=head3 json_result($http_result)
+
+Returns the json decoded content, if request is a success
+=cut
 sub json_result()
 {
     my ($self, $res) = @_;
@@ -68,6 +97,10 @@ sub json_result()
     }
 }
 
+=head3 raw_result($http_result)
+
+Returns the content of the http, without any changes
+=cut
 sub raw_result()
 {
     my ($self, $res) = @_;
@@ -83,7 +116,10 @@ sub raw_result()
 }
 
 
-# Auth, check login and fill token
+=head3 auth($username, $password)
+
+Returns the token, if auth successfull
+=cut
 sub auth()
 {
     my ($self, $username, $password) = @_;
@@ -103,7 +139,6 @@ sub auth()
     );
 }
 
-# Receive login and fill token if correct
 sub auth_result
 {
     my ($self, $res) = @_;
@@ -114,12 +149,16 @@ sub auth_result
     return $self->{'token'};
 }
 
-# Check status
+=head3 status()
+
+Returns the old reader global status
+=cut
 sub status()
 {
     my ($self) = @_;
     return $self->req(GET($self->{'host'}.TheOldReader::Constants::STATUS), 'status_result');
 }
+
 
 sub status_result()
 {
@@ -132,7 +171,10 @@ sub status_result()
     return 0;
 }
 
-# List unread feeds (obvious)
+=head3 unread_feeds()
+
+Return unread feed ids
+=cut
 sub unread_feeds()
 {
     my ($self) = @_;
@@ -142,7 +184,10 @@ sub unread_feeds()
 }
 
 
-# Get subscription list(@TODO: hash by labels)
+=head3 subscription_list()
+
+Return subscription list
+=cut
 sub subscription_list()
 {
     my ($self) = @_;
@@ -151,17 +196,6 @@ sub subscription_list()
         return $self->{'subscriptions'};
     }
     $self->req(GET($self->{'host'}.TheOldReader::Constants::SUBSCRIPTION_LIST), 'subscription_list_result');
-}
-
-# Get category information for a given id
-sub get_category()
-{
-    my ($self, $id) = @_;
-    if(!$self->{'subscriptions'})
-    {
-        $self->subscription_list();
-    }
-    return $self->{'subscriptions_refs'}{$id};
 }
 
 sub subscription_list_result()
@@ -187,7 +221,10 @@ sub subscription_list_result()
     return $self->{'subscriptions'};
 }
 
-# Fetch user information
+=head3 user_info()
+
+Return the user info
+=cut
 sub user_info()
 {
     my ($self) = @_;
@@ -196,7 +233,12 @@ sub user_info()
 
 
 
-# Get last items
+=head3 last($stream_id, $max_items, $start_from)
+
+Return the last items from $stream_id, starting from $start_from
+    $reader->last('user/-/label/blogs',1);
+
+=cut
 sub last()
 {
     my ($self,$item, $max, $next_id) = @_;
@@ -215,6 +257,12 @@ sub last()
     $self->req(GET($url), 'json_result');
 }
 
+=head3 unread($stream_id, $max_items, $start_from)
+
+Return the last unread items from $stream_id, starting from $start_from
+    $reader->unread('user/-/label/blogs',1);
+
+=cut
 sub unread()
 {
     my ($self,$item, $max, $next_id) = @_;
@@ -235,6 +283,12 @@ sub unread()
 }
 
 
+=head3 contents(\@ids)
+
+Return the content of ids
+    $reader->contents(['xxxxxxx']);
+
+=cut
 sub contents()
 {
     my ($self,@items)=  @_;
@@ -249,13 +303,6 @@ sub contents()
     return $content;
 }
 
-sub log()
-{
-    my ($self, $command) = @_;
-    open(WRITE,">>log"),
-    print WRITE "API $command\n";
-    close WRITE;
-}
 
 sub labels()
 {
@@ -452,7 +499,7 @@ sub add_feed()
 {
     my ($self,$add_feed) = @_;
 
-    my $url = $self->{'host'}.TheOldReader::Constants::ADD;
+    my $url = $self->{'host'}.TheOldReader::Constants::ADD_FEED;
     my %form = ();
     $form{'quickadd'} = $add_feed;
 
@@ -460,6 +507,13 @@ sub add_feed()
 }
 
 
+sub log()
+{
+    my ($self, $command) = @_;
+    open(WRITE,">>log"),
+    print WRITE "API $command\n";
+    close WRITE;
+}
 
 
 1;
