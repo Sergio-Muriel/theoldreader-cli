@@ -30,5 +30,6 @@ use constant STATE_LIKE => 'user/-/state/com.google/like';
 use constant STATE_READ => 'user/-/state/com.google/read';
 use constant STATE_STARRED => 'user/-/state/com.google/starred';
 use constant STATE_BROADCAST => 'user/-/state/com.google/broadcast';
+use constant STATE_FRIENDS => 'user/-/state/com.google/broadcast-friends';
 
 1;

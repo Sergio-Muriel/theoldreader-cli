@@ -246,15 +246,26 @@ sub update_labels()
         ]
     };
 
-    foreach my $ref(@friends)
+    if($#friends>0)
     {
-        my $key = $ref->{'stream'};
-        $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert($ref->{'displayName'});
-        $gui_labels->{'labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
-        $gui_labels->{'original_labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
-
-        push(@{$gui_labels->{'values'}}, $ref->{'stream'});
+        $self->log("Add friends ");
+        my $key = TheOldReader::Constants::STATE_FRIENDS;
+        $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert("Friends");
+        $gui_labels->{'labels'}{$key} = $self->{'converter'}->convert("Friends");
+        $gui_labels->{'original_labels'}{$key} = $self->{'converter'}->convert("Friends");
+        push(@{$gui_labels->{'values'}}, $key);
     }
+
+    #foreach my $ref(@friends)
+    #{
+    #    my $key = $ref->{'stream'};
+    #    $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert($ref->{'displayName'});
+    #    $gui_labels->{'labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+    #    $gui_labels->{'original_labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+    #
+    #    push(@{$gui_labels->{'values'}}, $ref->{'stream'});
+    #}
+
     foreach my $ref(keys %labels)
     {
         $gui_labels->{'display_labels'}{$ref} = $self->{'converter'}->convert($labels->{$ref});
