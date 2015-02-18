@@ -75,7 +75,11 @@ sub raw_result()
     {
         return $res->content;
     }
-    return undef;
+    else
+    {
+        $self->log("Error received: ".$res->content);
+        return undef;
+    }
 }
 
 
@@ -417,6 +421,36 @@ sub friends()
 
     my $url = $self->{'host'}.TheOldReader::Constants::FRIENDS;
     return $self->req(GET($url), 'json_result');
+}
+
+# Get last items
+sub unfollow()
+{
+    my ($self,$id) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT_FRIEND;
+    my %form = ();
+    $form{'action'} = 'removefollowing';
+    $form{'u'} = $id;
+    my $result =  $self->req(POST($url, \%form), 'raw_result');
+    $self->log(Dumper $url);
+    $self->log(Dumper \%form);
+    $self->log("Result unfollow $id:  $result $url");
+}
+
+# Get last items
+sub follow()
+{
+    my ($self,$id) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::EDIT_FRIEND;
+    my %form = ();
+    $form{'action'} = 'addfollowing';
+    $form{'u'} = $id;
+    my $result =  $self->req(POST($url, \%form), 'raw_result');
+    $self->log(Dumper $url);
+    $self->log(Dumper \%form);
+    $self->log("Result follow $id:  $result $url");
 }
 
 

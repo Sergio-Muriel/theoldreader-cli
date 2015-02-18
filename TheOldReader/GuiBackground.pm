@@ -213,6 +213,13 @@ sub mark_unread()
     $self->add_gui_job("last_status $id");
 }
 
+sub unfollow()
+{
+    my ($self, $id) = @_;
+    my $result = $self->{'reader'}->unfollow($id);
+    $self->add_gui_job("update_labels");
+}
+
 
 sub last()
 {

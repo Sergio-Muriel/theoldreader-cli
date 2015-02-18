@@ -419,6 +419,23 @@ sub friends()
         $self->{'cache'}->save_cache('friends', $content->{'friends'});
     }
 }
+sub follow()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+
+    my $result = $self->{'reader'}->follow($id);
+    $self->output_string($result);
+}
+
+sub unfollow()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+
+    my $result = $self->{'reader'}->unfollow($id);
+    $self->output_string($result);
+}
 
 sub log()
 {
