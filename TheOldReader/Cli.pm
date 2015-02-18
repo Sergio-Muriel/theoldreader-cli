@@ -436,6 +436,14 @@ sub unfollow()
     my $result = $self->{'reader'}->unfollow($id);
     $self->output_string($result);
 }
+sub add_feed()
+{
+    my ($self, @params) = @_;
+    my $url = shift(@params);
+
+    my $result = $self->{'reader'}->add_feed($url);
+    $self->output_string($result);
+}
 
 sub log()
 {

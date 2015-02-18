@@ -433,12 +433,9 @@ sub unfollow()
     $form{'action'} = 'removefollowing';
     $form{'u'} = $id;
     my $result =  $self->req(POST($url, \%form), 'raw_result');
-    $self->log(Dumper $url);
-    $self->log(Dumper \%form);
-    $self->log("Result unfollow $id:  $result $url");
+    $self->output_string("Result unfollow $id:  $result $url");
 }
 
-# Get last items
 sub follow()
 {
     my ($self,$id) = @_;
@@ -448,9 +445,21 @@ sub follow()
     $form{'action'} = 'addfollowing';
     $form{'u'} = $id;
     my $result =  $self->req(POST($url, \%form), 'raw_result');
+    $self->output_string("Result follow $id:  $result $url");
+}
+
+sub add_feed()
+{
+    my ($self,$add_feed) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::ADD;
+    my %form = ();
+    $form{'quickadd'} = $add_feed;
+
+    my $result =  $self->req(POST($url, \%form), 'raw_result') || '';
     $self->log(Dumper $url);
     $self->log(Dumper \%form);
-    $self->log("Result follow $id:  $result $url");
+    $self->log("Result add feed $add_feed: $url  $result");
 }
 
 
