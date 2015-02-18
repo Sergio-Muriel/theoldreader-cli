@@ -207,13 +207,13 @@ sub update_labels()
 
     my $labels = $self->{'cache'}->load_cache('labels');
     my $friends = $self->{'cache'}->load_cache('friends');
-    if(!$labels || !$friends)
+    if(!$labels)
     {
         return;
     }
 
     my %labels = %{$labels};
-    my @friends = @{$friends};
+    my @friends = $friends ? @{$friends} : ();
     my %counts = ();
 
     my $gui_labels = {};
