@@ -795,13 +795,13 @@ sub display_item()
 
         # Block tags
         $content =~ s/<br\s*\/?>/\n/g;
-        while($content =~ /<(h\d|p|div|ul)[^>]*>(.*)?<\/\1>/is)
+        while($content =~ /<(h\d|p|div|ul|table|tr|td|th)[^>]*>(.*)?<\/\1>/is)
         {
-            $content =~ s/<(h\d|p|div|ul)[^>]*>(.*)?<\/\1>/$2\n/isg;
+            $content =~ s/<(h\d|p|div|ul|table|tr|td|th)[^>]*>(.*)?<\/\1>/$2\n/isg;
         }
 
         # Inline tags and unclosed block tags
-        $content =~ s/<\/?(?:span|strong|b|i|em|div|ul|p|h\d)[^>]*>//isg;
+        $content =~ s/<\/?[^>]+>//isg;
 
         # Get url
         my @canonical = @{$item->{'canonical'}};
