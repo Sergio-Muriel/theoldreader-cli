@@ -274,6 +274,7 @@ sub last()
 
     # Dont wait for content items to load list
     $self->add_gui_job("display_list $clear $id");
+    $self->unread_feeds();
 }
 
 
