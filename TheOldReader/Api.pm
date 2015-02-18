@@ -456,10 +456,7 @@ sub add_feed()
     my %form = ();
     $form{'quickadd'} = $add_feed;
 
-    my $result =  $self->req(POST($url, \%form), 'raw_result') || '';
-    $self->log(Dumper $url);
-    $self->log(Dumper \%form);
-    $self->log("Result add feed $add_feed: $url  $result");
+    return $self->req(POST($url, \%form), 'json_result') || '';
 }
 
 

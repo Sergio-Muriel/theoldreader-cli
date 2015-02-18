@@ -45,7 +45,7 @@ sub new
 sub help()
 {
     my ($self) = @_;
-    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast ]");
+    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed ]");
     $self->output_string("");
 
     $self->output_string("Available commands:");
@@ -442,7 +442,7 @@ sub add_feed()
     my $url = shift(@params);
 
     my $result = $self->{'reader'}->add_feed($url);
-    $self->output_string($result);
+    $self->output_string("Added ".$$result{'streamId'}.": ".$$result{'query'});
 }
 
 sub log()
