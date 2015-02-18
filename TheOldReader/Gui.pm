@@ -671,11 +671,7 @@ sub left_container_focus()
     my ($self) = @_;
     my $id = $self->{'left_container'}->get_active_value();
 
-    my $text = ""; #"u:update count  f:add friend  ";
-    if($id =~ /^user\/[^\-]/)
-    {
-        $text.= "F:remove friend";
-    }
+    my $text = "u:update";
     $self->{'helptext'}->text($text);
 }
 
@@ -1053,18 +1049,6 @@ sub right_container_unread()
 
     $self->add_background_job("mark_unread ".$id, "Unmark as read");
     $self->update_loading_list($id);
-}
-
-sub left_container_remove_friend()
-{
-    my ($self) = @_;
-    my $id = $self->{'left_container'}->get_active_value();
-    if($id =~ /^user\/([^\-\/]+)\//)
-    {
-        my $userid = $1;
-        $self->log("Remove friend $userid");
-        $self->add_background_job("unfollow ".$userid, "Unfollow $userid");
-    }
 }
 
 sub bind_keys()

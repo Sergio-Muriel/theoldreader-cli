@@ -214,6 +214,12 @@ sub unfollow()
     my $result = $self->{'reader'}->unfollow($id);
     $self->add_gui_job("update_labels");
 }
+sub follow()
+{
+    my ($self, $id) = @_;
+    my $result = $self->{'reader'}->follow($id);
+    $self->add_gui_job("update_labels");
+}
 
 
 sub last()
