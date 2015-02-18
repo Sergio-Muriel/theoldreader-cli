@@ -639,7 +639,7 @@ sub display_list()
             $self->last_status($id);
         }
     }
-    else
+    elsif(@{$gui_list->{'values'}}==0)
     {
         $gui_list->{'labels'}{'loading'} = ' No items found';
     }
