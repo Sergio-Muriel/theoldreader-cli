@@ -156,6 +156,7 @@ sub update_count()
     my $labels = $self->{'labels'};
     if(!$labels)
     {
+        $self->log("ERROR: no labels");
         return;
     }
     my %counts= ();
@@ -167,6 +168,7 @@ sub update_count()
     my $cache_unread_feeds = $self->{'cache'}->load_cache('unread_feeds');
     if(!$cache_unread_feeds)
     {
+        $self->log("ERROR: no cache file unread_feeds");
         return;
     }
 
@@ -526,6 +528,7 @@ sub build_content()
         -bold => 1,
         -fg => 'yellow',
         -bg => 'blue',
+        -width => $ENV{'COLS'},
         -text => 'q:back  n:next   p:previous  s:star/untar r:mark as read  R:unmark as read  o:open in browser'
     );
 
@@ -729,6 +732,7 @@ sub display_item()
     }
 
     my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+    $self->log("display $id");
     my $text="";
     if($item)
     {
