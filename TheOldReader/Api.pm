@@ -479,8 +479,7 @@ sub unfollow()
     my %form = ();
     $form{'action'} = 'removefollowing';
     $form{'u'} = $id;
-    my $result =  $self->req(POST($url, \%form), 'raw_result');
-    $self->output_string("Result unfollow $id:  $result $url");
+    return $self->req(POST($url, \%form), 'raw_result');
 }
 
 sub follow()
@@ -491,8 +490,7 @@ sub follow()
     my %form = ();
     $form{'action'} = 'addfollowing';
     $form{'u'} = $id;
-    my $result =  $self->req(POST($url, \%form), 'raw_result');
-    $self->output_string("Result follow $id:  $result $url");
+    return $self->req(POST($url, \%form), 'raw_result');
 }
 
 sub add_feed()
