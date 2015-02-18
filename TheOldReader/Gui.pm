@@ -193,7 +193,7 @@ sub update_count()
         $labels->{'labels'}{$ref} = substr($labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
     }
 
-    if($update && !$self->{'item_displayed'})
+    if(!$self->{'item_displayed'})
     {
         $self->{'left_container'}->labels($labels->{'labels'});
         $self->{'cui'}->draw(1);
@@ -671,7 +671,7 @@ sub left_container_focus()
     my ($self) = @_;
     my $id = $self->{'left_container'}->get_active_value();
 
-    my $text = "u:update count  f:add friend  ";
+    my $text = ""; #"u:update count  f:add friend  ";
     if($id =~ /^user\/[^\-]/)
     {
         $text.= "F:remove friend";
