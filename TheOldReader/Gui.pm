@@ -63,71 +63,6 @@ sub call_count
     $self->update_list();
 }
 
-sub display_list()
-{
-    my ($self, $params) = @_;
-    my ($clear, $id) = split(/\s+/, $params);
-
-    $self->{'cat_id'} = $id;
-
-    my $last = $self->{'cache'}->load_cache("last ".$id);
-    if(!$last)
-    {
-        return;
-    }
-    $self->{'next_list'} = $$last{'continuation'};
-
-    my $gui_list = {
-        'labels' => {
-            'loading' => ' Loading ...'
-        },
-        'values' => []
-    };
-    if($clear ne 'clear' and $self->{'list_data'})
-    {
-        $gui_list = $self->{'list_data'};
-    }
-    else
-    {
-        $self->{'list_data'} = $gui_list;
-    }
-
-    $gui_list->{'labels'}{'load_more'} = '    [ Select to load more ]';
-
-    my @hash_ids = @{$$last{'itemRefs'}};
-    my @new_values= ();
-    foreach(@hash_ids)
-    {
-        my $id = $_->{'id'};
-        if(!grep(/$id/,@{$gui_list->{'values'}}))
-        {
-            push(@new_values, $id);
-            push(@{$gui_list->{'values'}}, $id);
-        }
-        $self->last_status($id);
-    }
-
-    if($clear ne 'clear')
-    {
-        $self->{'right_container'}->insert_at(0, \@new_values);
-    }
-    else
-    {
-        if($self->{'next_list'})
-        {
-            push(@{$gui_list->{'values'}}, 'load_more');
-        }
-        $self->{'right_container'}->values(@{$gui_list->{'values'}});
-    }
-
-    $self->{'right_container'}->labels($gui_list->{'labels'});
-
-    if(!$self->{'item_displayed'})
-    {
-        $self->{'container'}->draw();
-        $self->{'cui'}->draw(1);
-    }
-}
 
 sub update_loading_list()
 {
@@ -258,7 +193,7 @@ sub update_count()
         $labels->{'labels'}{$ref} = substr($labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
     }
 
-    if($update && !$self->{'item_displayed'})
+    if(!$self->{'item_displayed'})
     {
         $self->{'left_container'}->labels($labels->{'labels'});
         $self->{'cui'}->draw(1);
@@ -271,12 +206,14 @@ sub update_labels()
     my ($self, @params) = @_;
 
     my $labels = $self->{'cache'}->load_cache('labels');
-    if(!$labels)
+    my $friends = $self->{'cache'}->load_cache('friends');
+    if(!$labels || !$friends)
     {
         return;
     }
 
     my %labels = %{$labels};
+    my @friends = @{$friends};
     my %counts = ();
 
     my $gui_labels = {};
@@ -308,6 +245,26 @@ sub update_labels()
             TheOldReader::Constants::STATE_READ,
         ]
     };
+
+    if($#friends>0)
+    {
+        $self->log("Add friends ");
+        my $key = TheOldReader::Constants::STATE_FRIENDS;
+        $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert("Friends");
+        $gui_labels->{'labels'}{$key} = $self->{'converter'}->convert("Friends");
+        $gui_labels->{'original_labels'}{$key} = $self->{'converter'}->convert("Friends");
+        push(@{$gui_labels->{'values'}}, $key);
+    }
+
+    #foreach my $ref(@friends)
+    #{
+    #    my $key = $ref->{'stream'};
+    #    $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert($ref->{'displayName'});
+    #    $gui_labels->{'labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+    #    $gui_labels->{'original_labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+    #
+    #    push(@{$gui_labels->{'values'}}, $ref->{'stream'});
+    #}
 
     foreach my $ref(keys %labels)
     {
@@ -440,6 +397,8 @@ sub build_gui()
             $self->update_list('clear');
             $self->{'right_container'}->focus();
         },
+        -onselchange => sub { $self->left_container_focus(); },
+        -onfocus => sub { $self->left_container_focus(); }
     );
 
     $self->{'right_container'} = $self->{'container'}->add(
@@ -453,7 +412,8 @@ sub build_gui()
         -bg => 'blue',
         -fg => 'white',
         -onselchange => sub { $self->right_container_onselchange(); },
-        -onchange => sub { $self->right_container_onchange(); }
+        -onchange => sub { $self->right_container_onchange(); },
+        -onfocus => sub { $self->right_container_focus(); }
     );
 
 
@@ -475,7 +435,7 @@ sub build_gui()
         -bg => 'blue',
         -bold => 1,
         -width => $ENV{'COLS'},
-        -text => 'x:Display only unread/All  u:Update  s:star/unstar  r:mark read  R:unread l:like/unlike b:share  Enter:read summary  o:open in browser'
+        -text => ''
     );
 
     # FOOTER
@@ -487,11 +447,12 @@ sub build_gui()
         -bg => 'black',
         -fg => 'white'
     );
+
     $self->{'statusbar'} = $self->{'bottombar'}->add(
         'statusbar',
         'Label',
         -bold => 1,
-        -width => $ENV{'COLS'}
+        -width => $ENV{'COLS'},
         -text => ' Loading...'
     );
 
@@ -577,11 +538,12 @@ sub build_content()
         -bg => 'black',
         -fg => 'white'
     );
+
     $self->{'content_statusbar'} = $self->{'content_bottombar'}->add(
         'content_statusbar',
         'Label',
         -bold => 1,
-        -width => $ENV{'COLS'}
+        -width => $ENV{'COLS'},
         -text => ' Loading...'
     );
 }
@@ -631,6 +593,92 @@ sub update_list()
     $self->add_background_job("last $clear $id ".($self->{'only_unread'} || "0")." ".$next_list, "Fetching last items from $id");
 }
 
+sub display_list()
+{
+    my ($self, $params) = @_;
+    my ($clear, $id) = split(/\s+/, $params);
+
+    my $gui_list = {
+        'labels' => {
+            'loading' => ' Loading ...'
+        },
+        'values' => []
+    };
+    if($clear ne 'clear' and $self->{'list_data'})
+    {
+        $gui_list = $self->{'list_data'};
+    }
+    else
+    {
+        $self->{'list_data'} = $gui_list;
+    }
+
+    $self->{'cat_id'} = $id;
+
+    my $last = $self->{'cache'}->load_cache("last ".$id);
+    if(!$last)
+    {
+        $gui_list->{'labels'}{'loading'} = '    No items found (error)';
+        return;
+    }
+    $self->{'next_list'} = $$last{'continuation'};
+    $gui_list->{'labels'}{'load_more'} = '    [ Select to load more ]';
+
+    my @hash_ids = @{$$last{'itemRefs'}};
+    my @new_values= ();
+    if(@hash_ids)
+    {
+        foreach(@hash_ids)
+        {
+            my $id = $_->{'id'};
+            if(!grep(/$id/,@{$gui_list->{'values'}}))
+            {
+                push(@new_values, $id);
+                push(@{$gui_list->{'values'}}, $id);
+            }
+            $self->last_status($id);
+        }
+    }
+    else
+    {
+        $gui_list->{'labels'}{'loading'} = ' No items found';
+    }
+
+    if($clear ne 'clear')
+    {
+        $self->{'right_container'}->insert_at(0, \@new_values);
+    }
+    else
+    {
+        if($self->{'next_list'})
+        {
+            push(@{$gui_list->{'values'}}, 'load_more');
+        }
+        $self->{'right_container'}->values(@{$gui_list->{'values'}});
+    }
+
+    $self->{'right_container'}->labels($gui_list->{'labels'});
+
+    if(!$self->{'item_displayed'})
+    {
+        $self->{'container'}->draw();
+        $self->{'cui'}->draw(1);
+    }
+}
+
+sub left_container_focus()
+{
+    my ($self) = @_;
+    my $id = $self->{'left_container'}->get_active_value();
+
+    my $text = ""; #"u:update count  f:add friend  ";
+    if($id =~ /^user\/[^\-]/)
+    {
+        $text.= "F:remove friend";
+    }
+    $self->{'helptext'}->text($text);
+}
+
 sub right_container_onselchange()
 {
     my ($self) = @_;
@@ -667,6 +715,12 @@ sub right_container_onchange()
         $self->display_item($id);
     }
 }
+sub right_container_focus()
+{
+    my ($self) = @_;
+    $self->{'helptext'}->text('x:Display only unread/All  u:Update  s:star/unstar  r:mark read  R:unread l:like/unlike b:share  Enter:read summary  o:open in browser');
+}
+
 
 sub display_item()
 {
@@ -954,7 +1008,6 @@ sub right_container_broadcast()
     {
         if(!grep(/user\/-\/state\/com.google\/broadcast/,@{$feed->{'categories'}}))
         {
-            #my ($rv, $text) = input('Input Parameter!', BTN_OK | BTN_CANCEL, 'Search String', 20, qw(white black yellow));
             my ($rv, $text) = input('Input Parameter!', BTN_OK | BTN_CANCEL, 'Search String', 20, qw(white blue yellow));
             if(!$rv)
             {
@@ -1002,6 +1055,18 @@ sub right_container_unread()
     $self->update_loading_list($id);
 }
 
+sub left_container_remove_friend()
+{
+    my ($self) = @_;
+    my $id = $self->{'left_container'}->get_active_value();
+    if($id =~ /^user\/([^\-\/]+)\//)
+    {
+        my $userid = $1;
+        $self->log("Remove friend $userid");
+        $self->add_background_job("unfollow ".$userid, "Unfollow $userid");
+    }
+}
+
 sub bind_keys()
 {
     my ($self, @params) = @_;
@@ -1018,10 +1083,11 @@ sub bind_keys()
     $self->{'right_container'}->set_binding(sub { $self->right_container_broadcast(); }, "b");
     $self->{'right_container'}->set_binding(sub { $self->right_container_read(); }, "r");
     $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
+    $self->{'right_container'}->set_binding(sub { $self->right_container_read(); }, "r");
+    $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
     $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");
 
-    $self->{'content'}->set_binding(sub { $self->right_container_read(); }, "r");
-    $self->{'content'}->set_binding(sub { $self->right_container_unread(); }, "R");
+    $self->{'left_container'}->set_binding(sub { $self->left_container_remove_friend(); }, "F");
 
     $self->{'content'}->set_binding(sub { $self->close_content(); }, "q");
     $self->{'content'}->set_binding(sub { $self->next_item(); }, "n");

@@ -70,6 +70,7 @@ sub labels()
     my ($self, @params) = @_;
     # Init labels
     $self->{'reader'}->labels();
+    $self->{'reader'}->friends();
     $self->add_gui_job("update_labels");
 
 }
@@ -207,6 +208,13 @@ sub mark_unread()
     $self->add_gui_job("last_status $id");
 }
 
+sub unfollow()
+{
+    my ($self, $id) = @_;
+    my $result = $self->{'reader'}->unfollow($id);
+    $self->add_gui_job("update_labels");
+}
+
 
 sub last()
 {
@@ -261,6 +269,7 @@ sub last()
 
     # Dont wait for content items to load list
     $self->add_gui_job("display_list $clear $id");
+    $self->unread_feeds();
 }
 
 

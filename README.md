@@ -148,5 +148,8 @@ To display the name of the feeds that have unread items:
     ./reader mark_broadcast tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d mymessage
     ./reader unmark_broadcast tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
 
+### Get list of friends
+
+    ./reader friends
 
 

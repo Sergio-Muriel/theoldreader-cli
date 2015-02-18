@@ -380,6 +380,7 @@ sub mark_broadcast()
         $self->output_error("Error marking feed(s) as broadcast.");
     }
 }
+
 sub unmark_broadcast()
 {
     my ($self, @params) = @_;
@@ -394,6 +395,46 @@ sub unmark_broadcast()
     {
         $self->output_error("Error unmarking feed(s) as broadcast.");
     }
+}
+
+sub friends()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+
+    my $content = $self->{'reader'}->friends();
+    if(!$content)
+    {
+        $self->output_error("Cannot get friends list.");
+    }
+    else
+    {
+        my @friends = @{$content->{'friends'}};
+        my @list= ();
+        foreach(@friends)
+        {
+            push(@list, $_->{'displayName'}." : ".$_->{'stream'});
+        }
+        $self->output_list(@list);
+        $self->{'cache'}->save_cache('friends', $content->{'friends'});
+    }
+}
+sub follow()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+
+    my $result = $self->{'reader'}->follow($id);
+    $self->output_string($result);
+}
+
+sub unfollow()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+
+    my $result = $self->{'reader'}->unfollow($id);
+    $self->output_string($result);
 }
 
 sub log()
