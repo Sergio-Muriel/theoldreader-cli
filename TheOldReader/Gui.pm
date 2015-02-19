@@ -395,8 +395,8 @@ sub build_gui()
         'Listbox',
         -width => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -bfg  => 'white',
-        -values => [ 'loading' ],
-        -labels => { 'loading' => ' Loading...'},
+        -values => [ 'load_more' ],
+        -labels => { 'load_more' => ' Loading...'},
         -onchange => sub {
             $self->update_list('clear');
             $self->{'right_container'}->focus();
@@ -411,8 +411,8 @@ sub build_gui()
         -border => 0,
         -x => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -y => 0,
-        -values => [ 'loading' ],
-        -labels => { 'loading' => ' Loading ...' },
+        -values => [ 'load_more' ],
+        -labels => { 'load_more' => ' Loading ...' },
         -bg => 'blue',
         -fg => 'white',
         -onselchange => sub { $self->right_container_onselchange(); },
@@ -585,9 +585,9 @@ sub update_list()
         # Clear list
         my $gui_list = {
             'labels' => {
-                'loading' => ' Loading ...',
+                'load_more' => ' Loading ...',
             },
-            'values' => [ 'loading' ]
+            'values' => [ 'load_more' ]
         };
         $self->{'right_container'}->values(@{$gui_list->{'values'}});
         $self->{'right_container'}->labels($gui_list->{'labels'});
@@ -610,7 +610,7 @@ sub display_list()
 
     my $gui_list = {
         'labels' => {
-            'loading' => ' Loading ...'
+            'load_more' => ' Loading ...'
         },
         'values' => []
     };
@@ -628,7 +628,7 @@ sub display_list()
     my $last = $self->{'cache'}->load_cache("last ".$id);
     if(!$last)
     {
-        $gui_list->{'labels'}{'loading'} = '    No items found (error)';
+        $gui_list->{'labels'}{'load_more'} = '    No items found (error)';
         return;
     }
     $self->{'next_list'} = $$last{'continuation'};
@@ -651,7 +651,12 @@ sub display_list()
     }
     elsif(@{$gui_list->{'values'}}==0)
     {
-        $gui_list->{'labels'}{'loading'} = ' No items found';
+        $self->log("Updating $clear");
+        $gui_list->{'labels'}{'load_more'} = ' No items found';
+    }
+    if(!$self->{'next_list'})
+    {
+        $gui_list->{'labels'}{'load_more'} = '    [ Select to update ]';
     }
 
     if($clear ne 'clear')
@@ -702,6 +707,7 @@ sub right_container_onselchange()
         else
         {
             $self->log("No next item id to load next list.");
+            $self->update_list("noclear");
         }
     }
 }
