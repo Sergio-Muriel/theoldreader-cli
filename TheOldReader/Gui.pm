@@ -83,10 +83,7 @@ sub update_loading_list()
     $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like.$broadcast." ".$feed->{'title'});
     $self->{'right_container'}->labels($gui_list{'labels'});
 
-    if(!$self->{'item_displayed'})
-    {
-        $self->{'container'}->draw();
-    }
+    $self->{'cui'}->draw();
 }
 
 sub last_status()
@@ -140,10 +137,7 @@ sub last_status()
     $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like.$broadcast." ".$feed->{'title'});
     $self->{'right_container'}->labels($gui_list->{'labels'});
 
-    if(!$self->{'item_displayed'})
-    {
-        $self->{'container'}->draw();
-    }
+    $self->{'cui'}->draw();
     $self->update_status("Updated status of $id");
 }
 
@@ -196,12 +190,9 @@ sub update_count()
         $labels->{'labels'}{$ref} = substr($labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
     }
 
-    if(!$self->{'item_displayed'})
-    {
-        $self->{'left_container'}->labels($labels->{'labels'});
-        $self->{'cui'}->draw(1);
-        $self->{'counts'} = \%counts;
-    }
+    $self->{'left_container'}->labels($labels->{'labels'});
+    $self->{'cui'}->draw(1);
+    $self->{'counts'} = \%counts;
 }
 
 sub update_labels()
@@ -291,12 +282,7 @@ sub update_labels()
     }
 
     $self->update_status("Labels updated.");
-
-    if(!$self->{'item_displayed'})
-    {
-        $self->{'left_container'}->draw(1);
-        $self->{'cui'}->draw(1);
-    }
+    $self->{'cui'}->draw(1);
 }
 
 sub update_status()
@@ -462,7 +448,7 @@ sub build_gui()
 
     $self->{'bottombar'}->focus();
     $self->{'left_container'}->focus();
-    $self->{'right_container'}->draw();
+    $self->{'cui'}->draw();
 }
 
 sub build_content()
@@ -673,12 +659,7 @@ sub display_list()
     }
 
     $self->{'right_container'}->labels($gui_list->{'labels'});
-
-    if(!$self->{'item_displayed'})
-    {
-        $self->{'container'}->draw();
-        $self->{'cui'}->draw(1);
-    }
+    $self->{'cui'}->draw(1);
 }
 
 sub left_container_focus()
@@ -996,8 +977,6 @@ sub close_content()
 
     $self->{'item_idx'}=undef;
     $self->{'window'}->focus();
-    $self->{'window'}->draw();
-    $self->{'container'}->draw();
     $self->{'cui'}->draw(1);
 }
 
@@ -1092,7 +1071,8 @@ sub goto_next()
     $self->{'right_container'}{'-ypos'} = $idx+1;
     if(!$self->{'item_displayed'})
     {
-        $self->{'right_container'}->draw(1);
+        $self->{'right_container'}->focus();
+        $self->{'cui'}->draw();
     }
 }
 
