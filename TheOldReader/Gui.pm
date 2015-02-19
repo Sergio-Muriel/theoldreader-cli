@@ -767,6 +767,25 @@ sub display_item()
             }
         }
 
+        # Likes
+        my @likes=();
+        my $more_likes=0;
+        foreach(@{$item->{'likingUsers'}})
+        {
+            if($#likes<2)
+            {
+                push(@likes,$_->{'displayName'});
+            }
+            else
+            {
+                $more_likes=1;
+            }
+        }
+        if($more_likes)
+        {
+            push(@likes, "... (".$item->{'likingUsersCount'}." users)");
+        }
+
         # Content
         my $content=$$item{'summary'}{'content'};
         my @urls=();
@@ -828,6 +847,7 @@ sub display_item()
         $text.="Author:\t".$$item{'author'}."\n";
         $text.="Date:\t".$dt."\n";
         $text.="Labels:\t".join(", ",@labels)."\n";
+        $text.="Likes:\t".join(", ",@likes)."\n";
         $text.="Url:\t".$canonical[0]{'href'}."\n";
         $text.="\n";
         $text.=$content."\n";
