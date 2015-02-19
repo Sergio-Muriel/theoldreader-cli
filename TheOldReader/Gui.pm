@@ -278,7 +278,6 @@ sub update_labels()
 
     if(!defined($self->{'left_container'}->get()))
     {
-        $self->log("set selected!");
         $self->{'left_container'}->set_selection((0));
     }
 
@@ -374,7 +373,7 @@ sub build_gui()
         -border => 1,
         -padBottom => 2,
         -y    => 1,
-        -bfg  => 'white'
+        -bfg  => 'grey'
     );
 
     $self->{'left_container'} = $self->{'container'}->add(
@@ -634,7 +633,6 @@ sub display_list()
     }
     elsif(@{$gui_list->{'values'}}==0)
     {
-        $self->log("Updating $clear");
         $gui_list->{'labels'}{'load_more'} = ' No items found';
     }
     if(!$self->{'next_list'})
@@ -684,8 +682,7 @@ sub right_container_onselchange()
         }
         else
         {
-            $self->log("No next item id to load next list.");
-            $self->update_list("noclear");
+            $self->update_status("No more items to load. Press 'u' to refresh.");
         }
     }
 }
@@ -745,7 +742,6 @@ sub display_item()
     }
 
     my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
-    $self->log("display $id");
     my $text="";
     if($item)
     {
