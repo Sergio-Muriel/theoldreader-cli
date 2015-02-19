@@ -886,6 +886,23 @@ sub open_item()
     }
 }
 
+sub open_all()
+{
+    my ($self) = @_;
+    my @items = @{$self->{'right_container'}->values()};
+    foreach my $id(@items)
+    {
+        my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+        if($item)
+        {
+            my @canonical = @{$item->{'canonical'}};
+            open CMD, "| ".($self->{'browser'}||"x-www-browser") ." '".$canonical[0]{'href'}."' 2>/dev/null";
+            close CMD;
+            $self->right_container_read();
+        }
+    }
+}
+
 sub next_item()
 {
     my ($self,$id) = @_;
@@ -1074,6 +1091,7 @@ sub bind_keys()
     $self->{'right_container'}->set_binding(sub { $self->right_container_read(); }, "r");
     $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
     $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");
+    $self->{'right_container'}->set_binding(sub { $self->open_all(); }, "O");
 
     $self->{'left_container'}->set_binding(sub { $self->left_container_remove_friend(); }, "F");
 
