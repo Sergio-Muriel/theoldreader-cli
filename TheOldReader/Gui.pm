@@ -573,6 +573,11 @@ sub update_list()
     }
 
     my $id = $self->{'left_container'}->get_active_value();
+    if($id eq 'load_more' or $id eq "loading")
+    {
+        return;
+    }
+
     if($clear and $clear eq 'clear')
     {
         # Clear list
