@@ -504,9 +504,36 @@ sub build_help()
         -border => 0,
         -x => 0
     );
-    $self->{'help_text'}->text("
-        Help content todo
-    ");
+    $self->{'help_text'}->text("General key bindings:
+?           Display Help
+Ctrl+C      Exit
+Ctrl+Q      Exit
+
+Help window:
+q           Exit this help window
+
+Main window:
+q           Exit
+u           Update selected label
+x           Switch display only unread or all items
+
+Feed list:
+Enter       Display item fullscreen
+s           Star item
+l           Like item
+b           Broadcast item (share!)
+r           Read item
+R           Unread item
+o           Open item in the browser
+O           Open ALL displayed item in the browser
+n           Dsiap
+
+Displaying item:
+n           Display next item
+p           Display previous item
+o           Open item in the browser
+
+");
 }
 
 sub run_gui()
@@ -1084,35 +1111,31 @@ sub bind_keys()
         $self->exit_dialog();
     };
 
-    $self->{'window'}->set_binding(sub { $self->update_list("clear"); }, "u");
-    $self->{'window'}->set_binding(sub { $self->switch_unread_all(); }, "x");
-    $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
+    $self->{'cui'}->set_binding(sub { $self->display_help(); }, "?");
+    $self->{'cui'}->set_binding($exit_ref, "\cC");
+    $self->{'cui'}->set_binding($exit_ref, "\cQ");
 
+    $self->{'container'}->set_binding(sub { $self->close_content(); }, "q");
+    $self->{'container'}->set_binding(sub { $self->update_list("clear"); }, "u");
+    $self->{'container'}->set_binding(sub { $self->switch_unread_all(); }, "x");
+
+    $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
     $self->{'right_container'}->set_binding(sub { $self->right_container_like(); }, "l");
     $self->{'right_container'}->set_binding(sub { $self->right_container_broadcast(); }, "b");
     $self->{'right_container'}->set_binding(sub { $self->right_container_read(); }, "r");
     $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
-    $self->{'right_container'}->set_binding(sub { $self->right_container_read(); }, "r");
-    $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
     $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");
     $self->{'right_container'}->set_binding(sub { $self->open_all(); }, "O");
 
-    $self->{'left_container'}->set_binding(sub { $self->left_container_remove_friend(); }, "F");
-
-    $self->{'content_container'}->set_binding(sub { $self->close_content(); }, "q");
     $self->{'content_container'}->set_binding(sub { $self->next_item(); }, "n");
     $self->{'content_container'}->set_binding(sub { $self->prev_item(); }, "p");
     $self->{'content_container'}->set_binding(sub { $self->open_item(); }, "o");
 
-    $self->{'cui'}->set_binding(sub { $self->display_help(); }, "?");
+
     $self->{'help_container'}->set_binding(sub { $self->close_help(); }, "q");
 
-    $self->{'right_container'}->set_binding($exit_ref, "");
-    $self->{'left_container'}->set_binding($exit_ref, "q");
 
-    $self->{'cui'}->set_binding($exit_ref, "\cC");
-    $self->{'cui'}->set_binding($exit_ref, "\cQ");
 }
 sub exit_dialog()
 {
