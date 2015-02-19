@@ -18,6 +18,7 @@ use TheOldReader::Constants;
 use TheOldReader::Cache;
 
 use threads;
+use Curses qw(KEY_ENTER);
 use Curses::UI::POE;
 use Curses::Forms::Dialog::Input;
 use Data::Dumper;
@@ -289,7 +290,6 @@ sub update_status()
 {
     my ($self, $text) = @_;
     $self->{'statusbar'}->text($text);
-    $self->{'content_statusbar'}->text($text);
     $self->{'cui'}->draw();
 }
 
@@ -402,7 +402,6 @@ sub build_gui()
         -bg => 'blue',
         -fg => 'white',
         -onselchange => sub { $self->right_container_onselchange(); },
-        -onchange => sub { $self->right_container_onchange(); },
         -onfocus => sub { $self->right_container_focus(); }
     );
 
@@ -448,7 +447,7 @@ sub build_gui()
 
     $self->{'bottombar'}->focus();
     $self->{'left_container'}->focus();
-    $self->{'cui'}->draw();
+    $self->{'right_container'}->draw();
 }
 
 sub build_content()
@@ -456,27 +455,7 @@ sub build_content()
     my ($self) = @_;
     $self->log("Building content");
 
-    $self->{'content'} = $self->{'cui'}->add(
-        'content', 'Window',
-    );
-    
-    $self->{'content_topbar'} = $self->{'content'}->add(
-        'content_topbar',
-        'Container',
-        -y    => 0,
-        -height => 1,
-        -bg => 'blue',
-        -fg => 'white'
-    );
-
-    $self->{'content_top'} = $self->{'content_topbar'}->add(
-        'content_top',
-        'Label',
-        -bold => 1,
-        -text => 'The Old Reader - GUI'
-    );
-
-    $self->{'content_container'} = $self->{'content'}->add(
+    $self->{'content_container'} = $self->{'window'}->add(
         'content_container',
         'Container',
         -border => 1,
@@ -498,44 +477,6 @@ sub build_content()
         -focusable => 1,
         -border => 0,
         -x => 0
-    );
-
-    # HELP Bar
-    $self->{'content_helpbar'} = $self->{'content'}->add(
-        'content_helpbar',
-        'Container',
-        -y    => $ENV{'LINES'}-2,
-        -height => 1,
-        -bg => 'red',
-        -fg => 'white'
-    );
-
-    $self->{'content_helptext'} = $self->{'content_helpbar'}->add(
-        'content_helptext',
-        'Label',
-        -bold => 1,
-        -fg => 'yellow',
-        -bg => 'blue',
-        -width => $ENV{'COLS'},
-        -text => 'q:back  n:next   p:previous  s:star/untar r:mark as read  R:unmark as read  o:open in browser'
-    );
-
-    # FOOTER
-    $self->{'content_bottombar'} = $self->{'content'}->add(
-        'content_bottombar',
-        'Container',
-        -y    => $ENV{'LINES'}-1,
-        -height => 1,
-        -bg => 'black',
-        -fg => 'white'
-    );
-
-    $self->{'content_statusbar'} = $self->{'content_bottombar'}->add(
-        'content_statusbar',
-        'Label',
-        -bold => 1,
-        -width => $ENV{'COLS'},
-        -text => ' Loading...'
     );
 }
 
@@ -699,13 +640,20 @@ sub right_container_onchange()
     my $id = $self->{'right_container'}->get_active_value();
     if($id)
     {
+        if($id eq 'load_more' or $id eq "loading")
+        {
+            $self->update_list("noclear",$self->{'next_list'});
+            return $self->close_content();
+        }
+
         # Check if need to load more (last selected)
-        $self->{'content'}->draw();
-        $self->{'content'}->focus();
         $self->{'content_container'}->focus();
-        $self->display_item($id);
+        $self->{'content_text'}->draw();
         $self->{'item_idx'} = $self->{'right_container'}->get_active_id();
         $self->display_item($id);
+        $self->{'statusbar'}->text("test2");
+        $self->{'content_text'}->draw();
+        $self->{'cui'}->draw();
     }
 }
 sub right_container_focus()
@@ -976,7 +924,7 @@ sub close_content()
     $self->{'item_displayed'}=0;
 
     $self->{'item_idx'}=undef;
-    $self->{'window'}->focus();
+    $self->{'right_container'}->focus();
     $self->{'cui'}->draw(1);
 }
 
@@ -1094,7 +1042,7 @@ sub bind_keys()
 
     $self->{'window'}->set_binding(sub { $self->update_list("clear"); }, "u");
     $self->{'window'}->set_binding(sub { $self->switch_unread_all(); }, "x");
-    $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, "<enter>");
+    $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
     $self->{'right_container'}->set_binding(sub { $self->right_container_like(); }, "l");
@@ -1108,12 +1056,14 @@ sub bind_keys()
 
     $self->{'left_container'}->set_binding(sub { $self->left_container_remove_friend(); }, "F");
 
-    $self->{'content'}->set_binding(sub { $self->close_content(); }, "q");
-    $self->{'content'}->set_binding(sub { $self->next_item(); }, "n");
-    $self->{'content'}->set_binding(sub { $self->prev_item(); }, "p");
-    $self->{'content'}->set_binding(sub { $self->open_item(); }, "o");
+    $self->{'content_container'}->set_binding(sub { $self->close_content(); }, "q");
+    $self->{'content_container'}->set_binding(sub { $self->next_item(); }, "n");
+    $self->{'content_container'}->set_binding(sub { $self->prev_item(); }, "p");
+    $self->{'content_container'}->set_binding(sub { $self->open_item(); }, "o");
 
-    $self->{'window'}->set_binding($exit_ref, "q");
+    $self->{'right_container'}->set_binding($exit_ref, "q");
+    $self->{'left_container'}->set_binding($exit_ref, "q");
+
     $self->{'cui'}->set_binding($exit_ref, "\cC");
     $self->{'cui'}->set_binding($exit_ref, "\cQ");
 }
