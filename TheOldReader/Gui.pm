@@ -1088,11 +1088,7 @@ sub goto_next()
     my ($self) = @_;
     my $idx = $self->{'right_container'}{'-ypos'};
     $self->{'right_container'}{'-ypos'} = $idx+1;
-    if(!$self->{'item_displayed'})
-    {
-        $self->{'right_container'}->focus();
-        $self->{'cui'}->draw();
-    }
+    $self->{'cui'}->draw();
 }
 
 sub right_container_unread()
