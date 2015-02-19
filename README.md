@@ -24,7 +24,7 @@ On debian you can install the packages using the apt command:
 
 ### If you don't want the gui, just install
 
-    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libtext-iconv-perl
+    $ apt-get install libjson-perl libwww-perl libio-prompt-perl
 
 ### For OS X (using Homebrew/cpanm)
 
