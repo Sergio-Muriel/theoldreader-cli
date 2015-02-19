@@ -302,6 +302,7 @@ sub init
     # Build gui
     $self->build_gui();
     $self->build_content();
+    $self->build_help();
     $self->bind_keys();
 
     # Run background jobs
@@ -479,6 +480,34 @@ sub build_content()
         -x => 0
     );
 }
+sub build_help()
+{
+    my ($self) = @_;
+    $self->{'help_container'} = $self->{'window'}->add(
+        'help_container',
+        'Container',
+        -border => 1,
+        -height => $ENV{'LINES'} - 3,
+        -y    => 1,
+        -bg => 'black',
+        -fg => 'white',
+        -bfg  => 'white'
+    );
+    $self->{'help_text'} = $self->{'help_container'}->add(
+        'help_text',
+        'TextViewer',
+        -padleft => 1,
+        -padright => 1,
+        -vscrollbar => 1,
+        -wrapping => 1,
+        -focusable => 1,
+        -border => 0,
+        -x => 0
+    );
+    $self->{'help_text'}->text("
+        Help content todo
+    ");
+}
 
 sub run_gui()
 {
@@ -608,7 +637,7 @@ sub left_container_focus()
     my ($self) = @_;
     my $id = $self->{'left_container'}->get_active_value();
 
-    my $text = "u:update";
+    my $text = "?:help  u:update";
     $self->{'helptext'}->text($text);
 }
 
@@ -651,7 +680,6 @@ sub right_container_onchange()
         $self->{'content_text'}->draw();
         $self->{'item_idx'} = $self->{'right_container'}->get_active_id();
         $self->display_item($id);
-        $self->{'statusbar'}->text("test2");
         $self->{'content_text'}->draw();
         $self->{'cui'}->draw();
     }
@@ -659,7 +687,23 @@ sub right_container_onchange()
 sub right_container_focus()
 {
     my ($self) = @_;
-    $self->{'helptext'}->text('x:Display only unread/All  u:Update  s:star/unstar  r:mark read  R:unread l:like/unlike b:share  Enter:read summary  o:open in browser');
+    $self->{'helptext'}->text('?:help  x:Display only unread/All  u:Update  s:star/unstar  r:mark read  R:unread l:like/unlike b:share  Enter:read summary  o:open in browser');
+}
+
+
+sub display_help()
+{
+    my ($self) = @_;
+    $self->{'help_container'}->focus();
+    $self->{'help_text'}->draw();
+    $self->{'cui'}->draw();
+}
+
+sub close_help()
+{
+    my ($self) = @_;
+    $self->{'right_container'}->focus();
+    $self->{'cui'}->draw();
 }
 
 
@@ -1061,7 +1105,10 @@ sub bind_keys()
     $self->{'content_container'}->set_binding(sub { $self->prev_item(); }, "p");
     $self->{'content_container'}->set_binding(sub { $self->open_item(); }, "o");
 
-    $self->{'right_container'}->set_binding($exit_ref, "q");
+    $self->{'cui'}->set_binding(sub { $self->display_help(); }, "?");
+    $self->{'help_container'}->set_binding(sub { $self->close_help(); }, "q");
+
+    $self->{'right_container'}->set_binding($exit_ref, "");
     $self->{'left_container'}->set_binding($exit_ref, "q");
 
     $self->{'cui'}->set_binding($exit_ref, "\cC");
