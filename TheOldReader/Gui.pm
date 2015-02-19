@@ -144,6 +144,7 @@ sub last_status()
     {
         $self->{'container'}->draw();
     }
+    $self->update_status("Updated status of $id");
 }
 
 
@@ -301,8 +302,9 @@ sub update_labels()
 sub update_status()
 {
     my ($self, $text) = @_;
-    $self->{'statusbar'}->text("Labels updated.");
-    $self->{'content_statusbar'}->text("Labels updated.");
+    $self->{'statusbar'}->text($text);
+    $self->{'content_statusbar'}->text($text);
+    $self->{'cui'}->draw();
 }
 
 
