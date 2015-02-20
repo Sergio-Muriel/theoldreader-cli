@@ -502,6 +502,7 @@ sub add_feed()
     my $url = $self->{'host'}.TheOldReader::Constants::ADD_FEED;
     my %form = ();
     $form{'quickadd'} = $add_feed;
+    $form{'output'} = 'json';
 
     return $self->req(POST($url, \%form), 'json_result') || '';
 }

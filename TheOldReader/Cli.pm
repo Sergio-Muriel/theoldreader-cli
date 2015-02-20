@@ -442,7 +442,14 @@ sub add_feed()
     my $url = shift(@params);
 
     my $result = $self->{'reader'}->add_feed($url);
-    $self->output_string("Added ".$$result{'streamId'}.": ".$$result{'query'});
+    if($result and !$$result{'error'})
+    {
+        $self->output_string("Added ".$$result{'streamId'}.": ".$$result{'query'});
+    }
+    else
+    {
+        $self->output_error("ERROR: Cannot add feed: ".$$result{'error'});
+    }
 }
 
 sub log()
