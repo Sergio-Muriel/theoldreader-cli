@@ -33,6 +33,7 @@ sub read_config()
         /^token:(.*)$/ and $self->{'token'}=$1;
         /^max_items_displayed:(\d+)$/ and $self->{'max_items_displayed'}=$1;
         /^only_unread:(\d*)$/ and $self->{'only_unread'}=$1;
+        /^display_feeds:(\d*)$/ and $self->{'display_feeds'}=$1;
         /^browser:(.*)$/ and $self->{'browser'}=$1;
     }
     close(CONFIG);
