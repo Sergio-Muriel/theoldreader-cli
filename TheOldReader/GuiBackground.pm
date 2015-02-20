@@ -298,21 +298,58 @@ sub thread_command()
             $self->log("FATAL ERROR: unknown command $command");
         }
     }
+    
 }
 
 sub thread_init()
 {
     my ($self) = @_;
 
-    while(1)
+    my $continue=1;
+    while($continue)
     {
         my $received;
         while($received = $self->{'share'}->shift('background_job'))
         {
-            my $trd = threads->create(sub { $self->thread_command($received); });
-            $trd->detach();
+            # Close finisehed
+            my @joinable = threads->list(threads::joinable);
+            foreach(@joinable)
+            {
+                $_->join();
+            }
+
+            my @threadlist = threads->list(threads::running);
+            my $was_waiting=0;
+            while ($#threadlist>TheOldReader::Constants::MAX_BG_THREADS)
+            {
+                select(undef,undef,undef,0.5);
+                $self->log("Waiting for some threads to close (".$#threadlist.")");
+                @threadlist = threads->list(threads::running);
+                $was_waiting=1;
+            }
+            if($was_waiting)
+            {
+                $self->log("OK, we can run new thread! (".$#threadlist.")");
+            }
+
+            if($received eq "quit")
+            {
+                $continue=0;
+            }
+            else
+            {
+                threads->create(sub { $self->thread_command($received); });
+            }
         }
         select(undef,undef,undef,0.5);
+    }
+
+    # Close finisehed
+    $self->add_gui_job("quit");
+    my @joinable = threads->list();
+    foreach(@joinable)
+    {
+        $_->detach();
     }
 }
 

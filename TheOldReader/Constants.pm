@@ -6,8 +6,9 @@ use parent qw(Exporter);
 
 use constant GUI_CATEGORIES_WIDTH => 30;
 use constant GUI_CATEGORIES_WIDTHSMALL => 15;
-use constant GUI_UPDATE => 120;
+use constant GUI_UPDATE => 10;
 
+use constant MAX_BG_THREADS => 3;
 use constant DEFAULT_MAX => 10;
 use constant WAIT_WATCH => 10;
 use constant CACHE_DIR => './cache/';

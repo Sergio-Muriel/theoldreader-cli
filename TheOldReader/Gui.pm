@@ -92,7 +92,7 @@ sub get_labels()
 {
     my ($self, $feed) = @_;
     my @labels=();
-    if($self->{'display_feeds'})
+    if(!$self->{'display_feeds'})
     {
         foreach(@{$feed->{'categories'}})
         {
@@ -244,11 +244,11 @@ sub update_labels()
 
     if($self->{'display_feeds'})
     {
-        $self->display_labels();
+        $self->display_feeds();
     }
     else
     {
-        $self->display_feeds();
+        $self->display_labels();
     }
 }
 
@@ -463,15 +463,21 @@ sub build_gui()
             },
 
             loop_event_tick => sub{
-                $self->loop_event();
-                $_[HEAP]->{next_loop_event}++;
-                $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
+                if(!$self->{'quit'})
+                {
+                    $self->loop_event();
+                    $_[HEAP]->{next_loop_event}++;
+                    $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
+                }
             },
 
             count_event_tick => sub{
-                $self->call_count();
-                $_[HEAP]->{next_count_event}+=TheOldReader::Constants::GUI_UPDATE;
-                $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
+                if(!$self->{'quit'})
+                {
+                    $self->call_count();
+                    $_[HEAP]->{next_count_event}+=TheOldReader::Constants::GUI_UPDATE;
+                    $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
+                }
             },
 
             _stop => sub {
@@ -1267,14 +1273,21 @@ sub bind_keys()
 
 
 }
+
+sub quit()
+{
+    my ($self, @params) = @_;
+    $self->{'quit'}=1;
+    $self->log("after Quit2");
+    $self->{'cui'}->mainloopExit;
+    $self->log("done2");
+    exit(1);
+}
+
 sub exit_dialog()
 {
     my ($self, @params) = @_;
-
-    my $exit_ref = sub { $self->exit_dialog(); };
-    threads->exit();
-    $self->{'cui'}->mainloopExit();
-    # exit(0);
+    $self->add_background_job("quit");
 }
 
 sub output_error()

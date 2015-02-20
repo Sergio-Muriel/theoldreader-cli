@@ -49,13 +49,14 @@ my $obj = TheOldReader::GuiShared->new(
         'gui_job' => []
 );
 
-threads->create(sub {
+my $bg =threads->create(sub {
     my $background = TheOldReader::GuiBackground->new( 'config' => $config, 'share' => $obj);
     $background->thread_init();
+    $background->log("DONE thread bg ! ");
 });
+$bg->detach();
 
 my $client = TheOldReader::Gui->new( 'config' => $config, 'share' => $obj);
-
 $client->init();
 
 
