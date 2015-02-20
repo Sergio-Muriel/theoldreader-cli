@@ -1107,9 +1107,9 @@ sub bind_keys()
     $self->{'cui'}->set_binding($exit_ref, "\cC");
     $self->{'cui'}->set_binding($exit_ref, "\cQ");
 
-    $self->{'container'}->set_binding(sub { $self->close_content(); }, "q");
     $self->{'container'}->set_binding(sub { $self->update_list("clear"); }, "u");
     $self->{'container'}->set_binding(sub { $self->switch_unread_all(); }, "x");
+    $self->{'container'}->set_binding($exit_ref, "q");
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
@@ -1120,6 +1120,7 @@ sub bind_keys()
     $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");
     $self->{'right_container'}->set_binding(sub { $self->open_all(); }, "O");
 
+    $self->{'content_container'}->set_binding(sub { $self->close_content(); }, "q");
     $self->{'content_container'}->set_binding(sub { $self->next_item(); }, "n");
     $self->{'content_container'}->set_binding(sub { $self->prev_item(); }, "p");
     $self->{'content_container'}->set_binding(sub { $self->open_item(); }, "o");
