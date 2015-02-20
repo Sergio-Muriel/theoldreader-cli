@@ -195,7 +195,9 @@ sub subscription_list()
     {
         return $self->{'subscriptions'};
     }
-    $self->req(GET($self->{'host'}.TheOldReader::Constants::SUBSCRIPTION_LIST), 'subscription_list_result');
+    my $result = $self->req(GET($self->{'host'}.TheOldReader::Constants::SUBSCRIPTION_LIST), 'subscription_list_result');
+    $self->{'cache'}->save_cache('subscriptions', $result);
+    return $result;
 }
 
 sub subscription_list_result()

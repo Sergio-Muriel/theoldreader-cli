@@ -44,6 +44,14 @@ sub save_config()
     print WRITE "token:".$self->{'token'}."\n";
     print WRITE "max_items_displayed:".$self->{'max_items_displayed'}."\n";
 
+    if($self->{'display_feeds'})
+    {
+        print WRITE "display_feeds:".$self->{'display_feeds'}."\n";
+    }
+    else
+    {
+        print WRITE "display_feeds:0\n";
+    }
     if($self->{'only_unread'})
     {
         print WRITE "only_unread:".$self->{'only_unread'}."\n";

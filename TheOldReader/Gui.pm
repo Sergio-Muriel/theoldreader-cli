@@ -200,6 +200,97 @@ sub update_labels()
 {
     my ($self, @params) = @_;
 
+    if($self->{'display_feeds'})
+    {
+        $self->display_labels();
+    }
+    else
+    {
+        $self->display_feeds();
+    }
+}
+sub display_feeds()
+{
+    my ($self, @params) = @_;
+
+    my $subscriptions = $self->{'cache'}->load_cache('subscriptions');
+    my $friends = $self->{'cache'}->load_cache('friends');
+    if(!$subscriptions)
+    {
+        return;
+    }
+
+    my %subscriptions = %{$subscriptions};
+    my @friends = $friends ? @{$friends} : ();
+    my %counts = ();
+
+    my $gui_labels = {};
+    $gui_labels = {
+        'labels' => {
+            TheOldReader::Constants::STATE_ALL => 'All items',
+            TheOldReader::Constants::STATE_STARRED=> 'Starred',
+            TheOldReader::Constants::STATE_LIKE=> 'Liked',
+            TheOldReader::Constants::STATE_BROADCAST=> 'Shared',
+            TheOldReader::Constants::STATE_READ=> 'Read',
+        },
+        'display_labels' => {
+            TheOldReader::Constants::STATE_STARRED=> 'Starred',
+            TheOldReader::Constants::STATE_LIKE=> 'Liked',
+            TheOldReader::Constants::STATE_BROADCAST=> 'Shared'
+        },
+        'original_labels' => {
+            TheOldReader::Constants::STATE_ALL=> 'All items',
+            TheOldReader::Constants::STATE_STARRED=> 'Starred',
+            TheOldReader::Constants::STATE_LIKE=> 'Liked',
+            TheOldReader::Constants::STATE_BROADCAST=> 'Shared',
+            TheOldReader::Constants::STATE_READ=> 'Read',
+        },
+        'values' => [
+            TheOldReader::Constants::STATE_ALL,
+            TheOldReader::Constants::STATE_STARRED,
+            TheOldReader::Constants::STATE_LIKE,
+            TheOldReader::Constants::STATE_BROADCAST,
+            TheOldReader::Constants::STATE_READ,
+        ]
+    };
+
+    foreach my $ref(@friends)
+    {
+        my $key = $ref->{'stream'};
+        $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert($ref->{'displayName'});
+        $gui_labels->{'labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+        $gui_labels->{'original_labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+    
+       push(@{$gui_labels->{'values'}}, $ref->{'stream'});
+    }
+
+    foreach my $feed_id(keys %subscriptions)
+    {
+        $gui_labels->{'display_labels'}{$feed_id} = $self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
+        $gui_labels->{'labels'}{$feed_id} = "> ".$self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
+        $gui_labels->{'original_labels'}{$feed_id} = "> ".$self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
+
+        push(@{$gui_labels->{'values'}}, $feed_id);
+    }
+
+    $self->{'labels'} = $gui_labels;
+
+
+    $self->{'left_container'}->values(@{$gui_labels->{'values'}});
+    $self->{'left_container'}->labels($gui_labels->{'labels'});
+
+    if(!defined($self->{'left_container'}->get()))
+    {
+        $self->{'left_container'}->set_selection((0));
+    }
+
+    $self->update_status("Labels updated.");
+    $self->{'cui'}->draw(1);
+}
+sub display_labels()
+{
+    my ($self, @params) = @_;
+
     my $labels = $self->{'cache'}->load_cache('labels');
     my $friends = $self->{'cache'}->load_cache('friends');
     if(!$labels)
@@ -515,6 +606,7 @@ Main window:
 q           Exit
 u           Update selected label
 x           Switch display only unread or all items
+l           Switch display labels or feeds on the left column
 
 Feed list:
 Enter       Display item fullscreen
@@ -662,7 +754,7 @@ sub left_container_focus()
     my ($self) = @_;
     my $id = $self->{'left_container'}->get_active_value();
 
-    my $text = "?:help  u:update";
+    my $text = "?:help l:switch display labels or feeds   u:update";
     $self->{'helptext'}->text($text);
 }
 
@@ -985,6 +1077,15 @@ sub switch_unread_all()
     $self->save_config();
     $self->update_list("clear");
 }
+
+sub switch_labels_feeds()
+{
+    my ($self) = @_;
+    $self->{'display_feeds'} = !$self->{'display_feeds'};
+    $self->save_config();
+    $self->update_labels();
+}
+
 sub close_content()
 {
     my ($self) = @_;
@@ -1109,6 +1210,7 @@ sub bind_keys()
 
     $self->{'container'}->set_binding(sub { $self->update_list("clear"); }, "u");
     $self->{'container'}->set_binding(sub { $self->switch_unread_all(); }, "x");
+    $self->{'container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
     $self->{'container'}->set_binding($exit_ref, "q");
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
