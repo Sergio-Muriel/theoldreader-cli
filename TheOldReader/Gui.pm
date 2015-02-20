@@ -209,6 +209,7 @@ sub update_labels()
         $self->display_feeds();
     }
 }
+
 sub display_feeds()
 {
     my ($self, @params) = @_;
@@ -258,8 +259,8 @@ sub display_feeds()
     {
         my $key = $ref->{'stream'};
         $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert($ref->{'displayName'});
-        $gui_labels->{'labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
-        $gui_labels->{'original_labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
+        $gui_labels->{'labels'}{$key} = ' @-'.$self->{'converter'}->convert($ref->{'displayName'});
+        $gui_labels->{'original_labels'}{$key} = ' @-'.$self->{'converter'}->convert($ref->{'displayName'});
     
        push(@{$gui_labels->{'values'}}, $ref->{'stream'});
     }
@@ -267,8 +268,8 @@ sub display_feeds()
     foreach my $feed_id(keys %subscriptions)
     {
         $gui_labels->{'display_labels'}{$feed_id} = $self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
-        $gui_labels->{'labels'}{$feed_id} = "> ".$self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
-        $gui_labels->{'original_labels'}{$feed_id} = "> ".$self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
+        $gui_labels->{'labels'}{$feed_id} = " > ".$self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
+        $gui_labels->{'original_labels'}{$feed_id} = " > ".$self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
 
         push(@{$gui_labels->{'values'}}, $feed_id);
     }
@@ -355,8 +356,8 @@ sub display_labels()
     foreach my $ref(keys %labels)
     {
         $gui_labels->{'display_labels'}{$ref} = $self->{'converter'}->convert($labels->{$ref});
-        $gui_labels->{'labels'}{$ref} = "> ".$self->{'converter'}->convert($labels->{$ref});
-        $gui_labels->{'original_labels'}{$ref} = "> ".$self->{'converter'}->convert($labels->{$ref});
+        $gui_labels->{'labels'}{$ref} = " > ".$self->{'converter'}->convert($labels->{$ref});
+        $gui_labels->{'original_labels'}{$ref} = " > ".$self->{'converter'}->convert($labels->{$ref});
 
         push(@{$gui_labels->{'values'}}, $ref);
     }
@@ -446,7 +447,7 @@ sub build_gui()
         'Container',
         -y    => 0,
         -height => 1,
-        -bg => 'blue',
+        -bg => 'black',
         -fg => 'white'
     );
 
@@ -454,6 +455,7 @@ sub build_gui()
         'toptext',
         'Label',
         -bold => 1,
+        -bg => 'black',
         -text => 'The Old Reader - GUI'
     );
 
@@ -461,10 +463,9 @@ sub build_gui()
     $self->{'container'} = $self->{'window'}->add(
         'container',
         'Container',
-        -border => 1,
+        -border => 0,
         -padBottom => 2,
-        -y    => 1,
-        -bfg  => 'grey'
+        -y    => 1
     );
 
     $self->{'left_container'} = $self->{'container'}->add(
@@ -549,12 +550,11 @@ sub build_content()
     $self->{'content_container'} = $self->{'window'}->add(
         'content_container',
         'Container',
-        -border => 1,
+        -border => 0,
         -height => $ENV{'LINES'} - 3,
         -y    => 1,
         -bg => 'blue',
-        -fg => 'white',
-        -bfg  => 'white'
+        -fg => 'white'
     );
 
 
@@ -576,12 +576,11 @@ sub build_help()
     $self->{'help_container'} = $self->{'window'}->add(
         'help_container',
         'Container',
-        -border => 1,
+        -border => 0,
         -height => $ENV{'LINES'} - 3,
         -y    => 1,
         -bg => 'black',
-        -fg => 'white',
-        -bfg  => 'white'
+        -fg => 'white'
     );
     $self->{'help_text'} = $self->{'help_container'}->add(
         'help_text',
