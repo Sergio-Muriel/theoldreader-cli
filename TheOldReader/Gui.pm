@@ -71,7 +71,7 @@ sub update_loading_list()
 
     my %gui_list = %{$self->{'list_data'}};
     my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
-    my $title="@";
+    my $fresh="@";
     my $starred="@";
     my $like="@";
     my $broadcast="@";
@@ -81,7 +81,8 @@ sub update_loading_list()
         return;
     }
 
-    $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like.$broadcast." ".$feed->{'title'});
+    my $title = $self->get_title($feed);
+    $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$fresh.$starred.$like.$broadcast." ".$title);
     $self->{'right_container'}->labels($gui_list{'labels'});
 
     $self->{'cui'}->draw();
@@ -106,6 +107,24 @@ sub get_labels()
         push (@labels, $feed->{'origin'}->{'title'});
     }
     return @labels;
+}
+
+sub get_title()
+{
+    my ($self, $feed) = @_;
+    my $id = $self->{'left_container'}->get_active_value();
+    my $title;
+    if($id !~ /label/)
+    {
+        $title = join(", ",$self->get_labels($feed));
+        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTHSMALL-1-length($title));
+        $title = substr($title,0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTHSMALL-1)).$spaces;
+        $title .= " - ".$feed->{'title'};
+    }
+    else
+    {
+        $title = $feed->{'title'};
+    }
 }
 
 sub last_status()
@@ -157,18 +176,7 @@ sub last_status()
         $broadcast=" ";
     }
 
-    my $title;
-    if($id !~ /label/)
-    {
-        $title = join(", ",$self->get_labels($feed));
-        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTHSMALL-1-length($title));
-        $title = substr($title,0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTHSMALL-1)).$spaces;
-        $title .= " - ".$feed->{'title'};
-    }
-    else
-    {
-        $title = $feed->{'title'};
-    }
+    my $title = $self->get_title($feed);;
     $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$fresh.$starred.$like.$broadcast." ".$title);
     $self->{'right_container'}->labels($gui_list->{'labels'});
 
