@@ -1,6 +1,6 @@
 # The Old Reader Cli (Client)
 
-![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli3.png)
+![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli6.png)
 
 ## Unofficial program
 This is an unofficial perl client/gui  based on the documentation found at https://github.com/theoldreader/api.
@@ -52,7 +52,7 @@ To run the gui, run the gui.pl script
 
 When loaded, you will find a list of labels (on the left), and a list of associated items, on the right.
 
-![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli3.png)
+![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli6.png)
 
 Use tab to switch between windows, and press enter to select an item.
 
@@ -66,7 +66,7 @@ You can also press:
 - Enter: to display the summary
 
 Displaying feeds instead of labels
-![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli4.png)
+![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli7.png)
 
 
 Displaying content of a feed

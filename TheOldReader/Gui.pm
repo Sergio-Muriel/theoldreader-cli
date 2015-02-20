@@ -87,13 +87,34 @@ sub update_loading_list()
     $self->{'cui'}->draw();
 }
 
+sub get_labels()
+{
+    my ($self, $feed) = @_;
+    my @labels=();
+    if($self->{'display_feeds'})
+    {
+        foreach(@{$feed->{'categories'}})
+        {
+            if($_ =~ /label/ and $self->{'labels'}{'display_labels'}{$_})
+            {
+                push(@labels,$self->{'labels'}{'display_labels'}{$_});
+            }
+        }
+    }
+    else
+    {
+        push (@labels, $feed->{'origin'}->{'title'});
+    }
+    return @labels;
+}
+
 sub last_status()
 {
     my ($self, $id) = @_;
 
     my $gui_list = $self->{'list_data'};
     my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
-    my $title;
+    my $fresh;
     my $starred;
     my $like;
     my $broadcast;
@@ -105,11 +126,11 @@ sub last_status()
 
     if(grep(/user\/-\/state\/com.google\/fresh/,@{$feed->{'categories'}}))
     {
-        $title="N";
+        $fresh="N";
     }
     else
     {
-        $title=" ";
+        $fresh=" ";
     }
     if(grep(/user\/-\/state\/com.google\/starred/,@{$feed->{'categories'}}))
     {
@@ -135,7 +156,20 @@ sub last_status()
     {
         $broadcast=" ";
     }
-    $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$title.$starred.$like.$broadcast." ".$feed->{'title'});
+
+    my $title;
+    if($id !~ /label/)
+    {
+        $title = join(", ",$self->get_labels($feed));
+        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTHSMALL-1-length($title));
+        $title = substr($title,0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTHSMALL-1)).$spaces;
+        $title .= " - ".$feed->{'title'};
+    }
+    else
+    {
+        $title = $feed->{'title'};
+    }
+    $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$fresh.$starred.$like.$broadcast." ".$title);
     $self->{'right_container'}->labels($gui_list->{'labels'});
 
     $self->{'cui'}->draw();
@@ -846,14 +880,7 @@ sub display_item()
         my $dt = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $Y,$m,$d, $H,$M,$S);
 
         # Labels
-        my @labels=();
-        foreach(@{$item->{'categories'}})
-        {
-            if($self->{'labels'}{'display_labels'}{$_})
-            {
-                push(@labels,$self->{'labels'}{'display_labels'}{$_});
-            }
-        }
+        my @labels = $self->get_labels($item);
 
         # Likes
         my @likes=();
