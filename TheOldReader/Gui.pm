@@ -838,6 +838,7 @@ sub display_item()
     if($item)
     {
         $self->add_background_job("mark_read ".$id, "Mark as read");
+        $self->update_loading_list($id);
 
         # Date
         my ($S,$M,$H,$d,$m,$Y) = localtime($$item{'published'});
