@@ -49,10 +49,13 @@ my $obj = TheOldReader::GuiShared->new(
         'gui_job' => []
 );
 
-my $client = TheOldReader::Gui->new( 'config' => $config, 'share' => $obj);
-my $background = TheOldReader::GuiBackground->new( 'config' => $config, 'share' => $obj);
+threads->create(sub {
+    my $background = TheOldReader::GuiBackground->new( 'config' => $config, 'share' => $obj);
+    $background->thread_init();
+});
 
-$background->init();
+my $client = TheOldReader::Gui->new( 'config' => $config, 'share' => $obj);
+
 $client->init();
 
 

@@ -49,14 +49,6 @@ sub error()
 
 
 
-sub init
-{
-    my ($self, @params) = @_;
-
-    my $trd = threads->create(sub { $self->thread_init(); });
-    $trd->detach();
-}
-
 sub unread_feeds()
 {
     my ($self, @params) = @_;
