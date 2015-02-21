@@ -345,7 +345,7 @@ sub thread_init()
                 threads->create(sub { $self->thread_command($received); });
             }
         }
-        select(undef,undef,undef,0.5);
+        sleep(1);
     }
 
     # Close finisehed
