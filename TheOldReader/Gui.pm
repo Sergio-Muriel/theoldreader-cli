@@ -440,9 +440,10 @@ sub init
     $self->build_help();
     $self->bind_keys();
 
-    # Run background jobs
-    # $self->update_labels();
-    $self->add_background_job("labels", "Updating labels...");
+    # No backgroud jobs for primary load
+    $self->{'reader'}->labels();
+    $self->{'reader'}->friends();
+    $self->update_labels();
 
     # Loo gui
     $self->run_gui();
