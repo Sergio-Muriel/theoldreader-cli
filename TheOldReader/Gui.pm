@@ -9,6 +9,7 @@ $VERSION     = 1.00;
 
 use strict;
 use warnings;
+use POSIX qw(strftime);
 use LWP::UserAgent;
 use JSON;
 use Carp qw(croak);
@@ -37,6 +38,7 @@ sub new
     {
         $self->{'config'} = TheOldReader::Constants::DEFAULT_CONFIG;
     }
+    $self->{'debug'} = $params{'debug'};
 
     $self->read_config();
     $self->{'cache'} = TheOldReader::Cache->new();
@@ -1086,8 +1088,10 @@ sub loop_event()
     my ($self, @params) = @_;
     
     my $received = $self->{'share'}->shift('gui_job');
+    $self->log("Waiting for command.") if ($self->{'debug'});
     if($received)
     {
+        $self->log("Received command $received") if($self->{'debug'});
         my ($command, $params)  = ($received=~ /^(\S+)\s*(.*?)$/);
         if($command)
         {
@@ -1105,9 +1109,10 @@ sub loop_event()
 
 sub log()
 {
+    my $date = strftime "%m/%d/%Y %H:%I:%S", localtime;
     my ($self, $command) = @_;
     open(WRITE,">>log"),
-    print WRITE "GUI: $command\n";
+    print WRITE "$date GUI: $command\n";
     close WRITE;
 }
 
@@ -1287,7 +1292,7 @@ sub quit()
 sub exit_dialog()
 {
     my ($self, @params) = @_;
-    $self->add_background_job("quit");
+    $self->add_background_job("quit","Quit request to backgroud jobs");
 }
 
 sub output_error()

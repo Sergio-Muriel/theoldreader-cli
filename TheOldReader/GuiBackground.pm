@@ -15,6 +15,7 @@ use TheOldReader::Config;
 use TheOldReader::Api;
 use TheOldReader::Constants;
 use TheOldReader::Cache;
+use POSIX qw(strftime);
 
 use threads;
 use Curses::UI;
@@ -34,6 +35,7 @@ sub new
     {
         $self->{'config'} = TheOldReader::Constants::DEFAULT_CONFIG;
     }
+    $self->{'debug'} = $params{'debug'};
 
     $self->read_config();
     $self->{'share'} = $params{'share'};
@@ -309,8 +311,10 @@ sub thread_init()
     while($continue)
     {
         my $received;
+        $self->log("Waiting for command.") if ($self->{'debug'});
         while($received = $self->{'share'}->shift('background_job'))
         {
+            $self->log("Received ".$received) if($self->{'debug'});
             # Close finisehed
             my @joinable = threads->list(threads::joinable);
             foreach(@joinable)
@@ -323,13 +327,13 @@ sub thread_init()
             while ($#threadlist>TheOldReader::Constants::MAX_BG_THREADS)
             {
                 select(undef,undef,undef,0.5);
-                $self->log("Waiting for some threads to close (".$#threadlist.")");
+                $self->log("Waiting for some threads to close (".$#threadlist.")") if($self->{'debug'});
                 @threadlist = threads->list(threads::running);
                 $was_waiting=1;
             }
             if($was_waiting)
             {
-                $self->log("OK, we can run new thread! (".$#threadlist.")");
+                $self->log("OK, we can run new thread! (".$#threadlist.")") if($self->{'debug'});
             }
 
             if($received eq "quit")
@@ -355,9 +359,10 @@ sub thread_init()
 
 sub log()
 {
+    my $date = strftime "%m/%d/%Y %H:%I:%S", localtime;
     my ($self, $command) = @_;
     open(WRITE,">>log"),
-    print WRITE "BG: $command\n";
+    print WRITE "$date BG: $command\n";
     close WRITE;
 }
 
