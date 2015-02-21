@@ -604,20 +604,31 @@ sub build_content()
         -border => 0,
         -height => $ENV{'LINES'} - 3,
         -y    => 1,
-        -bg => 'blue',
         -fg => 'white'
     );
-
+    $self->{'content_top'} = $self->{'content_container'}->add(
+        'content_top',
+        'TextViewer',
+        -wrapping => 0,
+        -focusable => 0,
+        -border => 0,
+        -height => 7,
+        -bg => 'blue',
+        -x => 0
+    );
 
     $self->{'content_text'} = $self->{'content_container'}->add(
         'content_text',
         'TextViewer',
-        -padleft => 1,
-        -padright => 1,
         -vscrollbar => 1,
         -wrapping => 1,
         -focusable => 1,
-        -border => 0,
+        -y => 7,
+        -border => 1,
+        -bg => 'blue',
+        -fg => 'white',
+        -bfg => 'white',
+        -bbg => 'blue',
         -x => 0
     );
 }
@@ -884,6 +895,7 @@ sub display_item()
     }
 
     my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+    my $intro="";
     my $text="";
     if($item)
     {
@@ -974,15 +986,16 @@ sub display_item()
         # Get url
         my @canonical = @{$item->{'canonical'}};
 
-        $text ="Feed:\t".$$item{'origin'}{'title'}."\n";
-        $text.="Title:\t".$$item{'title'}."\n";
-        $text.="Author:\t".$$item{'author'}."\n";
-        $text.="Date:\t".$dt."\n";
-        $text.="Labels:\t".join(", ",@labels)."\n";
-        $text.="Likes:\t".join(", ",@likes)."\n";
-        $text.="Url:\t".$canonical[0]{'href'}."\n";
-        $text.="\n";
-        $text.=$content."\n";
+        $intro ="Feed:\t".$$item{'origin'}{'title'}."\n";
+        $intro.="Title:\t".$$item{'title'}."\n";
+        $intro.="Author:\t".$$item{'author'}."\n";
+        $intro.="Date:\t".$dt."\n";
+        $intro.="Labels:\t".join(", ",@labels)."\n";
+        $intro.="Likes:\t".join(", ",@likes)."\n";
+        $intro.="Url:\t".$canonical[0]{'href'}."\n";
+
+
+        $text=$content."\n";
         $text.="\n";
         if(@urls)
         {
@@ -1012,7 +1025,11 @@ sub display_item()
     }
 
     $text = $self->{'converter'}->convert($text);
+    $intro = $self->{'converter'}->convert($intro);
+
+    $self->{'content_top'}->text($intro);
     $self->{'content_text'}->text($text);
+    $self->{'content_text'}->focus();
 }
 
 sub prev_item()
