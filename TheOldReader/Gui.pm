@@ -469,7 +469,7 @@ sub build_gui()
                 if(!$self->{'quit'})
                 {
                     $self->loop_event();
-                    $_[HEAP]->{next_loop_event}++;
+                    $_[HEAP]->{next_loop_event} = int(time())+2;
                     $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
                 }
             },
@@ -478,7 +478,7 @@ sub build_gui()
                 if(!$self->{'quit'})
                 {
                     $self->call_count();
-                    $_[HEAP]->{next_count_event}+=TheOldReader::Constants::GUI_UPDATE;
+                    $_[HEAP]->{next_count_event}= int(time())+TheOldReader::Constants::GUI_UPDATE;
                     $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
                 }
             },
@@ -1111,6 +1111,7 @@ sub loop_event()
 sub log()
 {
     my $date = strftime "%m/%d/%Y %H:%I:%S", localtime;
+
     my ($self, $command) = @_;
     open(WRITE,">>log"),
     print WRITE "$date GUI: $command\n";
