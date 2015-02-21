@@ -1105,9 +1105,9 @@ sub loop_event()
 {
     my ($self, @params) = @_;
     
-    my $received = $self->{'share'}->shift('gui_job');
+    my $received;
     $self->log("Waiting for command.") if ($self->{'debug'});
-    if($received)
+    while($received = $self->{'share'}->shift('gui_job'))
     {
         $self->log("Received command $received") if($self->{'debug'});
         my ($command, $params)  = ($received=~ /^(\S+)\s*(.*?)$/);
