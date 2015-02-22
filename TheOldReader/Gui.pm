@@ -63,7 +63,7 @@ sub call_count
 {
     my ($self, @params) = @_;
     $self->add_background_job("unread_feeds", "Updating count...");
-    $self->update_list();
+    $self->update_list("noclear");
 }
 
 
@@ -251,7 +251,7 @@ sub update_labels()
         $self->display_labels();
     }
     $self->update_count();
-    $self->update_list();
+    $self->update_list("noclear");
 }
 
 sub display_feeds()
@@ -526,6 +526,7 @@ sub build_gui()
         -bfg  => 'white',
         -values => [ 'load_more' ],
         -labels => { 'load_more' => ' Loading...'},
+        -onchange => sub { $self->left_container_onchange(); },
         -onfocus => sub { $self->left_container_focus(); }
     );
 
@@ -703,8 +704,14 @@ sub update_list()
     }
 
     my $id = $self->{'left_container'}->get_active_value();
-    if($id eq 'load_more' or $id eq "loading" or $self->{'loading_feed_list'})
+    if($self->{'loading_feed_list'} and $clear eq 'noclear')
     {
+        $self->log("Still loading list. no update") if($self->{'debug'});
+        return;
+    }
+    if($id eq 'load_more' or $id eq "loading")
+    {
+        $self->log("Not loading list $id") if($self->{'debug'});
         return;
     }
 
@@ -736,6 +743,7 @@ sub update_list()
 sub display_list()
 {
     my ($self, $params) = @_;
+    $self->{'loading_feed_list'}=0;
 
     # Mark as loaded to allow next list item to load
 
@@ -840,10 +848,26 @@ sub right_container_onselchange()
     }
 }
 
+sub clear_right()
+{
+    my ($self) = @_;
+    # Clear list
+    my $gui_list = {
+        'labels' => {
+            'load_more' => ' Loading ...',
+        },
+        'values' => [ 'load_more' ]
+    };
+    $self->{'right_container'}->values(@{$gui_list->{'values'}});
+    $self->{'right_container'}->labels($gui_list->{'labels'});
+    $self->{'list_data'} = $gui_list;
+}
+
 sub left_container_onchange()
 {
     my ($self) = @_;
-    $self->update_list('clear');
+    $self->log("New list update");
+    $self->clear_right();
     $self->{'right_container'}->focus();
 }
 
@@ -1285,8 +1309,6 @@ sub bind_keys()
     $self->{'container'}->set_binding(sub { $self->switch_unread_all(); }, "x");
     $self->{'container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
     $self->{'container'}->set_binding($exit_ref, "q");
-
-    $self->{'left_container'}->set_binding(sub { $self->left_container_onchange(); }, KEY_ENTER);
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
