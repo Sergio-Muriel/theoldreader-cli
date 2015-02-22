@@ -179,7 +179,10 @@ sub unread_feeds()
 {
     my ($self) = @_;
     my $list = $self->req(GET($self->{'host'}.TheOldReader::Constants::UNREAD_COUNTS), 'json_result');
-    $self->{'cache'}->save_cache('unread_feeds', $list);
+    if($list)
+    {
+        $self->{'cache'}->save_cache('unread_feeds', $list);
+    }
     return $list;
 }
 
@@ -196,7 +199,10 @@ sub subscription_list()
         return $self->{'subscriptions'};
     }
     my $result = $self->req(GET($self->{'host'}.TheOldReader::Constants::SUBSCRIPTION_LIST), 'subscription_list_result');
-    $self->{'cache'}->save_cache('subscriptions', $result);
+    if($result)
+    {
+        $self->{'cache'}->save_cache('subscriptions', $result);
+    }
     return $result;
 }
 
@@ -256,7 +262,7 @@ sub last()
     {
         $url.="&c=$next_id";
     }
-    $self->req(GET($url), 'json_result');
+    return $self->req(GET($url), 'json_result');
 }
 
 =head3 unread($stream_id, $max_items, $start_from)
@@ -281,7 +287,7 @@ sub unread()
     {
         $url.="&c=$next_id";
     }
-    $self->req(GET($url), 'json_result');
+    return $self->req(GET($url), 'json_result');
 }
 
 
@@ -301,28 +307,35 @@ sub contents()
     {
         push(@{$form{'i'}}, $_);
     }
-    my $content = $self->req(POST($url, \%form), 'json_result');
-    return $content;
+    return $self->req(POST($url, \%form), 'json_result');
 }
 
 
 sub labels()
 {
     my ($self)=  @_;
+    $self->log("In sub labels");
 
     if(!$self->{'labels'})
     {
         my $list = $self->subscription_list();
-        $self->{'labels'} = ();
-        foreach my $ref(keys %{$list})
+        if($list)
         {
-            my @categories = @{$$list{$ref}{'categories'}};
-            foreach(@categories)
+            $self->{'labels'} = ();
+            foreach my $ref(keys %{$list})
             {
-                $self->{'labels'}{${$_}{'id'}} = ${$_}{'label'};
+                my @categories = @{$$list{$ref}{'categories'}};
+                foreach(@categories)
+                {
+                    $self->{'labels'}{${$_}{'id'}} = ${$_}{'label'};
+                }
             }
+            $self->{'cache'}->save_cache('labels', $self->{'labels'});
         }
-        $self->{'cache'}->save_cache('labels', $self->{'labels'});
+        else
+        {
+            $self->log("ERROR: Cannot fetch subscription list.");
+        }
     }
     return $self->{'labels'};
 }

@@ -241,11 +241,12 @@ sub last()
         $items = $self->{'reader'}->last($id, $self->{'max_items_displayed'}, $next_id);
     }
 
-    $self->{'cache'}->save_cache("last $id", $items);
     if(!$items)
     {
-        return $self->output_error("Cannot get last items. Check out configuration.");
+        return $self->add_gui_job("error Cannot get last items. Check out configuration.");
     }
+    $self->{'cache'}->save_cache("last $id", $items);
+
     my @hash_ids = @{$$items{'itemRefs'}};
     my @ids = ();
     foreach(@hash_ids)

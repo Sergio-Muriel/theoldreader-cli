@@ -55,7 +55,7 @@ sub new
 sub error()
 {
     my ($self, $message) = @_;
-    print STDERR "Error: $message\n";
+    $self->update_status("ERROR: $message");
 }
 
 
@@ -452,7 +452,7 @@ sub init
     $self->update_labels();
 
     # Loo gui
-    $self->log("Starting run gui") if ($self->{'debug'});
+    $self->log("Starting fetch friends") if ($self->{'debug'});
     $self->run_gui();
 }
 
@@ -603,7 +603,7 @@ sub build_gui()
 sub build_content()
 {
     my ($self) = @_;
-    $self->log("Building content");
+    $self->log("Building content") if ($self->{'debug'});
 
     $self->{'content_container'} = $self->{'window'}->add(
         'content_container',
@@ -1309,9 +1309,8 @@ sub quit()
 {
     my ($self, @params) = @_;
     $self->{'quit'}=1;
-    $self->log("after Quit2");
     $self->{'cui'}->mainloopExit;
-    $self->log("done2");
+    $self->log("done");
     exit(1);
 }
 
