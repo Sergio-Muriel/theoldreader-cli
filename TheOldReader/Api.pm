@@ -314,7 +314,6 @@ sub contents()
 sub labels()
 {
     my ($self)=  @_;
-    $self->log("In sub labels");
 
     if(!$self->{'labels'})
     {
