@@ -2,6 +2,7 @@ package TheOldReader::Gui;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use Text::Iconv;
+use utf8;
 
 $VERSION     = 1.00;
 @ISA         = qw(Exporter TheOldReader::Config);
@@ -43,7 +44,6 @@ sub new
     $self->read_config();
     $self->{'cache'} = TheOldReader::Cache->new();
     $self->{'share'} = $params{'share'};
-    $self->{'converter'} = Text::Iconv->new("utf8","latin1");
 
     $self->{'reader'} = TheOldReader::Api->new(
        'host' => TheOldReader::Constants::DEFAULT_HOST,
@@ -79,12 +79,12 @@ sub update_loading_list()
     my $broadcast="@";
     if(!$feed)
     {
-        $self->log("ERROR: cannot find feed $id");
+        $self->log("cannot find feed $id");
         return;
     }
 
     my $title = $self->get_title($feed);
-    $gui_list{'labels'}{$id} = $self->{'converter'}->convert(" ".$fresh.$starred.$like.$broadcast." ".$title);
+    $gui_list{'labels'}{$id} = (" ".$fresh.$starred.$like.$broadcast." ".$title);
     $self->{'right_container'}->labels($gui_list{'labels'});
 
     $self->{'cui'}->draw();
@@ -127,6 +127,8 @@ sub get_title()
     {
         $title = $feed->{'title'};
     }
+    $self->log("TITLE $title");
+    return $title;
 }
 
 sub last_status()
@@ -141,7 +143,7 @@ sub last_status()
     my $broadcast;
     if(!$feed)
     {
-        $self->log("ERROR: cannot find feed $id");
+        $self->log("cannot find feed $id");
         return;
     }
 
@@ -179,7 +181,7 @@ sub last_status()
     }
 
     my $title = $self->get_title($feed);;
-    $gui_list->{'labels'}{$id} = $self->{'converter'}->convert(" ".$fresh.$starred.$like.$broadcast." ".$title);
+    $gui_list->{'labels'}{$id} = (" ".$fresh.$starred.$like.$broadcast." ".$title);
     $self->{'right_container'}->labels($gui_list->{'labels'});
 
     $self->{'cui'}->draw();
@@ -196,7 +198,6 @@ sub update_count()
     my $labels = $self->{'labels'};
     if(!$labels)
     {
-        $self->log("ERROR: no labels");
         return;
     }
     my %counts= ();
@@ -208,7 +209,8 @@ sub update_count()
     my $cache_unread_feeds = $self->{'cache'}->load_cache('unread_feeds');
     if(!$cache_unread_feeds)
     {
-        $self->log("ERROR: no cache file unread_feeds");
+        $self->call_count();
+        $self->error("No cache file unread_feeds. Requesting count from server.");
         return;
     }
 
@@ -236,8 +238,8 @@ sub update_count()
     }
 
     $self->{'left_container'}->labels($labels->{'labels'});
-    $self->{'cui'}->draw(1);
     $self->{'counts'} = \%counts;
+    $self->{'cui'}->draw();
 }
 
 sub update_labels()
@@ -252,6 +254,8 @@ sub update_labels()
     {
         $self->display_labels();
     }
+    $self->update_count();
+    $self->update_list();
 }
 
 sub display_feeds()
@@ -302,18 +306,18 @@ sub display_feeds()
     foreach my $ref(@friends)
     {
         my $key = $ref->{'stream'};
-        $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert($ref->{'displayName'});
-        $gui_labels->{'labels'}{$key} = ' @-'.$self->{'converter'}->convert($ref->{'displayName'});
-        $gui_labels->{'original_labels'}{$key} = ' @-'.$self->{'converter'}->convert($ref->{'displayName'});
+        $gui_labels->{'display_labels'}{$key} = ($ref->{'displayName'});
+        $gui_labels->{'labels'}{$key} = ' @-'.($ref->{'displayName'});
+        $gui_labels->{'original_labels'}{$key} = ' @-'.($ref->{'displayName'});
     
        push(@{$gui_labels->{'values'}}, $ref->{'stream'});
     }
 
     foreach my $feed_id(keys %subscriptions)
     {
-        $gui_labels->{'display_labels'}{$feed_id} = $self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
-        $gui_labels->{'labels'}{$feed_id} = " > ".$self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
-        $gui_labels->{'original_labels'}{$feed_id} = " > ".$self->{'converter'}->convert($subscriptions{$feed_id}{'title'});
+        $gui_labels->{'display_labels'}{$feed_id} = ($subscriptions{$feed_id}{'title'});
+        $gui_labels->{'labels'}{$feed_id} = " > ".($subscriptions{$feed_id}{'title'});
+        $gui_labels->{'original_labels'}{$feed_id} = " > ".($subscriptions{$feed_id}{'title'});
 
         push(@{$gui_labels->{'values'}}, $feed_id);
     }
@@ -332,6 +336,7 @@ sub display_feeds()
     $self->update_status("Labels updated.");
     $self->{'cui'}->draw(1);
 }
+
 sub display_labels()
 {
     my ($self, @params) = @_;
@@ -381,27 +386,17 @@ sub display_labels()
     {
         $self->log("Add friends ");
         my $key = TheOldReader::Constants::STATE_FRIENDS;
-        $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert("Friends");
-        $gui_labels->{'labels'}{$key} = $self->{'converter'}->convert("Friends");
-        $gui_labels->{'original_labels'}{$key} = $self->{'converter'}->convert("Friends");
+        $gui_labels->{'display_labels'}{$key} = ("Friends");
+        $gui_labels->{'labels'}{$key} = ("Friends");
+        $gui_labels->{'original_labels'}{$key} = ("Friends");
         push(@{$gui_labels->{'values'}}, $key);
     }
 
-    #foreach my $ref(@friends)
-    #{
-    #    my $key = $ref->{'stream'};
-    #    $gui_labels->{'display_labels'}{$key} = $self->{'converter'}->convert($ref->{'displayName'});
-    #    $gui_labels->{'labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
-    #    $gui_labels->{'original_labels'}{$key} = '@-'.$self->{'converter'}->convert($ref->{'displayName'});
-    #
-    #    push(@{$gui_labels->{'values'}}, $ref->{'stream'});
-    #}
-
     foreach my $ref(keys %labels)
     {
-        $gui_labels->{'display_labels'}{$ref} = $self->{'converter'}->convert($labels->{$ref});
-        $gui_labels->{'labels'}{$ref} = " > ".$self->{'converter'}->convert($labels->{$ref});
-        $gui_labels->{'original_labels'}{$ref} = " > ".$self->{'converter'}->convert($labels->{$ref});
+        $gui_labels->{'display_labels'}{$ref} = ($labels->{$ref});
+        $gui_labels->{'labels'}{$ref} = " > ".($labels->{$ref});
+        $gui_labels->{'original_labels'}{$ref} = " > ".($labels->{$ref});
 
         push(@{$gui_labels->{'values'}}, $ref);
     }
@@ -417,7 +412,7 @@ sub display_labels()
         $self->{'left_container'}->set_selection((0));
     }
 
-    $self->update_status("Labels updated.");
+    $self->update_status("Feeds list updated.");
     $self->{'cui'}->draw(1);
 }
 
@@ -444,12 +439,13 @@ sub init
     $self->log("Starting bind keys") if ($self->{'debug'});
     $self->bind_keys();
 
-    # No backgroud jobs for primary load
-    $self->log("Starting fetch labels") if ($self->{'debug'});
-    $self->{'reader'}->labels();
-    $self->log("Starting fetch friends") if ($self->{'debug'});
-    $self->{'reader'}->friends();
+    # Update labels/friend list
     $self->update_labels();
+
+    #Force draw of gui before loading labels and friends
+    $self->{'cui'}->draw();
+
+    $self->add_background_job("labels","Updating label and friend list");
 
     # Loo gui
     $self->log("Starting fetch friends") if ($self->{'debug'});
@@ -463,6 +459,7 @@ sub build_gui()
     $self->{'cui'} = new Curses::UI::POE(
         -clear_on_exit => 1,
         -color_support => 1,
+        -utf8 => 1,
         inline_states => {
             _start => sub {
                 $_[HEAP]->{next_loop_event} = int(time());
@@ -533,11 +530,6 @@ sub build_gui()
         -bfg  => 'white',
         -values => [ 'load_more' ],
         -labels => { 'load_more' => ' Loading...'},
-        -onchange => sub {
-            $self->update_list('clear');
-            $self->{'right_container'}->focus();
-        },
-        -onselchange => sub { $self->left_container_focus(); },
         -onfocus => sub { $self->left_container_focus(); }
     );
 
@@ -595,9 +587,7 @@ sub build_gui()
         -text => ' Loading...'
     );
 
-    $self->{'bottombar'}->focus();
-    $self->{'left_container'}->focus();
-    $self->{'right_container'}->draw();
+    $self->{'right_container'}->focus();
 }
 
 sub build_content()
@@ -717,7 +707,7 @@ sub update_list()
     }
 
     my $id = $self->{'left_container'}->get_active_value();
-    if($id eq 'load_more' or $id eq "loading")
+    if($id eq 'load_more' or $id eq "loading" or $self->{'loading_feed_list'})
     {
         return;
     }
@@ -742,12 +732,18 @@ sub update_list()
 
     $self->{'cui'}->draw(1);
 
+    $self->{'loading_feed_list'} = 1;
+
     $self->add_background_job("last $clear $id ".($self->{'only_unread'} || "0")." ".$next_list, "Fetching last items from $id");
 }
 
 sub display_list()
 {
     my ($self, $params) = @_;
+
+    # Mark as loaded to allow next list item to load
+    $self->{'loading_feed_list'}=0;
+
     my ($clear, $id) = split(/\s+/, $params);
 
     my $gui_list = {
@@ -846,6 +842,14 @@ sub right_container_onselchange()
         }
     }
 }
+
+sub left_container_onchange()
+{
+    my ($self) = @_;
+    $self->update_list('clear');
+    $self->{'right_container'}->focus();
+}
+
 sub right_container_onchange()
 {
     my ($self) = @_;
@@ -1031,8 +1035,8 @@ sub display_item()
         $text="Error getting feed information $id";
     }
 
-    $text = $self->{'converter'}->convert($text);
-    $intro = $self->{'converter'}->convert($intro);
+    $text = ($text);
+    $intro = ($intro);
 
     $self->{'content_top'}->text($intro);
     $self->{'content_text'}->text($text);
@@ -1284,6 +1288,8 @@ sub bind_keys()
     $self->{'container'}->set_binding(sub { $self->switch_unread_all(); }, "x");
     $self->{'container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
     $self->{'container'}->set_binding($exit_ref, "q");
+
+    $self->{'left_container'}->set_binding(sub { $self->left_container_onchange(); }, KEY_ENTER);
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");

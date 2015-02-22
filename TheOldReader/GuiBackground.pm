@@ -55,16 +55,49 @@ sub unread_feeds()
 {
     my ($self, @params) = @_;
     # Init labels
-    $self->{'reader'}->unread_feeds();
-    $self->add_gui_job("update_count");
+    my $unread = $self->{'reader'}->unread_feeds();
+    if($unread)
+    {
+        $self->{'cache'}->save_cache("unread_feeds", $unread);
+        $self->add_gui_job("update_count");
+    }
+    else
+    {
+        $self->add_gui_job("error Cannot fetch unread feeds"); 
+    }
 }
 
 sub labels()
 {
     my ($self, @params) = @_;
-    # Init labels
-    $self->{'reader'}->labels();
-    $self->{'reader'}->friends();
+    my $subscriptions = $self->{'reader'}->subscription_list();
+    if($subscriptions)
+    {
+        my %labels = ();
+        foreach my $ref(keys %{$subscriptions})
+        {
+            my @categories = @{$$subscriptions{$ref}{'categories'}};
+            foreach(@categories)
+            {
+                $labels{${$_}{'id'}} = ${$_}{'label'};
+            }
+        }
+        $self->{'cache'}->save_cache("labels", \%labels);
+        $self->{'cache'}->save_cache("subscriptions", $subscriptions);
+    }
+    else
+    {
+        return $self->add_gui_job("error Cannot get labels.");
+    }
+    my $friends = $self->{'reader'}->friends();
+    if($friends)
+    {
+        $self->{'cache'}->save_cache("friends", $$friends{'friends'});
+    }
+    else
+    {
+        return $self->add_gui_job("error Cannot get friend list.");
+    }
     $self->add_gui_job("update_labels");
 
 }
