@@ -435,17 +435,24 @@ sub init
 
 
     # Build gui
+    $self->log("Starting build gui") if ($self->{'debug'});
     $self->build_gui();
+    $self->log("Starting build content") if ($self->{'debug'});
     $self->build_content();
+    $self->log("Starting build help") if ($self->{'debug'});
     $self->build_help();
+    $self->log("Starting bind keys") if ($self->{'debug'});
     $self->bind_keys();
 
     # No backgroud jobs for primary load
+    $self->log("Starting fetch labels") if ($self->{'debug'});
     $self->{'reader'}->labels();
+    $self->log("Starting fetch friends") if ($self->{'debug'});
     $self->{'reader'}->friends();
     $self->update_labels();
 
     # Loo gui
+    $self->log("Starting run gui") if ($self->{'debug'});
     $self->run_gui();
 }
 
