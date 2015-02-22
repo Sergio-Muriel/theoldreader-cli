@@ -44,8 +44,6 @@ sub new
     my ($class, %params) = @_;
     my $self = bless { %params }, $class;
 
-    $self->{'cache'} = TheOldReader::Cache->new();
-
     my $ua = LWP::UserAgent->new;
     $ua->agent("irssi-theoldreader/0.1");
     $self->{'ua'} = $ua;
@@ -178,12 +176,7 @@ Return unread feed ids
 sub unread_feeds()
 {
     my ($self) = @_;
-    my $list = $self->req(GET($self->{'host'}.TheOldReader::Constants::UNREAD_COUNTS), 'json_result');
-    if($list)
-    {
-        $self->{'cache'}->save_cache('unread_feeds', $list);
-    }
-    return $list;
+    return $self->req(GET($self->{'host'}.TheOldReader::Constants::UNREAD_COUNTS), 'json_result');
 }
 
 
@@ -198,12 +191,7 @@ sub subscription_list()
     {
         return $self->{'subscriptions'};
     }
-    my $result = $self->req(GET($self->{'host'}.TheOldReader::Constants::SUBSCRIPTION_LIST), 'subscription_list_result');
-    if($result)
-    {
-        $self->{'cache'}->save_cache('subscriptions', $result);
-    }
-    return $result;
+    return $self->req(GET($self->{'host'}.TheOldReader::Constants::SUBSCRIPTION_LIST), 'subscription_list_result');
 }
 
 sub subscription_list_result()
@@ -329,7 +317,6 @@ sub labels()
                     $self->{'labels'}{${$_}{'id'}} = ${$_}{'label'};
                 }
             }
-            $self->{'cache'}->save_cache('labels', $self->{'labels'});
         }
         else
         {
