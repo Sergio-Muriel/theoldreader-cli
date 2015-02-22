@@ -127,7 +127,6 @@ sub get_title()
     {
         $title = $feed->{'title'};
     }
-    $self->log("TITLE $title");
     return $title;
 }
 
@@ -183,9 +182,6 @@ sub last_status()
     my $title = $self->get_title($feed);;
     $gui_list->{'labels'}{$id} = (" ".$fresh.$starred.$like.$broadcast." ".$title);
     $self->{'right_container'}->labels($gui_list->{'labels'});
-
-    $self->{'cui'}->draw();
-    $self->update_status("Updated status of $id");
 }
 
 
@@ -742,9 +738,9 @@ sub display_list()
     my ($self, $params) = @_;
 
     # Mark as loaded to allow next list item to load
-    $self->{'loading_feed_list'}=0;
 
     my ($clear, $id) = split(/\s+/, $params);
+    $self->update_status("Received new list for $id");
 
     my $gui_list = {
         'labels' => {
@@ -811,6 +807,7 @@ sub display_list()
 
     $self->{'right_container'}->labels($gui_list->{'labels'});
     $self->{'cui'}->draw(1);
+    $self->update_status("Loaded new list for $id");
 }
 
 sub left_container_focus()
