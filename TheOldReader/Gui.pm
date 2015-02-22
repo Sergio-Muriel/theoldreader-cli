@@ -850,7 +850,7 @@ sub right_container_onselchange()
 
 sub clear_right()
 {
-    my ($self) = @_;
+    my ($self, @params) = @_;
     # Clear list
     my $gui_list = {
         'labels' => {
