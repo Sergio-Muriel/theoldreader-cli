@@ -927,6 +927,7 @@ sub display_item()
         return $self->close_content();
     }
 
+    $self->log("Open $id");
     my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
     my $intro="";
     my $text="";
@@ -1057,8 +1058,8 @@ sub display_item()
         $text="Error getting feed information $id";
     }
 
-    $text = ($text);
-    $intro = ($intro);
+    utf8::decode($text);
+    utf8::decode($intro);
 
     $self->{'content_top'}->text($intro);
     $self->{'content_text'}->text($text);
