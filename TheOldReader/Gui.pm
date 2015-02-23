@@ -527,7 +527,7 @@ sub build_gui()
         -bfg  => 'white',
         -values => [ 'load_more' ],
         -labels => { 'load_more' => ' Loading...'},
-        -onchange => sub { $self->left_container_onchange(); },
+        #-onchange => sub { $self->left_container_onchange(); },
         -onfocus => sub { $self->left_container_focus(); }
     );
 
@@ -1310,6 +1310,8 @@ sub bind_keys()
     $self->{'container'}->set_binding(sub { $self->switch_unread_all(); }, "x");
     $self->{'container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
     $self->{'container'}->set_binding($exit_ref, "q");
+
+    $self->{'left_container'}->set_binding(sub { $self->left_container_onchange(); }, KEY_ENTER);
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
