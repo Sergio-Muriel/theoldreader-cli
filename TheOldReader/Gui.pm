@@ -190,8 +190,6 @@ sub update_count()
 {
     my ($self, @params) = @_;
 
-    $self->update_status("Count updated");
-
     my $labels = $self->{'labels'};
     if(!$labels)
     {
@@ -237,6 +235,10 @@ sub update_count()
     $self->{'left_container'}->labels($labels->{'labels'});
     $self->{'counts'} = \%counts;
     $self->{'cui'}->draw();
+    if($update)
+    {
+        $self->update_status("Count updated");
+    }
 }
 
 sub update_labels()
