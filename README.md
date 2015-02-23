@@ -18,7 +18,7 @@ On debian you can install the packages using the apt command:
 
 ### If you want the gui
 
-    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl libtext-iconv-perl
+    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl
 
     $ cpan -i Curses::UI::POE Curses::Forms::Dialog
 
@@ -29,7 +29,7 @@ On debian you can install the packages using the apt command:
 ### For OS X (using Homebrew/cpanm)
 
     $ brew install cpanm
-    $ sudo perl -MCPAN -e 'install JSON,LWP::UserAgent,IO::Prompt,Curses::UI,Curses::UI::POE,Text::Iconv,Mozilla::CA,Curses::Forms::Dialog'
+    $ sudo perl -MCPAN -e 'install JSON,LWP::UserAgent,IO::Prompt,Curses::UI,Curses::UI::POE,Mozilla::CA,Curses::Forms::Dialog'
 
 ## Create configuration file
 
