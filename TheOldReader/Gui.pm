@@ -127,6 +127,7 @@ sub get_title()
     {
         $title = $feed->{'title'};
     }
+    utf8::decode($title);
     return $title;
 }
 
