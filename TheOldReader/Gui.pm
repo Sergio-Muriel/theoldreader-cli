@@ -675,7 +675,6 @@ r           Read item
 R           Unread item
 o           Open item in the browser
 O           Open ALL unread items in the browser
-n           Dsiap
 
 Displaying item:
 n           Display next item
