@@ -674,7 +674,7 @@ b           Broadcast item (share!)
 r           Read item
 R           Unread item
 o           Open item in the browser
-O           Open ALL displayed item in the browser
+O           Open ALL unread items in the browser
 n           Dsiap
 
 Displaying item:
@@ -1113,10 +1113,13 @@ sub open_all()
         my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
         if($item)
         {
-            my @canonical = @{$item->{'canonical'}};
-            open CMD, "| ".($self->{'browser'}||"x-www-browser") ." '".$canonical[0]{'href'}."' 2>/dev/null";
-            close CMD;
-            $self->right_container_read();
+            if(grep(/user\/-\/state\/com.google\/fresh/,@{$item->{'categories'}}))
+            {
+                my @canonical = @{$item->{'canonical'}};
+                open CMD, "| ".($self->{'browser'}||"x-www-browser") ." '".$canonical[0]{'href'}."' 2>/dev/null";
+                close CMD;
+                $self->right_container_read();
+            }
         }
     }
 }
