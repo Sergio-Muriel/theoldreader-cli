@@ -74,15 +74,21 @@ sub labels()
     if($subscriptions)
     {
         my %labels = ();
-        foreach my $ref(keys %{$subscriptions})
+        my @labels;
+        foreach my $ref(@{$subscriptions})
         {
-            my @categories = @{$$subscriptions{$ref}{'categories'}};
+            my @categories = @{$ref->{'categories'}};
             foreach(@categories)
             {
-                $labels{${$_}{'id'}} = ${$_}{'label'};
+                if(!$labels{${$_}{'id'}})
+                {
+                    $labels{${$_}{'id'}} = ${$_}{'label'};
+                    push(@labels, $_);
+                    $self->log("Push ".${$_}{'label'});
+                }
             }
         }
-        $self->{'cache'}->save_cache("labels", \%labels);
+        $self->{'cache'}->save_cache("labels", \@labels);
         $self->{'cache'}->save_cache("subscriptions", $subscriptions);
     }
     else
@@ -246,6 +252,16 @@ sub follow()
     my ($self, $id) = @_;
     my $result = $self->{'reader'}->follow($id);
     $self->add_gui_job("update_labels");
+}
+
+sub rename_label()
+{
+    my ($self, $params) = @_;
+    my ($tag, $newtag) = ($params =~ /^__(.*)__ __(.*)__/);
+    $self->log("Rename $tag to $newtag");
+
+    $self->{'reader'}->rename_label($tag, $newtag);
+    return $self->labels();
 }
 
 

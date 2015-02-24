@@ -116,18 +116,19 @@ sub subscription_list()
     my ($self) = @_;
 
     my $list =  $self->{'reader'}->subscription_list();
+    $self->log("RESULT : ".Dumper $list);
     if(!$list)
     {
         return $self->output_error("Cannot get subscription list. Check out configuration.");
     }
     my @urls = ();
-    foreach my $ref(keys %{$list})
+    foreach my $ref(@{$list})
     {
-        push(@urls, $$list{$ref}{'url'});
+        push(@urls, $ref->{'url'});
     }
     $self->output_string("Feed urls:");
     $self->output_list(@urls);
-    $self->{'cache'}->save_cache("subscription_list",$list);
+    $self->{'cache'}->save_cache("subscription_list",\$list);
     return $list;
 }
 

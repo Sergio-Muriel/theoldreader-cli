@@ -245,6 +245,7 @@ sub update_labels()
 {
     my ($self, @params) = @_;
 
+    my $previous_selected = $self->{'left_container'}{'-ypos'};
     if($self->{'display_feeds'})
     {
         $self->display_feeds();
@@ -253,6 +254,9 @@ sub update_labels()
     {
         $self->display_labels();
     }
+
+    $self->{'left_container'}{'-ypos'} = $previous_selected;
+
     $self->update_count();
     $self->update_list("noclear");
 }
@@ -347,7 +351,7 @@ sub display_labels()
         return;
     }
 
-    my %labels = %{$labels};
+    my @labels = @{$labels};
     my @friends = $friends ? @{$friends} : ();
     my %counts = ();
 
@@ -391,13 +395,13 @@ sub display_labels()
         push(@{$gui_labels->{'values'}}, $key);
     }
 
-    foreach my $ref(keys %labels)
+    foreach my $label(@labels)
     {
-        $gui_labels->{'display_labels'}{$ref} = ($labels->{$ref});
-        $gui_labels->{'labels'}{$ref} = " > ".($labels->{$ref});
-        $gui_labels->{'original_labels'}{$ref} = " > ".($labels->{$ref});
+        $gui_labels->{'display_labels'}{$label->{'id'}} = $label->{'label'};
+        $gui_labels->{'labels'}{$label->{'id'}} = " > ".$label->{'label'};
+        $gui_labels->{'original_labels'}{$label->{'id'}} = " > ".$label->{'label'};
 
-        push(@{$gui_labels->{'values'}}, $ref);
+        push(@{$gui_labels->{'values'}}, $label->{'id'});
     }
 
     $self->{'labels'} = $gui_labels;
@@ -666,6 +670,10 @@ u           Update selected label
 x           Switch display only unread or all items
 l           Switch display labels or feeds on the left column
 
+Label list:
+r           rename label
+Enter       Display selected label items
+
 Feed list:
 Enter       Display item fullscreen
 s           Star item
@@ -825,7 +833,7 @@ sub left_container_focus()
     my ($self) = @_;
     my $id = $self->{'left_container'}->get_active_value();
 
-    my $text = "?:help l:switch display labels or feeds   u:update";
+    my $text = "?:help r:rename label  l:switch display labels or feeds  u:update";
     $self->{'helptext'}->text($text);
 }
 
@@ -871,6 +879,21 @@ sub left_container_onchange()
     $self->log("New list update");
     $self->clear_right();
     $self->{'right_container'}->focus();
+}
+sub left_container_rename()
+{
+    my ($self) = @_;
+    my $id = $self->{'left_container'}->get_active_value();
+
+    if($id =~ /label/)
+    {
+        my ($rv, $text) = input('Change label name of '.$id, BTN_OK | BTN_CANCEL, 'New name', 20, qw(white black yellow));
+        if(!$rv)
+        {
+            my ($rawid) =  ($id =~ /label\/(.*)$/);
+            $self->add_background_job("rename_label __".$rawid."__ __".$text."__", "Rename label $id to $text");
+        }
+    }
 }
 
 sub right_container_onchange()
@@ -1317,6 +1340,7 @@ sub bind_keys()
     $self->{'container'}->set_binding($exit_ref, "q");
 
     $self->{'left_container'}->set_binding(sub { $self->left_container_onchange(); }, KEY_ENTER);
+    $self->{'left_container'}->set_binding(sub { $self->left_container_rename(); }, "r");
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");

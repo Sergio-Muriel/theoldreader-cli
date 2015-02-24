@@ -202,19 +202,10 @@ sub subscription_list_result()
         my $data = from_json($res->content);
         if($$data{'subscriptions'})
         {
-            my @subscriptions = @{$$data{'subscriptions'}};
-            $self->{'subscriptions'} = ();
-            $self->{'subscriptions_refs'} = ();
-            my $num=0;
-            foreach my $item(@subscriptions)
-            {
-                $$item{'internal'}= ++$num; 
-                $self->{'subscriptions'}{$item->{'id'}} = $item;
-                $self->{'subscriptions_refs'}{$num} = \$self->{'subscriptions'}{$item->{'id'}};
-            }
+            return \@{$$data{'subscriptions'}};
         }
     }
-    return $self->{'subscriptions'};
+    return undef;
 }
 
 =head3 user_info()
@@ -309,9 +300,9 @@ sub labels()
         if($list)
         {
             $self->{'labels'} = ();
-            foreach my $ref(keys %{$list})
+            foreach my $ref(@{$list})
             {
-                my @categories = @{$$list{$ref}{'categories'}};
+                my @categories = @{$ref->{'categories'}};
                 foreach(@categories)
                 {
                     $self->{'labels'}{${$_}{'id'}} = ${$_}{'label'};
