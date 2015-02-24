@@ -116,7 +116,6 @@ sub subscription_list()
     my ($self) = @_;
 
     my $list =  $self->{'reader'}->subscription_list();
-    $self->log("RESULT : ".Dumper $list);
     if(!$list)
     {
         return $self->output_error("Cannot get subscription list. Check out configuration.");
@@ -239,9 +238,9 @@ sub labels()
     $self->output_string("List of labels:");
     my @labels = ();
 
-    foreach my $ref(keys %{$list})
+    foreach my $ref(@{$list->{'tags'}})
     {
-        push(@labels, "$ref : ".$$list{$ref});
+        push(@labels, $ref->{'id'});
     }
     $self->output_list(@labels);
     $self->output_string("");
@@ -458,7 +457,6 @@ sub rename_label()
     my $tag = shift(@params);
     my $newtag = shift(@params);
 
-    $self->log("Rename $tag to $newtag");
     my $result = $self->{'reader'}->rename_label($tag, $newtag);
     $self->output_string("Renaming label $tag to $newtag: result $result");
 }

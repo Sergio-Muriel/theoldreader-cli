@@ -294,27 +294,8 @@ sub labels()
 {
     my ($self)=  @_;
 
-    if(!$self->{'labels'})
-    {
-        my $list = $self->subscription_list();
-        if($list)
-        {
-            $self->{'labels'} = ();
-            foreach my $ref(@{$list})
-            {
-                my @categories = @{$ref->{'categories'}};
-                foreach(@categories)
-                {
-                    $self->{'labels'}{${$_}{'id'}} = ${$_}{'label'};
-                }
-            }
-        }
-        else
-        {
-            $self->log("ERROR: Cannot fetch subscription list.");
-        }
-    }
-    return $self->{'labels'};
+    my $url = $self->{'host'}.TheOldReader::Constants::LABELS;
+    return $self->req(GET($url), 'json_result');
 }
 
 # Get last items

@@ -28,6 +28,7 @@ use constant EDIT_FRIEND => '/reader/api/0/friend/edit';
 use constant ADD_FEED => '/reader/api/0/subscription/quickadd';
 use constant EDIT_FEED => '/reader/api/0/subscription/edit';
 use constant RENAME_TAG => '/reader/api/0/rename-tag';
+use constant LABELS => '/reader/api/0/tag/list?output=json';
 
 
 use constant STATE_ALL => 'user/-/state/com.google/reading-list';

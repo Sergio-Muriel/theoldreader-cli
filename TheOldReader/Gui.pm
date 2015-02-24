@@ -272,7 +272,7 @@ sub display_feeds()
         return;
     }
 
-    my %subscriptions = %{$subscriptions};
+    my @subscriptions = @{$subscriptions};
     my @friends = $friends ? @{$friends} : ();
     my %counts = ();
 
@@ -316,13 +316,13 @@ sub display_feeds()
        push(@{$gui_labels->{'values'}}, $ref->{'stream'});
     }
 
-    foreach my $feed_id(keys %subscriptions)
+    foreach my $feed(@subscriptions)
     {
-        $gui_labels->{'display_labels'}{$feed_id} = ($subscriptions{$feed_id}{'title'});
-        $gui_labels->{'labels'}{$feed_id} = " > ".($subscriptions{$feed_id}{'title'});
-        $gui_labels->{'original_labels'}{$feed_id} = " > ".($subscriptions{$feed_id}{'title'});
+        $gui_labels->{'display_labels'}{$feed->{'id'}} = ($feed->{'title'});
+        $gui_labels->{'labels'}{$feed->{'id'}} = " > ".($feed->{'title'});
+        $gui_labels->{'original_labels'}{$feed->{'id'}} = " > ".($feed->{'title'});
 
-        push(@{$gui_labels->{'values'}}, $feed_id);
+        push(@{$gui_labels->{'values'}}, $feed->{'id'});
     }
 
     $self->{'labels'} = $gui_labels;
@@ -397,11 +397,15 @@ sub display_labels()
 
     foreach my $label(@labels)
     {
-        $gui_labels->{'display_labels'}{$label->{'id'}} = $label->{'label'};
-        $gui_labels->{'labels'}{$label->{'id'}} = " > ".$label->{'label'};
-        $gui_labels->{'original_labels'}{$label->{'id'}} = " > ".$label->{'label'};
-
-        push(@{$gui_labels->{'values'}}, $label->{'id'});
+        my $labelid = $label->{'id'};
+        my ($labelname) = ($labelid =~ /label\/(.*)$/);
+        if($labelname)
+        {
+            $gui_labels->{'display_labels'}{$labelid} = $labelname;
+            $gui_labels->{'labels'}{$labelid} = " > ".$labelname;
+            $gui_labels->{'original_labels'}{$labelid} = " > ".$labelname;
+            push(@{$gui_labels->{'values'}}, $labelid);
+        }
     }
 
     $self->{'labels'} = $gui_labels;
@@ -448,7 +452,14 @@ sub init
     #Force draw of gui before loading labels and friends
     $self->{'cui'}->draw();
 
-    $self->add_background_job("labels","Updating label and friend list");
+    if($self->{'display_feeds'})
+    {
+        $self->add_background_job("subscription_list","Updating label and friend list");
+    }
+    else
+    {
+        $self->add_background_job("labels","Updating label and friend list");
+    }
 
     # Loo gui
     $self->log("Starting fetch friends") if ($self->{'debug'});
@@ -1209,7 +1220,14 @@ sub switch_labels_feeds()
     my ($self) = @_;
     $self->{'display_feeds'} = !$self->{'display_feeds'};
     $self->save_config();
-    $self->update_labels();
+    if($self->{'display_feeds'})
+    {
+        $self->add_background_job("subscription_list","Updating label and friend list");
+    }
+    else
+    {
+        $self->add_background_job("labels","Updating label and friend list");
+    }
 }
 
 sub close_content()

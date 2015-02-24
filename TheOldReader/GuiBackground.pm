@@ -67,7 +67,7 @@ sub unread_feeds()
     }
 }
 
-sub labels()
+sub subscription_list()
 {
     my ($self, @params) = @_;
     my $subscriptions = $self->{'reader'}->subscription_list();
@@ -75,21 +75,31 @@ sub labels()
     {
         my %labels = ();
         my @labels;
-        foreach my $ref(@{$subscriptions})
-        {
-            my @categories = @{$ref->{'categories'}};
-            foreach(@categories)
-            {
-                if(!$labels{${$_}{'id'}})
-                {
-                    $labels{${$_}{'id'}} = ${$_}{'label'};
-                    push(@labels, $_);
-                    $self->log("Push ".${$_}{'label'});
-                }
-            }
-        }
-        $self->{'cache'}->save_cache("labels", \@labels);
         $self->{'cache'}->save_cache("subscriptions", $subscriptions);
+    }
+    else
+    {
+        return $self->add_gui_job("error Cannot get labels.");
+    }
+    my $friends = $self->{'reader'}->friends();
+    if($friends)
+    {
+        $self->{'cache'}->save_cache("friends", $$friends{'friends'});
+    }
+    else
+    {
+        return $self->add_gui_job("error Cannot get friend list.");
+    }
+    $self->add_gui_job("update_labels");
+}
+
+sub labels()
+{
+    my ($self, @params) = @_;
+    my $labels = $self->{'reader'}->labels();
+    if($labels)
+    {
+        $self->{'cache'}->save_cache("labels", $labels->{'tags'});
     }
     else
     {
