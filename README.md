@@ -163,4 +163,7 @@ To display the name of the feeds that have unread items:
     ./reader.pl add_feed http://rss.lemonde.fr/c/205/f/3050/index.rss
     Added feed/54e4b255fea0e7ed4a0000a7: http://rss.lemonde.fr/c/205/f/3050/index.rss
 
+### Rename label
+
+    ./reader.pl rename_label My_tag New_Tag_Name
 

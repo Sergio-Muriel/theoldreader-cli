@@ -506,6 +506,18 @@ sub add_feed()
     return $self->req(POST($url, \%form), 'json_result') || '';
 }
 
+sub rename_label()
+{
+    my ($self,$tag, $newtag) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::RENAME_TAG;
+    my %form = ();
+    $form{'s'} = 'user/-/label/'.$tag;
+    $form{'dest'} = 'user/-/label/'.$newtag;
+
+    return $self->req(POST($url, \%form), 'raw_result') || '';
+}
+
 
 sub log()
 {
