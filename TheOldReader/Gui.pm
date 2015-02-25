@@ -916,6 +916,19 @@ sub left_container_rename()
         }
     }
 }
+sub left_container_add()
+{
+    my ($self) = @_;
+
+    $self->{'cui'}->leave_curses();
+    my $url = prompt("Enter RSS url to add: ");
+    $self->{'cui'}->reset_curses();
+    $self->{'cui'}->draw();
+    if($url)
+    {
+        $self->add_background_job("add_feed $url", "Adding feed $url");
+    }
+}
 
 sub right_container_onchange()
 {
@@ -1373,6 +1386,7 @@ sub bind_keys()
 
     $self->{'left_container'}->set_binding(sub { $self->left_container_onchange(); }, KEY_ENTER);
     $self->{'left_container'}->set_binding(sub { $self->left_container_rename(); }, "r");
+    $self->{'left_container'}->set_binding(sub { $self->left_container_add(); }, "a");
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");

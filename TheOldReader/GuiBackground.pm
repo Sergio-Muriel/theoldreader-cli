@@ -273,6 +273,21 @@ sub rename_label()
     $self->{'reader'}->rename_label($tag, $newtag);
     return $self->labels();
 }
+sub add_feed()
+{
+    my ($self, $url) = @_;
+    $self->log("Add url $url");
+
+    my $result = $self->{'reader'}->add_feed($url);
+    if($result and !$$result{'error'})
+    {
+        return $self->add_gui_job("update_status feed $url added");
+    }
+    else
+    {
+        return $self->add_gui_job("error Cannot add $url: ".$$result{'error'});
+    }
+}
 
 
 sub last()
