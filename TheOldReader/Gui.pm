@@ -346,7 +346,7 @@ sub display_labels()
 
     my $labels = $self->{'cache'}->load_cache('labels');
     my $friends = $self->{'cache'}->load_cache('friends');
-    if(!$labels)
+    if(!$labels and ref($labels) eq 'ARRAY')
     {
         return;
     }
