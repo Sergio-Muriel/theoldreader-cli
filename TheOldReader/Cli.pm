@@ -45,7 +45,7 @@ sub new
 sub help()
 {
     my ($self) = @_;
-    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | rename_label ]");
+    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | rename_label | add_comment ]");
     $self->output_string("");
 
     $self->output_string("Available commands:");
@@ -459,6 +459,16 @@ sub rename_label()
 
     my $result = $self->{'reader'}->rename_label($tag, $newtag);
     $self->output_string("Renaming label $tag to $newtag: result $result");
+}
+
+sub add_comment()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+    my $text = shift(@params);
+
+    my $result = $self->{'reader'}->add_comment($id, $text);
+    $self->output_string("Adding comment to $id: result $result");
 }
 
 sub log()

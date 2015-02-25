@@ -489,6 +489,16 @@ sub rename_label()
 
     return $self->req(POST($url, \%form), 'raw_result') || '';
 }
+sub add_comment()
+{
+    my ($self,$id, $text) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::ADD_COMMENT;
+    my %form = ();
+    $form{'i'} = $id;
+    $form{'comment'} = $text;
+    return $self->req(POST($url, \%form), 'raw_result') || '';
+}
 
 
 sub log()

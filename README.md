@@ -167,3 +167,7 @@ To display the name of the feeds that have unread items:
 
     ./reader.pl rename_label My_tag New_Tag_Name
 
+### Add comment
+
+    ./reader.pl add_comment tag:google.com,2005:reader/item/54eda62e315adec5b5007e2 "My text"
+
