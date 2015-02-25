@@ -699,6 +699,12 @@ Displaying item:
 n           Display next item
 p           Display previous item
 o           Open item in the browser
+s           Star item
+l           Like item
+b           Broadcast item (share!)
+r           Read item
+R           Unread item
+o           Open item in the browser
 
 ");
 }
@@ -979,6 +985,8 @@ sub display_item()
 {
     my ($self,$id) = @_;
     $self->{'item_displayed'}=1;
+
+    $self->{'helptext'}->text('?:help  r:mark read  R:unread l:like/unlike b:share  Enter:read summary  o:open in browser');
     if($id eq 'load_more' or $id eq "loading")
     {
         $self->update_list("noclear",$self->{'next_list'});
@@ -991,7 +999,7 @@ sub display_item()
     my $text="";
     if($item)
     {
-        $self->add_background_job("mark_read ".$id, "Mark as read");
+        $self->add_background_job("mark_read ".$id, "Marking as read");
         $self->update_loading_list($id);
 
         # Date
@@ -1274,11 +1282,11 @@ sub right_container_star()
     {
         if(!grep(/user\/-\/state\/com.google\/starred/,@{$feed->{'categories'}}))
         {
-            $self->add_background_job("mark_starred ".$feed->{'id'}, "Mark starred");
+            $self->add_background_job("mark_starred ".$feed->{'id'}, "Marking starred");
         }
         else
         {
-            $self->add_background_job("unmark_starred ".$feed->{'id'}, "Unmark Starred");
+            $self->add_background_job("unmark_starred ".$feed->{'id'}, "Unmarking Starred");
         }
     }
     else
@@ -1297,11 +1305,11 @@ sub right_container_like()
     {
         if(!grep(/user\/-\/state\/com.google\/like/,@{$feed->{'categories'}}))
         {
-            $self->add_background_job("mark_like ".$feed->{'id'}, "Mark liked");
+            $self->add_background_job("mark_like ".$feed->{'id'}, "Marking as liked");
         }
         else
         {
-            $self->add_background_job("unmark_like ".$feed->{'id'}, "Unmark liked");
+            $self->add_background_job("unmark_like ".$feed->{'id'}, "Unmarking as liked");
         }
     }
     else
@@ -1327,12 +1335,12 @@ sub right_container_broadcast()
             $self->{'cui'}->draw();
             if($text)
             {
-                $self->add_background_job("mark_broadcast ".$feed->{'id'}." $text", "Mark liked");
+                $self->add_background_job("mark_broadcast ".$feed->{'id'}." $text", "Marking as liked");
             }
         }
         else
         {
-            $self->add_background_job("unmark_broadcast ".$feed->{'id'}, "Unmark liked");
+            $self->add_background_job("unmark_broadcast ".$feed->{'id'}, "Unmarking as liked");
         }
     }
     else
@@ -1346,7 +1354,7 @@ sub right_container_read()
     my ($self) = @_;
     my $id = $self->{'right_container'}->get_active_value();
 
-    $self->add_background_job("mark_read ".$id, "Mark as read");
+    $self->add_background_job("mark_read ".$id, "Marking as read");
     $self->update_loading_list($id);
     $self->goto_next();
 }
@@ -1364,7 +1372,7 @@ sub right_container_unread()
     my ($self) = @_;
     my $id = $self->{'right_container'}->get_active_value();
 
-    $self->add_background_job("mark_unread ".$id, "Unmark as read");
+    $self->add_background_job("mark_unread ".$id, "Unmarking as read");
     $self->update_loading_list($id);
 }
 
@@ -1400,7 +1408,13 @@ sub bind_keys()
     $self->{'content_container'}->set_binding(sub { $self->close_content(); }, "q");
     $self->{'content_container'}->set_binding(sub { $self->next_item(); }, "n");
     $self->{'content_container'}->set_binding(sub { $self->prev_item(); }, "p");
+    $self->{'content_container'}->set_binding(sub { $self->right_container_star(); }, "s");
+    $self->{'content_container'}->set_binding(sub { $self->right_container_like(); }, "l");
+    $self->{'content_container'}->set_binding(sub { $self->right_container_broadcast(); }, "b");
+    $self->{'content_container'}->set_binding(sub { $self->right_container_read(); }, "r");
+    $self->{'content_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
     $self->{'content_container'}->set_binding(sub { $self->open_item(); }, "o");
+
 
 
     $self->{'help_container'}->set_binding(sub { $self->close_help(); }, "q");

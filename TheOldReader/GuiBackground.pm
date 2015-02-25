@@ -133,6 +133,7 @@ sub mark_starred()
     }
     $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
     $self->add_gui_job("last_status $id");
+    $self->add_gui_job("update_status Marked as starred");
 }
 
 sub unmark_starred()
@@ -150,6 +151,7 @@ sub unmark_starred()
     }
     $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
     $self->add_gui_job("last_status $id");
+    $self->add_gui_job("update_status Unmarked as starred");
 }
 
 sub mark_like()
@@ -167,6 +169,7 @@ sub mark_like()
     }
     $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
     $self->add_gui_job("last_status $id");
+    $self->add_gui_job("update_status Marked as liked");
 }
 
 sub unmark_like()
@@ -184,6 +187,7 @@ sub unmark_like()
     }
     $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
     $self->add_gui_job("last_status $id");
+    $self->add_gui_job("update_status Unmarked as liked");
 }
 
 sub mark_broadcast()
@@ -202,6 +206,7 @@ sub mark_broadcast()
     }
     $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
     $self->add_gui_job("last_status $id");
+    $self->add_gui_job("update_status Marked as shared");
 }
 
 sub unmark_broadcast()
@@ -218,6 +223,7 @@ sub unmark_broadcast()
     }
     $id=~ s/tag\:google\.com\,2005\:reader\/item\///g;
     $self->add_gui_job("last_status $id");
+    $self->add_gui_job("update_status Unmarked as shared");
 }
 
 sub mark_read()
@@ -234,6 +240,7 @@ sub mark_read()
         }
     }
     $self->add_gui_job("last_status $id");
+    $self->add_gui_job("update_status Marked as read");
 }
 sub mark_unread()
 {
@@ -249,6 +256,7 @@ sub mark_unread()
         }
     }
     $self->add_gui_job("last_status $id");
+    $self->add_gui_job("update_status Unmarked as read");
 }
 
 sub unfollow()
