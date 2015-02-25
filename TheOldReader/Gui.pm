@@ -3,6 +3,7 @@ use Exporter;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use Text::Iconv;
 use utf8;
+use IO::Prompt;
 
 $VERSION     = 1.00;
 @ISA         = qw(Exporter TheOldReader::Config);
@@ -22,7 +23,6 @@ use TheOldReader::Cache;
 use threads;
 use Curses qw(KEY_ENTER);
 use Curses::UI::POE;
-use Curses::Forms::Dialog::Input;
 use Data::Dumper;
 
 # Create new instance
@@ -237,7 +237,7 @@ sub update_count()
     $self->{'cui'}->draw();
     if($update)
     {
-        $self->update_status("Count updated");
+        #$self->update_status("Count updated");
     }
 }
 
@@ -891,6 +891,13 @@ sub left_container_onchange()
     $self->clear_right();
     $self->{'right_container'}->focus();
 }
+
+sub output_string()
+{
+    my ($self, $msg) = @_;
+    print "$msg\n";
+}
+
 sub left_container_rename()
 {
     my ($self) = @_;
@@ -898,11 +905,14 @@ sub left_container_rename()
 
     if($id =~ /label/)
     {
-        my ($rv, $text) = input('Change label name of '.$id, BTN_OK | BTN_CANCEL, 'New name', 20, qw(white black yellow));
-        if(!$rv)
+        $self->{'cui'}->leave_curses();
+        my ($rawid) =  ($id =~ /label\/(.*)$/);
+        my $newid = prompt("Enter new name for $rawid: ");
+        $self->{'cui'}->reset_curses();
+        $self->{'cui'}->draw();
+        if($newid)
         {
-            my ($rawid) =  ($id =~ /label\/(.*)$/);
-            $self->add_background_job("rename_label __".$rawid."__ __".$text."__", "Rename label $id to $text");
+            $self->add_background_job("rename_label __".$rawid."__ __".$newid."__", "Rename label $rawid to $newid");
         }
     }
 }
@@ -1297,8 +1307,12 @@ sub right_container_broadcast()
     {
         if(!grep(/user\/-\/state\/com.google\/broadcast/,@{$feed->{'categories'}}))
         {
-            my ($rv, $text) = input('Input Parameter!', BTN_OK | BTN_CANCEL, 'Search String', 20, qw(white blue yellow));
-            if(!$rv)
+            $self->{'cui'}->leave_curses();
+            my ($rawid) =  ($id =~ /label\/(.*)$/);
+            my $text = prompt("Enter message to share: ");
+            $self->{'cui'}->reset_curses();
+            $self->{'cui'}->draw();
+            if($text)
             {
                 $self->add_background_job("mark_broadcast ".$feed->{'id'}." $text", "Mark liked");
             }
