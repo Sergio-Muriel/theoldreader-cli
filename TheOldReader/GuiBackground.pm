@@ -283,13 +283,17 @@ sub rename_label()
 }
 sub add_feed()
 {
-    my ($self, $url) = @_;
+    my ($self, $params) = @_;
+    my ($url,$label) = split(/\s+/,$params);
     $self->log("Add url $url");
 
     my $result = $self->{'reader'}->add_feed($url);
     if($result and !$$result{'error'})
     {
+        my $id = $$result{'streamId'};
+        $self->{'reader'}->edit_feed($id,$label);
         return $self->add_gui_job("update_status feed $url added");
+        return $self->add_gui_job("update_labels");
     }
     else
     {

@@ -934,12 +934,17 @@ sub left_container_add()
 
     $self->{'cui'}->leave_curses();
     my $url = prompt("Enter RSS url to add: ");
+    if($url =~ /^http/)
+    {
+        my $label = prompt("Enter a category for the feed: ");
+        $self->add_background_job("add_feed $url $label", "Adding feed $url");
+    }
+    else
+    {
+        $self->update_status("Cancel add feed.");
+    }
     $self->{'cui'}->reset_curses();
     $self->{'cui'}->draw();
-    if($url)
-    {
-        $self->add_background_job("add_feed $url", "Adding feed $url");
-    }
 }
 
 sub right_container_onchange()
