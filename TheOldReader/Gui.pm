@@ -897,6 +897,12 @@ sub left_container_onchange()
     $self->clear_right();
     $self->{'right_container'}->focus();
 }
+sub left_container_load()
+{
+    my ($self) = @_;
+    $self->left_container_onchange();
+    $self->update_list("clear");
+}
 
 sub output_string()
 {
@@ -1392,7 +1398,7 @@ sub bind_keys()
     $self->{'container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
     $self->{'container'}->set_binding($exit_ref, "q");
 
-    $self->{'left_container'}->set_binding(sub { $self->left_container_onchange(); }, KEY_ENTER);
+    $self->{'left_container'}->set_binding(sub { $self->left_container_load(); }, KEY_ENTER);
     $self->{'left_container'}->set_binding(sub { $self->left_container_rename(); }, "r");
     $self->{'left_container'}->set_binding(sub { $self->left_container_add(); }, "a");
 
