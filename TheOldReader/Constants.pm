@@ -30,6 +30,7 @@ use constant EDIT_FEED => '/reader/api/0/subscription/edit';
 use constant RENAME_TAG => '/reader/api/0/rename-tag';
 use constant LABELS => '/reader/api/0/tag/list?output=json';
 use constant ADD_COMMENT => '/reader/api/0/comment/edit';
+use constant FEED_EDIT => '/reader/api/0/subscription/edit';
 
 
 use constant STATE_ALL => 'user/-/state/com.google/reading-list';

@@ -470,6 +470,15 @@ sub add_comment()
     my $result = $self->{'reader'}->add_comment($id, $text);
     $self->output_string("Adding comment to $id: result $result");
 }
+sub edit_feed()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+    my $label = shift(@params);
+
+    my $result = $self->{'reader'}->edit_feed($id, $label);
+    $self->output_string("Edit feed $id. Result: $result");
+}
 
 sub log()
 {

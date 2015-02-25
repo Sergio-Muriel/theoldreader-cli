@@ -499,6 +499,24 @@ sub add_comment()
     $form{'comment'} = $text;
     return $self->req(POST($url, \%form), 'raw_result') || '';
 }
+sub edit_feed()
+{
+    my ($self,$id, $label) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::FEED_EDIT;
+    my %form = ();
+    $form{'ac'} = 'edit';
+    $form{'s'} = $id;
+    if(!$label || $label =~ /^\s*$/)
+    {
+        $form{'r'} = 'none';
+    }
+    else
+    {
+        $form{'a'} = 'user/-/label/'.$label;
+    }
+    return $self->req(POST($url, \%form), 'raw_result') || '';
+}
 
 
 sub log()
