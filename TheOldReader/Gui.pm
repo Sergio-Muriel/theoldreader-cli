@@ -43,6 +43,11 @@ sub new
     $self->{'debug'} = $params{'debug'};
 
     $self->read_config();
+
+    my ($dirpath) = (__FILE__ =~ /(.*\/)[^\/]+?$/);
+    bindtextdomain("messages", $dirpath."/locale");
+    textdomain("messages");
+
     $self->{'cache'} = TheOldReader::Cache->new();
     $self->{'share'} = $params{'share'};
 
@@ -63,7 +68,7 @@ sub error()
 sub call_count
 {
     my ($self, @params) = @_;
-    $self->add_background_job("unread_feeds", "Updating count...");
+    $self->add_background_job("unread_feeds", gettext("Updating count..."));
     $self->update_list("noclear");
 }
 
@@ -80,7 +85,7 @@ sub update_loading_list()
     my $broadcast="@";
     if(!$feed)
     {
-        $self->log("cannot find feed $id");
+        $self->error(gettext("Cannot find feed")." $id");
         return;
     }
 
@@ -144,7 +149,7 @@ sub last_status()
     my $broadcast;
     if(!$feed)
     {
-        $self->log("cannot find feed $id");
+        $self->log(gettext("Cannot find feed")." $id");
         return;
     }
 
@@ -206,7 +211,7 @@ sub update_count()
     if(!$cache_unread_feeds)
     {
         $self->call_count();
-        $self->error("No cache file unread_feeds. Requesting count from server.");
+        $self->error(gettext("No cache file unread_feeds. Requesting count from server."));
         return;
     }
 
@@ -237,7 +242,7 @@ sub update_count()
     $self->{'counts'} = \%counts;
     $self->{'cui'}->draw();
 
-    $self->update_status("Count updated");
+    $self->update_status(gettext("Count updated"));
 }
 
 sub update_labels()
@@ -278,23 +283,23 @@ sub display_feeds()
     my $gui_labels = {};
     $gui_labels = {
         'labels' => {
-            TheOldReader::Constants::STATE_ALL => 'All items',
-            TheOldReader::Constants::STATE_STARRED=> 'Starred',
-            TheOldReader::Constants::STATE_LIKE=> 'Liked',
-            TheOldReader::Constants::STATE_BROADCAST=> 'Shared',
-            TheOldReader::Constants::STATE_READ=> 'Read',
+            TheOldReader::Constants::STATE_ALL => gettext('All items'),
+            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
+            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
+            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared'),
+            TheOldReader::Constants::STATE_READ=> gettext('Read'),
         },
         'display_labels' => {
-            TheOldReader::Constants::STATE_STARRED=> 'Starred',
-            TheOldReader::Constants::STATE_LIKE=> 'Liked',
-            TheOldReader::Constants::STATE_BROADCAST=> 'Shared'
+            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
+            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
+            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared')
         },
         'original_labels' => {
-            TheOldReader::Constants::STATE_ALL=> 'All items',
-            TheOldReader::Constants::STATE_STARRED=> 'Starred',
-            TheOldReader::Constants::STATE_LIKE=> 'Liked',
-            TheOldReader::Constants::STATE_BROADCAST=> 'Shared',
-            TheOldReader::Constants::STATE_READ=> 'Read',
+            TheOldReader::Constants::STATE_ALL=> gettext('All items'),
+            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
+            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
+            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared'),
+            TheOldReader::Constants::STATE_READ=> gettext('Read'),
         },
         'values' => [
             TheOldReader::Constants::STATE_ALL,
@@ -335,7 +340,7 @@ sub display_feeds()
         $self->{'left_container'}->set_selection((0));
     }
 
-    $self->update_status("Labels updated.");
+    $self->update_status(gettext("Labels updated"));
     $self->{'cui'}->draw(1);
 }
 
@@ -357,23 +362,23 @@ sub display_labels()
     my $gui_labels = {};
     $gui_labels = {
         'labels' => {
-            TheOldReader::Constants::STATE_ALL => 'All items',
-            TheOldReader::Constants::STATE_STARRED=> 'Starred',
-            TheOldReader::Constants::STATE_LIKE=> 'Liked',
-            TheOldReader::Constants::STATE_BROADCAST=> 'Shared',
-            TheOldReader::Constants::STATE_READ=> 'Read',
+            TheOldReader::Constants::STATE_ALL => gettext('All items'),
+            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
+            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
+            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared'),
+            TheOldReader::Constants::STATE_READ=> gettext('Read'),
         },
         'display_labels' => {
-            TheOldReader::Constants::STATE_STARRED=> 'Starred',
-            TheOldReader::Constants::STATE_LIKE=> 'Liked',
-            TheOldReader::Constants::STATE_BROADCAST=> 'Shared'
+            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
+            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
+            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared')
         },
         'original_labels' => {
-            TheOldReader::Constants::STATE_ALL=> 'All items',
-            TheOldReader::Constants::STATE_STARRED=> 'Starred',
-            TheOldReader::Constants::STATE_LIKE=> 'Liked',
-            TheOldReader::Constants::STATE_BROADCAST=> 'Shared',
-            TheOldReader::Constants::STATE_READ=> 'Read',
+            TheOldReader::Constants::STATE_ALL=> gettext('All items'),
+            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
+            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
+            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared'),
+            TheOldReader::Constants::STATE_READ=> gettext('Read'),
         },
         'values' => [
             TheOldReader::Constants::STATE_ALL,
@@ -388,9 +393,9 @@ sub display_labels()
     {
         $self->log("Add friends ");
         my $key = TheOldReader::Constants::STATE_FRIENDS;
-        $gui_labels->{'display_labels'}{$key} = ("Friends");
-        $gui_labels->{'labels'}{$key} = ("Friends");
-        $gui_labels->{'original_labels'}{$key} = ("Friends");
+        $gui_labels->{'display_labels'}{$key} = (gettext("Friends"));
+        $gui_labels->{'labels'}{$key} = (gettext("Friends"));
+        $gui_labels->{'original_labels'}{$key} = (gettext("Friends"));
         push(@{$gui_labels->{'values'}}, $key);
     }
 
@@ -418,7 +423,7 @@ sub display_labels()
         $self->{'left_container'}->set_selection((0));
     }
 
-    $self->update_status("Feeds list updated.");
+    $self->update_status(gettext("Feeds list updated."));
     $self->{'cui'}->draw(1);
 }
 
@@ -453,11 +458,11 @@ sub init
 
     if($self->{'display_feeds'})
     {
-        $self->add_background_job("subscription_list","Updating label and friend list");
+        $self->add_background_job("subscription_list",gettext("Updating label and friend list"));
     }
     else
     {
-        $self->add_background_job("labels","Updating label and friend list");
+        $self->add_background_job("labels",gettext("Updating label and friend list"));
     }
 
     # Loo gui
@@ -524,7 +529,7 @@ sub build_gui()
         'Label',
         -bold => 1,
         -bg => 'black',
-        -text => 'The Old Reader - GUI'
+        -text => gettext('The Old Reader - GUI')
     );
 
 
@@ -542,7 +547,7 @@ sub build_gui()
         -width => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -bfg  => 'white',
         -values => [ 'load_more' ],
-        -labels => { 'load_more' => ' Loading...'},
+        -labels => { 'load_more' => ' '.gettext('Loading...')},
         #-onchange => sub { $self->left_container_onchange(); },
         -onfocus => sub { $self->left_container_focus(); }
     );
@@ -554,7 +559,7 @@ sub build_gui()
         -x => TheOldReader::Constants::GUI_CATEGORIES_WIDTH,
         -y => 0,
         -values => [ 'load_more' ],
-        -labels => { 'load_more' => ' Loading ...' },
+        -labels => { 'load_more' => ' '.gettext('Loading...') },
         -bg => 'blue',
         -fg => 'white',
         -onselchange => sub { $self->right_container_onselchange(); },
@@ -598,7 +603,7 @@ sub build_gui()
         'Label',
         -bold => 1,
         -width => $ENV{'COLS'},
-        -text => ' Loading...'
+        -text => gettext(' Loading...')
     );
 
     $self->{'right_container'}->focus();
@@ -666,44 +671,44 @@ sub build_help()
         -border => 0,
         -x => 0
     );
-    $self->{'help_text'}->text("General key bindings:
-?           Display Help
-Ctrl+C      Exit
-Ctrl+Q      Exit
+    $self->{'help_text'}->text(gettext("General key bindings:")."
+?           ".gettext("Display Help")."
+Ctrl+C      ".gettext("Exit")."
+Ctrl+Q      ".gettext("Exit")."
 
-Help window:
-q           Exit this help window
+".gettext("Help window:")."
+q           ".gettext("Exit this help window")."
 
-Main window:
-q           Exit
-u           Update selected label
-x           Switch display only unread or all items
-l           Switch display labels or feeds on the left column
+".gettext("Main window:")."
+q           ".gettext("Exit")."
+u           ".gettext("Update selected label")."
+x           ".gettext("Switch display only unread or all items")."
+l           ".gettext("Switch display labels or feeds on the left column")."
 
-Label list:
-r           rename label
-Enter       Display selected label items
+".gettext("Label list:")."
+r           ".gettext("rename label")."
+Enter       ".gettext("Display selected label items")."
 
-Feed list:
-Enter       Display item fullscreen
-s           Star item
-l           Like item
-b           Broadcast item (share!)
-r           Read item
-R           Unread item
-o           Open item in the browser
-O           Open ALL unread items in the browser
+".gettext("Feed list:")."
+Enter       ".gettext("Display item fullscreen")."
+s           ".gettext("Star item")."
+l           ".gettext("Like item")."
+b           ".gettext("Share item")."
+r           ".gettext("Read item")."
+R           ".gettext("Unread item")."
+o           ".gettext("Open item in the browser")."
+O           ".gettext("Open ALL unread items in the browser")."
 
-Displaying item:
-n           Display next item
-p           Display previous item
-o           Open item in the browser
-s           Star item
-l           Like item
-b           Broadcast item (share!)
-r           Read item
-R           Unread item
-o           Open item in the browser
+".gettext("Displaying item:")."
+n           ".gettext("Display next item")."
+p           ".gettext("Display previous item")."
+o           ".gettext("Open item in the browser")."
+s           ".gettext("Star item")."
+l           ".gettext("Like item")."
+b           ".gettext("Broadcast item (share!)")."
+r           ".gettext("Read item")."
+R           ".gettext("Unread item")."
+o           ".gettext("Open item in the browser")."
 
 ");
 }
@@ -746,7 +751,7 @@ sub update_list()
         # Clear list
         my $gui_list = {
             'labels' => {
-                'load_more' => ' Loading ...',
+                'load_more' => ' '.gettext('Loading...'),
             },
             'values' => [ 'load_more' ]
         };
@@ -763,7 +768,7 @@ sub update_list()
 
     $self->{'loading_feed_list'} = 1;
 
-    $self->add_background_job("last $clear $id ".($self->{'only_unread'} || "0")." ".$next_list, "Fetching last items from $id");
+    $self->add_background_job("last $clear $id ".($self->{'only_unread'} || "0")." ".$next_list, gettext("Fetching last items")." ($id)");
 }
 
 sub display_list()
@@ -774,11 +779,11 @@ sub display_list()
     # Mark as loaded to allow next list item to load
 
     my ($clear, $id) = split(/\s+/, $params);
-    $self->update_status("Received new list for $id");
+    $self->update_status(gettext("Received new list")." ($id)");
 
     my $gui_list = {
         'labels' => {
-            'load_more' => ' Loading ...'
+            'load_more' => ' '.gettext('Loading...')
         },
         'values' => []
     };
@@ -796,11 +801,11 @@ sub display_list()
     my $last = $self->{'cache'}->load_cache("last ".$id);
     if(!$last)
     {
-        $gui_list->{'labels'}{'load_more'} = '    No items found (error)';
+        $gui_list->{'labels'}{'load_more'} = '    '.gettext("No items found").' (error)';
         return;
     }
     $self->{'next_list'} = $$last{'continuation'};
-    $gui_list->{'labels'}{'load_more'} = '    [ Select to load more ]';
+    $gui_list->{'labels'}{'load_more'} = '    [ '.gettext('Select to load more').' ]';
 
     my @hash_ids = @{$$last{'itemRefs'}};
     my @new_values= ();
@@ -819,11 +824,11 @@ sub display_list()
     }
     elsif(@{$gui_list->{'values'}}==0)
     {
-        $gui_list->{'labels'}{'load_more'} = ' No items found';
+        $gui_list->{'labels'}{'load_more'} = ' '.gettext('No items found');
     }
     if(!$self->{'next_list'})
     {
-        $gui_list->{'labels'}{'load_more'} = '    [ Select to update ]';
+        $gui_list->{'labels'}{'load_more'} = '    [ '.gettext('Select to update').' ]';
     }
 
     if($clear ne 'clear')
@@ -841,7 +846,7 @@ sub display_list()
 
     $self->{'right_container'}->labels($gui_list->{'labels'});
     $self->{'cui'}->draw(1);
-    $self->update_status("Loaded new list for $id");
+    $self->update_status(gettext("Loaded new list")." ($id)");
 }
 
 sub left_container_focus()
@@ -849,7 +854,7 @@ sub left_container_focus()
     my ($self) = @_;
     my $id = $self->{'left_container'}->get_active_value();
 
-    my $text = "?:help r:rename label  l:switch display labels or feeds  u:update";
+    my $text = "?:".gettext("Help")." r:".gettext("Rename label")."  l:".gettext("Switch display labels or feeds")."  u:".gettext("Update");
     $self->{'helptext'}->text($text);
 }
 
@@ -864,12 +869,12 @@ sub right_container_onselchange()
         if($self->{'next_list'})
         {
             my $gui_list = $self->{'list_data'};
-            $gui_list->{'labels'}{'load_more'} = '    [ Loading ...]';
+            $gui_list->{'labels'}{'load_more'} = '    [ '.gettext('Loading...').' ]';
             $self->update_list("noclear",$self->{'next_list'});
         }
         else
         {
-            $self->update_status("No more items to load. Press 'u' to refresh.");
+            $self->update_status(gettext("No more items to load. Press 'u' to refresh."));
         }
     }
 }
@@ -880,7 +885,7 @@ sub clear_right()
     # Clear list
     my $gui_list = {
         'labels' => {
-            'load_more' => ' Loading ...',
+            'load_more' => ' '.gettext('Loading...'),
         },
         'values' => [ 'load_more' ]
     };
@@ -918,7 +923,7 @@ sub left_container_rename()
     {
         $self->{'cui'}->leave_curses();
         my ($rawid) =  ($id =~ /label\/(.*)$/);
-        my $newid = prompt("Enter new name for $rawid: ");
+        my $newid = prompt(gettext("Enter new name"));
         $self->{'cui'}->reset_curses();
         $self->{'cui'}->draw();
         if($newid)
@@ -932,15 +937,15 @@ sub left_container_add()
     my ($self) = @_;
 
     $self->{'cui'}->leave_curses();
-    my $url = prompt("Enter RSS url to add: ");
+    my $url = prompt(gettext("Enter RSS url to add").": ");
     if($url =~ /^http/)
     {
-        my $label = prompt("Enter a category for the feed: ");
-        $self->add_background_job("add_feed $url $label", "Adding feed $url");
+        my $label = prompt(gettext("Enter a category for the feed").": ");
+        $self->add_background_job("add_feed $url $label", gettext("Adding feed")." ($url)");
     }
     else
     {
-        $self->update_status("Cancel add feed.");
+        $self->update_status(gettext("Cancel add feed"));
     }
     $self->{'cui'}->reset_curses();
     $self->{'cui'}->draw();
@@ -971,7 +976,7 @@ sub right_container_onchange()
 sub right_container_focus()
 {
     my ($self) = @_;
-    $self->{'helptext'}->text('?:help  x:Display only unread/All  u:Update  s:star/unstar  r:mark read  R:unread l:like/unlike b:share  Enter:read summary  o:open in browser');
+    $self->{'helptext'}->text("?:".gettext("Help")."  x:".gettext("Switch display only unread or all items")."  u:".gettext("Update")."  s:".gettext("Star item")." r:".gettext("Mark an item as read")." R:".gettext("Unread item")." l:".gettext("Like item")." b:".gettext("Share item")."  Enter:".gettext("Display item fullscreen")." o:".gettext("Open item in the browser"));
 }
 
 
@@ -996,7 +1001,7 @@ sub display_item()
     my ($self,$id) = @_;
     $self->{'item_displayed'}=1;
 
-    $self->{'helptext'}->text('?:help  r:mark read  R:unread l:like/unlike b:share  Enter:read summary  o:open in browser');
+    $self->{'helptext'}->text("?:".gettext("Help")." r:".gettext("Mark as read an item")." R:".gettext("Unread item")." l:".gettext("Like item")." b:".gettext("Share item")."  Enter:".gettext("Display item fullscreen")." o:".gettext("Open item in the browser"));
     if($id eq 'load_more' or $id eq "loading")
     {
         $self->update_list("noclear",$self->{'next_list'});
@@ -1009,7 +1014,7 @@ sub display_item()
     my $text="";
     if($item)
     {
-        $self->add_background_job("mark_read ".$id, "Marking as read");
+        $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
         $self->update_loading_list($id);
 
         # Date
@@ -1037,7 +1042,7 @@ sub display_item()
         }
         if($more_likes)
         {
-            push(@likes, "... (".$item->{'likingUsersCount'}." users)");
+            push(@likes, "... (".$item->{'likingUsersCount'}." ".gettext("users").")");
         }
 
         # Content
@@ -1096,13 +1101,13 @@ sub display_item()
         # Get url
         my @canonical = @{$item->{'canonical'}};
 
-        $intro ="Feed:\t".$$item{'origin'}{'title'}."\n";
-        $intro.="Title:\t".$$item{'title'}."\n";
-        $intro.="Author:\t".$$item{'author'}."\n";
-        $intro.="Date:\t".$dt."\n";
-        $intro.="Labels:\t".join(", ",@labels)."\n";
-        $intro.="Likes:\t".join(", ",@likes)."\n";
-        $intro.="Url:\t".$canonical[0]{'href'}."\n";
+        $intro =gettext("Feed").":\t".$$item{'origin'}{'title'}."\n";
+        $intro.=gettext("Title").":\t".$$item{'title'}."\n";
+        $intro.=gettext("Author").":\t".$$item{'author'}."\n";
+        $intro.=gettext("Date").":\t".$dt."\n";
+        $intro.=gettext("Labels").":\t".join(", ",@labels)."\n";
+        $intro.=gettext("Likes").":\t".join(", ",@likes)."\n";
+        $intro.=gettext("Url").":\t".$canonical[0]{'href'}."\n";
 
 
         $text=$content."\n";
@@ -1110,7 +1115,7 @@ sub display_item()
         if(@urls)
         {
             $num=0;
-            $text.="Links:\n";
+            $text.=gettext("Links").":\n";
             foreach(@urls)
             {
                 $num++;
@@ -1120,7 +1125,7 @@ sub display_item()
         if(@images)
         {
             $num=0;
-            $text.="Images\n";
+            $text.=gettext("Images")."\n";
             foreach(@images)
             {
                 $num++;
@@ -1131,7 +1136,7 @@ sub display_item()
     }
     else
     {
-        $text="Error getting feed information $id";
+        $text=gettext("Error getting feed information")." ($id)";
     }
 
     utf8::decode($text);
@@ -1263,11 +1268,11 @@ sub switch_labels_feeds()
     $self->save_config();
     if($self->{'display_feeds'})
     {
-        $self->add_background_job("subscription_list","Updating label and friend list");
+        $self->add_background_job("subscription_list",gettext("Updating label and friend list"));
     }
     else
     {
-        $self->add_background_job("labels","Updating label and friend list");
+        $self->add_background_job("labels",gettext("Updating label and friend list"));
     }
 }
 
@@ -1292,11 +1297,11 @@ sub right_container_star()
     {
         if(!grep(/user\/-\/state\/com.google\/starred/,@{$feed->{'categories'}}))
         {
-            $self->add_background_job("mark_starred ".$feed->{'id'}, "Marking starred");
+            $self->add_background_job("mark_starred ".$feed->{'id'}, gettext("Marking starred"));
         }
         else
         {
-            $self->add_background_job("unmark_starred ".$feed->{'id'}, "Unmarking Starred");
+            $self->add_background_job("unmark_starred ".$feed->{'id'}, gettext("Unmarking Starred"));
         }
     }
     else
@@ -1315,11 +1320,11 @@ sub right_container_like()
     {
         if(!grep(/user\/-\/state\/com.google\/like/,@{$feed->{'categories'}}))
         {
-            $self->add_background_job("mark_like ".$feed->{'id'}, "Marking as liked");
+            $self->add_background_job("mark_like ".$feed->{'id'}, gettext("Marking as liked"));
         }
         else
         {
-            $self->add_background_job("unmark_like ".$feed->{'id'}, "Unmarking as liked");
+            $self->add_background_job("unmark_like ".$feed->{'id'}, gettext("Unmarking as liked"));
         }
     }
     else
@@ -1340,17 +1345,17 @@ sub right_container_broadcast()
         {
             $self->{'cui'}->leave_curses();
             my ($rawid) =  ($id =~ /label\/(.*)$/);
-            my $text = prompt("Enter message to share: ");
+            my $text = prompt(gettext("Enter message to share").": ");
             $self->{'cui'}->reset_curses();
             $self->{'cui'}->draw();
             if($text)
             {
-                $self->add_background_job("mark_broadcast ".$feed->{'id'}." $text", "Marking as liked");
+                $self->add_background_job("mark_broadcast ".$feed->{'id'}." $text", gettext("Marking as shared"));
             }
         }
         else
         {
-            $self->add_background_job("unmark_broadcast ".$feed->{'id'}, "Unmarking as liked");
+            $self->add_background_job("unmark_broadcast ".$feed->{'id'}, gettext("Unmarking as shared"));
         }
     }
     else
@@ -1364,7 +1369,7 @@ sub right_container_read()
     my ($self) = @_;
     my $id = $self->{'right_container'}->get_active_value();
 
-    $self->add_background_job("mark_read ".$id, "Marking as read");
+    $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
     $self->update_loading_list($id);
     $self->goto_next();
 }
@@ -1382,7 +1387,7 @@ sub right_container_unread()
     my ($self) = @_;
     my $id = $self->{'right_container'}->get_active_value();
 
-    $self->add_background_job("mark_unread ".$id, "Unmarking as read");
+    $self->add_background_job("mark_unread ".$id, gettext("Unmarking as read"));
     $self->update_loading_list($id);
 }
 
@@ -1444,7 +1449,7 @@ sub quit()
 sub exit_dialog()
 {
     my ($self, @params) = @_;
-    $self->add_background_job("quit","Quit request to backgroud jobs");
+    $self->add_background_job("quit",gettext("Quit request to backgroud jobs"));
 }
 
 sub output_error()
