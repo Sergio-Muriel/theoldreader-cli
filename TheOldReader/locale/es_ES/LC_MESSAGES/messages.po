@@ -1,0 +1,45 @@
+msgid "Available commands:"
+msgstr "Comandos disponibles"
+
+msgid "Creating configuration:"
+msgstr "Comandos disponibles"
+
+msgid "Email"
+msgstr "Correo electrónico"
+
+msgid "Password"
+msgstr "Contraseña"
+
+msgid "Error: invalid username / password."
+msgstr "Error: Email o contraseña incorrectos"
+
+msgid "Default browser"
+msgstr "Navegador internet por defecto"
+
+msgid "Configuration file created"
+msgstr "Fichero de configuración creado."
+
+msgid "Prompt for username and password to get auth token"
+msgstr ""
+
+msgid "Display unread items (of the feed or all)"
+msgstr "Muestra elementos no leidos (del parámetro, o de todo)"
+
+msgid "Display last items (of the feed, or all)"
+msgstr "Muetra los últimos elementos (del parámetros, o todo)"
+
+msgid "Display labels"
+msgstr "Muestra las etiquetas"
+
+msgid "Mark as read an item"
+msgstr "Marca el elemento como leido"
+
+msgid "List of subscribed urls"
+msgstr "Lista de urls suscritas"
+
+msgid "List feed names with unread items"
+msgstr "Lista de urls con elementos sin leer"
+
+msgid "Display unread items when they arrive, until CTRl+C is pressed"
+msgstr "Muestra elementos no leidos mientras llegan, hasta que se presiona CTRL+C"
+

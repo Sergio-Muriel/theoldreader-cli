@@ -4,6 +4,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use Text::Iconv;
 use utf8;
 use IO::Prompt;
+use Locale::gettext;
 
 $VERSION     = 1.00;
 @ISA         = qw(Exporter TheOldReader::Config);

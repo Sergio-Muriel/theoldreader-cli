@@ -4,6 +4,7 @@ use Exporter;
 use Storable;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use IO::Prompt;
+use Locale::gettext;
 
 $VERSION     = 1.00;
 @ISA         = qw(Exporter TheOldReader::Config);
@@ -16,6 +17,7 @@ use TheOldReader::Api;
 use TheOldReader::Cache;
 use Carp qw(croak);
 use Data::Dumper;
+use POSIX;
 
 sub new
 {
@@ -33,6 +35,10 @@ sub new
 
     $self->read_config();
 
+    my ($dirpath) = (__FILE__ =~ /(.*\/)[^\/]+?$/);
+    bindtextdomain("messages", $dirpath."/locale");
+    textdomain("messages");
+
     $self->{'cache'} = TheOldReader::Cache->new();
 
     $self->{'reader'} = TheOldReader::Api->new(
@@ -48,16 +54,16 @@ sub help()
     $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | rename_label | add_comment ]");
     $self->output_string("");
 
-    $self->output_string("Available commands:");
+    $self->output_string(gettext("Available commands:"));
     my @list= (
-        "create_config:\tPrompt for username and password to get auth token",
-        "unread [feed_id]:\tDisplay unread items (of the feed or all)",
-        "last [feed_id]:\tDisplay last items (of the feed, or all)",
-        "labels:\tDisplay labels",
-        "mark_read [item/feed/label]:\tMark as read an item",
-        "subscription_list:\tList of subscribed urls",
-        "unread_feeds\tList feed names with unread items",
-        "watch\tDisplay unread items when they arrive, until CTRl+C is pressed",
+        "create_config: ".gettext("Prompt for username and password to get auth token"),
+        "unread [feed_id]: ".gettext("Display unread items (of the feed or all)"),
+        "last [feed_id]: ".gettext("Display last items (of the feed, or all)"),
+        "labels: ".gettext("Display labels"),
+        "mark_read [item/feed/label]: ".gettext("Mark as read an item"),
+        "subscription_list: ".gettext("List of subscribed urls"),
+        "unread_feeds ".gettext("List feed names with unread items"),
+        "watch ".gettext("Display unread items when they arrive, until CTRl+C is pressed"),
     );
     $self->output_list(@list);
     $self->output_string("");
@@ -67,10 +73,10 @@ sub create_config()
 {
     my ($self) = @_;
     $self->output_string("");
-    $self->output_string("Creating configuration:");
+    $self->output_string(gettext("Creating configuration:"));
 
-    my $username = prompt('Username: ');
-    my $password = prompt('Password: ', -e => '*');
+    my $username = prompt(gettext('Email').': ');
+    my $password = prompt(gettext('Password').': ', -e => '*');
 
     $self->{'reader'} = TheOldReader::Api->new(
        'host' => TheOldReader::Constants::DEFAULT_HOST
@@ -78,17 +84,17 @@ sub create_config()
     my $token = $self->{'reader'}->auth($username, $password);
     if(!$token)
     {
-        return $self->output_error("Error: invalid username / password.");
+        return $self->output_error(gettext("Error: invalid username / password."));
     }
 
     my $max_items_displayed = 20;
-    my $browser = prompt('Default browser [x-www-browser]:') || 'x-www-browser';
+    my $browser = prompt(gettext('Default browser').' [x-www-browser]:') || 'x-www-browser';
     $self->{'token'} = $token;
     $self->{'browser'} = $browser;
     $self->{'max_items_displayed'} = $max_items_displayed;
 
     $self->save_config();
-    $self->output_string("File ".$self->{'config'}." created.");
+    $self->output_string(gettext("Configuration file created"));
 }
 
 
