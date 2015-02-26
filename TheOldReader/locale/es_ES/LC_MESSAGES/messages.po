@@ -43,3 +43,230 @@ msgstr "Lista de urls con elementos sin leer"
 msgid "Display unread items when they arrive, until CTRl+C is pressed"
 msgstr "Muestra elementos no leidos mientras llegan, hasta que se presiona CTRL+C"
 
+
+# GUI
+msgid "Updating count..."
+msgstr "Actualizando lista de elementos no leidos..."
+
+msgid "Cannot find feed"
+msgstr "No se puede encontrar el feed"
+
+msgid "No cache file unread_feeds. Requesting count from server."
+msgstr "No se encuentra el fichero. Pediendo una al servidor."
+
+msgid "Count updated"
+msgstr "Número de elementos no leidos actualizado"
+
+msgid "All items"
+msgstr "Todos"
+
+msgid "Starred"
+msgstr "Marcado"
+
+msgid "Liked"
+msgstr "Me gusta"
+
+msgid "Shared"
+msgstr "Compartido"
+
+msgid "Read"
+msgstr "Leido"
+
+msgid "Labels updated"
+msgstr "Etiquetas actualizadas"
+
+msgid "Friends"
+msgstr "Amigos"
+
+msgid "Feeds list updated."
+msgstr "Lista de feeds actualizada"
+
+msgid "Updating label and friend list"
+msgstr "Actualizando etiquetas y lista de amigos"
+
+msgid "The Old Reader - GUI"
+msgstr "The Old Reader - GUI"
+
+msgid "Loading..."
+msgstr "Cargando..."
+
+msgid "General key bindings:"
+msgstr "Teclas generales:"
+
+msgid "Display Help"
+msgstr "Muestra la ayuda"
+
+msgid "Exit"
+msgstr "Sale del programa"
+
+msgid "Help window:"
+msgstr "Ventana de ayuda:"
+
+msgid "Exit this help window"
+msgstr "Sale de esta ventana de ayuda"
+
+msgid "Main window:"
+msgstr "Ventana principal"
+
+msgid "Update selected label"
+msgstr "Actualiza la etiqueta seleccionada"
+
+msgid "Switch display only unread or all items"
+msgstr "Alterna entre mostrar elementos no leidos / todos los elementos"
+
+msgid "Switch display labels or feeds on the left column"
+msgstr "Alterna entre mostrar etiquetas o feeds"
+
+msgid "Label list:"
+msgstr "Lista de etiquetas"
+
+msgid "Rename label"
+msgstr "Renombrar etiqueta"
+
+msgid "Display selected label items"
+msgstr "Muestra elementos de la etiqueta"
+
+msgid "Feed list:"
+msgstr "Lista de feeds"
+
+msgid "Display item fullscreen"
+msgstr "Muestra un elemento a pantalla completa"
+
+msgid "Star item"
+msgstr "Marca un elemento"
+
+msgid "Like item"
+msgstr "Marca como 'me gusta'"
+
+msgid "Share item"
+msgstr "Marca como compartido"
+
+msgid "Read item"
+msgstr "Marca como leido"
+
+msgid "Unread item"
+msgstr "Desmarca como leido"
+
+msgid "Open item in the browser"
+msgstr "Abre en el navegador"
+
+msgid "Open ALL unread items in the browser"
+msgstr "Abre todo los elementos no leidos en el navegador"
+
+msgid "Displaying item:"
+msgstr "Mostrando un elemento:" 
+
+msgid "Display next item"
+msgstr "Muestra elemento siguiente"
+
+msgid "Display previous item"
+msgstr "Muestra elemento previo"
+
+msgid "Fetching last item"
+msgstr "Recuperando últimos elementos"
+
+msgid "Received new list"
+msgstr "Recibida nueva lista de elementos"
+
+msgid "No items found"
+msgstr "Ningún elemento encontrado"
+
+msgid "Select to load more"
+msgstr "Seleccionar para cargar más elementos"
+
+msgid "Select to update"
+msgstr "Seleccionar para actualizar"
+
+msgid "Loaded new list"
+msgstr "Cargada nueva lista"
+
+msgid "Help"
+msgstr "Ayuda"
+
+msgid "Switch display labels or feeds"
+msgstr "Alternar vista etiquetas/feeds"
+
+msgid "Update"
+msgstr "Actualizar"
+
+
+msgid "No more items to load. Press 'u' to refresh."
+msgstr "No hay más elementos. Pressiona 'u' para actualizar"
+
+msgid "Enter new name"
+msgstr "Entra un nuevo nombre"
+
+msgid "Enter RSS url to add"
+msgstr "Entra la dirreción del feed"
+
+msgid "Enter a category for the feed"
+msgstr "Entra la categoria de este feed"
+
+msgid "Adding feed"
+msgstr "Añadiendo feed"
+
+msgid "Feed added"
+msgstr "Feed añadido"
+
+msgid "Cancel add feed"
+msgstr "Se ha cancelado la acción"
+
+msgid "Marking as read"
+msgstr "Marcando como leido"
+
+msgid "Marking starred"
+msgstr "Marcando como destacado"
+
+msgid "Unmarking starred"
+msgstr "Desmarcando como destacado"
+
+msgid "Marking as liked"
+msgstr "Marcando como 'me gusta'"
+
+msgid "Unmarking liked"
+msgstr "Desmarcando como 'me gusta'"
+
+msgid "Marking as shared"
+msgstr "Marcando como compartido"
+
+msgid "Unmarking shared"
+msgstr "Desmarcando como compartido"
+
+msgid "users"
+msgstr "usuarios"
+
+msgid "Feed"
+msgstr "Feed"
+
+msgid "Title"
+msgstr "Título"
+
+msgid "Author"
+msgstr "Autor"
+
+msgid "Date"
+msgstr "Fecha"
+
+msgid "Labels"
+msgstr "Etiquetas"
+
+msgid "Likes"
+msgstr "Me gusta"
+
+msgid "Url"
+msgstr "URL"
+
+msgid "Links"
+msgstr "Enlaces"
+
+msgid "Images"
+msgstr "Imágenes"
+
+msgid "Error getting feed information"
+msgstr "Se ha producidor un error recuperando la información del feed"
+
+msgid "Enter message to share"
+msgstr "Mensaje para compartir" 
+
+msgid "Quit request to backgroud jobs"
+msgstr "Enviando petición de cierre..."
