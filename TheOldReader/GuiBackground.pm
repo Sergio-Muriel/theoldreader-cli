@@ -281,6 +281,15 @@ sub rename_label()
     $self->{'reader'}->rename_label($tag, $newtag);
     return $self->labels();
 }
+
+sub disable_label()
+{
+    my ($self, $tag) = @_;
+
+    $self->{'reader'}->disable_label($tag);
+    return $self->labels();
+}
+
 sub add_feed()
 {
     my ($self, $params) = @_;

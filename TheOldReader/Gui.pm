@@ -859,12 +859,12 @@ sub left_container_onselchange()
     
     if($id=~/label/)
     {
-        $text.="r:".gettext("Edit feed")."  ";
+        $text.="r:".gettext("Rename label")."  ";
+        $text.="d:".gettext("Delete label")."  ";
     }
     elsif($id=~ /feed/)
     {
-        $text.="r:".gettext("Rename label")."  ";
-        $text.="d:".gettext("Delete label")."  ";
+        $text.="r:".gettext("Edit feed")."  ";
     }
     
     $text.=" l:".gettext("Switch display labels or feeds")."  u:".gettext("Update");
@@ -941,10 +941,34 @@ sub left_container_rename()
         $self->{'cui'}->draw();
         if($newid)
         {
-            $self->add_background_job("rename_label __".$rawid."__ __".$newid."__", "Rename label $rawid to $newid");
+            $self->add_background_job("rename_label __".$rawid."__ __".$newid."__", gettext("Renaming label")." ($rawid\-\>$newid)");
         }
     }
 }
+
+sub left_container_delete()
+{
+    my ($self) = @_;
+    my $id = $self->{'left_container'}->get_active_value();
+
+    if($id =~ /label/)
+    {
+        $self->{'cui'}->leave_curses();
+        my $confirm = prompt(gettext("Are you sure you want to delete this label?")." [o/N] : ");
+        $self->{'cui'}->reset_curses();
+        $self->{'cui'}->draw();
+        if($confirm=~ /o/i)
+        {
+            my ($rawid) =  ($id =~ /label\/(.*)$/);
+            $self->add_background_job("disable_label ".$id,gettext("Disabling label")." ($rawid)");
+        }
+        else
+        {
+            $self->update_status(gettext("Cancel delete feed"));
+        }
+    }
+}
+
 sub left_container_add()
 {
     my ($self) = @_;
@@ -1422,6 +1446,7 @@ sub bind_keys()
 
     $self->{'left_container'}->set_binding(sub { $self->left_container_load(); }, KEY_ENTER);
     $self->{'left_container'}->set_binding(sub { $self->left_container_rename(); }, "r");
+    $self->{'left_container'}->set_binding(sub { $self->left_container_delete(); }, "d");
     $self->{'left_container'}->set_binding(sub { $self->left_container_add(); }, "a");
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
