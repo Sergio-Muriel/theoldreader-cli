@@ -1,4 +1,3 @@
-* Labels on separate file. (IMPORTANT!)
 * Remove labels (MAIN FEATURE)
 * Edit subscriptions titles and labels (MAIN FEATURE)
 * Remove subscription (MAIN FEATURE)
