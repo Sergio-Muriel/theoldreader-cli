@@ -1,4 +1,3 @@
-* Remove labels (MAIN FEATURE)
 * Edit subscriptions titles and labels (MAIN FEATURE)
 * Remove subscription (MAIN FEATURE)
 * Separate perl tor api with a new github project and use it a sub-module
