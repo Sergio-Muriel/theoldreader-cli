@@ -162,7 +162,7 @@ msgstr "Muestra elemento siguiente"
 msgid "Display previous item"
 msgstr "Muestra elemento previo"
 
-msgid "Fetching last item"
+msgid "Fetching last items"
 msgstr "Recuperando últimos elementos"
 
 msgid "Received new list"
