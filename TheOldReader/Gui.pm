@@ -686,7 +686,8 @@ x           ".gettext("Switch display only unread or all items")."
 l           ".gettext("Switch display labels or feeds on the left column")."
 
 ".gettext("Label list:")."
-r           ".gettext("rename label")."
+r           ".gettext("Rename label")."
+d           ".gettext("Delete label")."
 Enter       ".gettext("Display selected label items")."
 
 ".gettext("Feed list:")."
@@ -858,11 +859,12 @@ sub left_container_onselchange()
     
     if($id=~/label/)
     {
-        $text.="r:".gettext("Rename label")."  ";
+        $text.="r:".gettext("Edit feed")."  ";
     }
     elsif($id=~ /feed/)
     {
-        $text.="r:".gettext("Edit feed")."  ";
+        $text.="r:".gettext("Rename label")."  ";
+        $text.="d:".gettext("Delete label")."  ";
     }
     
     $text.=" l:".gettext("Switch display labels or feeds")."  u:".gettext("Update");
@@ -934,7 +936,7 @@ sub left_container_rename()
     {
         $self->{'cui'}->leave_curses();
         my ($rawid) =  ($id =~ /label\/(.*)$/);
-        my $newid = prompt(gettext("Enter new name"));
+        my $newid = prompt(gettext("Enter new name").": ");
         $self->{'cui'}->reset_curses();
         $self->{'cui'}->draw();
         if($newid)

@@ -123,6 +123,9 @@ msgstr "Lista de etiquetas"
 msgid "Rename label"
 msgstr "Renombrar etiqueta"
 
+msgid "Delete label"
+msgstr "Borrar etiqueta"
+
 msgid "Display selected label items"
 msgstr "Muestra elementos de la etiqueta"
 
