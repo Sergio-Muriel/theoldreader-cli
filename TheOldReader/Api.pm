@@ -499,6 +499,7 @@ sub add_comment()
     $form{'comment'} = $text;
     return $self->req(POST($url, \%form), 'raw_result') || '';
 }
+
 sub edit_feed()
 {
     my ($self,$id, $label) = @_;
@@ -515,6 +516,16 @@ sub edit_feed()
     {
         $form{'a'} = 'user/-/label/'.$label;
     }
+    return $self->req(POST($url, \%form), 'raw_result') || '';
+}
+
+sub disable_label()
+{
+    my ($self,$label) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::DISABLE_TAG;
+    my %form = ();
+    $form{'s'} = $label;
     return $self->req(POST($url, \%form), 'raw_result') || '';
 }
 

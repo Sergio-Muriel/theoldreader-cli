@@ -51,7 +51,7 @@ sub new
 sub help()
 {
     my ($self) = @_;
-    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | rename_label | add_comment ]");
+    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | rename_label | add_comment | disable_label ]");
     $self->output_string("");
 
     $self->output_string(gettext("Available commands:"));
@@ -62,8 +62,8 @@ sub help()
         "labels: ".gettext("Display labels"),
         "mark_read [item/feed/label]: ".gettext("Mark as read an item"),
         "subscription_list: ".gettext("List of subscribed urls"),
-        "unread_feeds ".gettext("List feed names with unread items"),
-        "watch ".gettext("Display unread items when they arrive, until CTRl+C is pressed"),
+        "unread_feeds: ".gettext("List feed names with unread items"),
+        "watch: ".gettext("Display unread items when they arrive, until CTRl+C is pressed"),
     );
     $self->output_list(@list);
     $self->output_string("");
@@ -476,6 +476,7 @@ sub add_comment()
     my $result = $self->{'reader'}->add_comment($id, $text);
     $self->output_string("Adding comment to $id: result $result");
 }
+
 sub edit_feed()
 {
     my ($self, @params) = @_;
@@ -484,6 +485,15 @@ sub edit_feed()
 
     my $result = $self->{'reader'}->edit_feed($id, $label);
     $self->output_string("Edit feed $id. Result: $result");
+}
+
+sub disable_label()
+{
+    my ($self, @params) = @_;
+    my $label = shift(@params);
+
+    my $result = $self->{'reader'}->disable_label($label);
+    $self->output_string("Disable label $label. Result: $result");
 }
 
 sub log()

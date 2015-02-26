@@ -548,8 +548,8 @@ sub build_gui()
         -bfg  => 'white',
         -values => [ 'load_more' ],
         -labels => { 'load_more' => ' '.gettext('Loading...')},
-        #-onchange => sub { $self->left_container_onchange(); },
-        -onfocus => sub { $self->left_container_focus(); }
+        -onselchange => sub { $self->left_container_onselchange(); },
+        -onfocus => sub { $self->left_container_onselchange(); }
     );
 
     $self->{'right_container'} = $self->{'container'}->add(
@@ -849,12 +849,23 @@ sub display_list()
     $self->update_status(gettext("Loaded new list")." ($id)");
 }
 
-sub left_container_focus()
+sub left_container_onselchange()
 {
     my ($self) = @_;
     my $id = $self->{'left_container'}->get_active_value();
 
-    my $text = "?:".gettext("Help")." r:".gettext("Rename label")."  l:".gettext("Switch display labels or feeds")."  u:".gettext("Update");
+    my $text = "?:".gettext("Help")." ";
+    
+    if($id=~/label/)
+    {
+        $text.="r:".gettext("Rename label")."  ";
+    }
+    elsif($id=~ /feed/)
+    {
+        $text.="r:".gettext("Edit feed")."  ";
+    }
+    
+    $text.=" l:".gettext("Switch display labels or feeds")."  u:".gettext("Update");
     $self->{'helptext'}->text($text);
 }
 
