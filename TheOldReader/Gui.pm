@@ -265,23 +265,9 @@ sub update_labels()
     $self->update_list("noclear");
 }
 
-sub display_feeds()
+sub default_label()
 {
-    my ($self, @params) = @_;
-
-    my $subscriptions = $self->{'cache'}->load_cache('subscriptions');
-    my $friends = $self->{'cache'}->load_cache('friends');
-    if(!$subscriptions)
-    {
-        return;
-    }
-
-    my @subscriptions = @{$subscriptions};
-    my @friends = $friends ? @{$friends} : ();
-    my %counts = ();
-
-    my $gui_labels = {};
-    $gui_labels = {
+    return  {
         'labels' => {
             TheOldReader::Constants::STATE_ALL => gettext('All items'),
             TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
@@ -309,6 +295,24 @@ sub display_feeds()
             TheOldReader::Constants::STATE_READ,
         ]
     };
+}
+
+sub display_feeds()
+{
+    my ($self, @params) = @_;
+
+    my $subscriptions = $self->{'cache'}->load_cache('subscriptions');
+    my $friends = $self->{'cache'}->load_cache('friends');
+    if(!$subscriptions)
+    {
+        return;
+    }
+
+    my @subscriptions = @{$subscriptions};
+    my @friends = $friends ? @{$friends} : ();
+    my %counts = ();
+
+    my $gui_labels = $self->default_label();
 
     foreach my $ref(@friends)
     {
@@ -322,9 +326,14 @@ sub display_feeds()
 
     foreach my $feed(@subscriptions)
     {
-        $gui_labels->{'display_labels'}{$feed->{'id'}} = ($feed->{'title'});
-        $gui_labels->{'labels'}{$feed->{'id'}} = " > ".($feed->{'title'});
-        $gui_labels->{'original_labels'}{$feed->{'id'}} = " > ".($feed->{'title'});
+        my $title  = $feed->{'title'};
+
+        #my $category = join("-",map(${$_}{'label'}, @{$feed->{'categories'}}));
+        #$title.= " ($category)";
+
+        $gui_labels->{'display_labels'}{$feed->{'id'}} = ($title);
+        $gui_labels->{'labels'}{$feed->{'id'}} = " > ".($title);
+        $gui_labels->{'original_labels'}{$feed->{'id'}} = " > ".($title);
 
         push(@{$gui_labels->{'values'}}, $feed->{'id'});
     }
@@ -359,35 +368,7 @@ sub display_labels()
     my @friends = $friends ? @{$friends} : ();
     my %counts = ();
 
-    my $gui_labels = {};
-    $gui_labels = {
-        'labels' => {
-            TheOldReader::Constants::STATE_ALL => gettext('All items'),
-            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
-            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
-            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared'),
-            TheOldReader::Constants::STATE_READ=> gettext('Read'),
-        },
-        'display_labels' => {
-            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
-            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
-            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared')
-        },
-        'original_labels' => {
-            TheOldReader::Constants::STATE_ALL=> gettext('All items'),
-            TheOldReader::Constants::STATE_STARRED=> gettext('Starred'),
-            TheOldReader::Constants::STATE_LIKE=> gettext('Liked'),
-            TheOldReader::Constants::STATE_BROADCAST=> gettext('Shared'),
-            TheOldReader::Constants::STATE_READ=> gettext('Read'),
-        },
-        'values' => [
-            TheOldReader::Constants::STATE_ALL,
-            TheOldReader::Constants::STATE_STARRED,
-            TheOldReader::Constants::STATE_LIKE,
-            TheOldReader::Constants::STATE_BROADCAST,
-            TheOldReader::Constants::STATE_READ,
-        ]
-    };
+    my $gui_labels = $self->default_label();
 
     if($#friends>0)
     {
@@ -942,6 +923,39 @@ sub left_container_rename()
         if($newid)
         {
             $self->add_background_job("rename_label __".$rawid."__ __".$newid."__", gettext("Renaming label")." ($rawid\-\>$newid)");
+        }
+    }
+    elsif($id=~/feed/)
+    {
+        my $subscriptions = $self->{'cache'}->load_cache('subscriptions');
+        if(!$subscriptions)
+        {
+            return;
+        }
+        my @subscriptions = @{$subscriptions};
+
+        foreach my $feed(@subscriptions)
+        {
+            if($feed->{'id'} eq $id)
+            {
+                my $title  = $feed->{'title'};
+                my $url  = $feed->{'url'};
+                my $category = join("-",map(${$_}{'label'}, @{$feed->{'categories'}}));
+
+                $self->{'cui'}->leave_curses();
+                $self->output_string("Edit feed $title ($url");
+                my $label = prompt(gettext("Enter a category for the feed").": ");
+                $self->{'cui'}->reset_curses();
+                $self->{'cui'}->draw();
+                if($label=~/\S/)
+                {
+                    $self->add_background_job("edit_feed __".$id."__ __".$label."__",gettext("Edit feed")." ($id)");
+                }
+            }
+            else
+            {
+                $self->error(gettext("Cannot find feed")." $id");
+            }
         }
     }
 }

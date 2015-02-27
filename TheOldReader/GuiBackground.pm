@@ -310,6 +310,24 @@ sub add_feed()
     }
 }
 
+sub edit_feed()
+{
+    my ($self, $params) = @_;
+    my ($id, $label) = ($params =~ /^__(.*)__ __(.*)__/);
+
+    $self->log("edit feed $id -> label: $label");
+    my $result = $self->{'reader'}->edit_feed($id, $label);
+    if($result eq 'OK')
+    {
+        return $self->add_gui_job("update_status feed $id added");
+        return $self->add_gui_job("update_labels");
+    }
+    else
+    {
+        return $self->add_gui_job("error Cannot edit feed $id ".$$result{'error'});
+    }
+}
+
 
 sub last()
 {
