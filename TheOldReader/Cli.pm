@@ -129,7 +129,7 @@ sub subscription_list()
     my @urls = ();
     foreach my $ref(@{$list})
     {
-        push(@urls, $ref->{'url'});
+        push(@urls, $ref->{'id'}." : ".$ref->{'url'});
     }
     $self->output_string("Feed urls:");
     $self->output_list(@urls);
@@ -482,8 +482,9 @@ sub edit_feed()
     my ($self, @params) = @_;
     my $id = shift(@params);
     my $label = shift(@params);
+    my $name = shift(@params);
 
-    my $result = $self->{'reader'}->edit_feed($id, $label);
+    my $result = $self->{'reader'}->edit_feed($id, $label, $name);
     $self->output_string("Edit feed $id. Result: $result");
 }
 

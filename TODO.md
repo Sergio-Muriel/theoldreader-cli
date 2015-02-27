@@ -1,4 +1,4 @@
-* Edit subscriptions titles and labels (MAIN FEATURE)
+* Edit subscriptions titles (MAIN FEATURE)
 * Remove subscription (MAIN FEATURE)
 * Separate perl tor api with a new github project and use it a sub-module
 * Remove old cache files (ENHANCEMENT) older than a number of (configuable) x days

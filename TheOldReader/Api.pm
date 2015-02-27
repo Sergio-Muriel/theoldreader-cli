@@ -502,12 +502,16 @@ sub add_comment()
 
 sub edit_feed()
 {
-    my ($self,$id, $label) = @_;
+    my ($self,$id, $label, $name) = @_;
 
     my $url = $self->{'host'}.TheOldReader::Constants::FEED_EDIT;
     my %form = ();
     $form{'ac'} = 'edit';
     $form{'s'} = $id;
+    if($name=~ /\S/)
+    {
+        $form{'t'} = $name;
+    }
     if(!$label || $label =~ /^\s*$/)
     {
         $form{'r'} = 'none';
