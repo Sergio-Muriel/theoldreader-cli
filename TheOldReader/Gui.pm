@@ -939,17 +939,28 @@ sub left_container_rename()
             if($feed->{'id'} eq $id)
             {
                 my $title  = $feed->{'title'};
+                my $label  = $feed->{'title'};
                 my $url  = $feed->{'url'};
                 my $category = join("-",map(${$_}{'label'}, @{$feed->{'categories'}}));
 
                 $self->{'cui'}->leave_curses();
-                $self->output_string("Edit feed $title ($url");
-                my $label = prompt(gettext("Enter a category for the feed").": ");
+                $self->output_string("Edit feed $title - $label ($url");
+                my $newtitle = prompt(gettext("Enter new name (".$title.")").": ");
+                if($newtitle=~/\S/)
+                {
+                    $title = $newtitle;
+                }
+
+                my $newlabel = prompt(gettext("Enter a category for the feed").": ");
+                if($newlabel=~/\S/)
+                {
+                    $label = $newlabel
+                }
                 $self->{'cui'}->reset_curses();
                 $self->{'cui'}->draw();
                 if($label=~/\S/)
                 {
-                    $self->add_background_job("edit_feed __".$id."__ __".$label."__",gettext("Edit feed")." ($id)");
+                    $self->add_background_job("edit_feed __".$id."__ __".$label."__ __".$title."__",gettext("Edit feed")." ($id)");
                 }
             }
             else

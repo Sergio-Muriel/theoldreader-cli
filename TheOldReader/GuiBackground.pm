@@ -301,6 +301,7 @@ sub add_feed()
     {
         my $id = $$result{'streamId'};
         $self->{'reader'}->edit_feed($id,$label);
+        $self->subscription_list();
         return $self->add_gui_job("update_status feed $url added");
         return $self->add_gui_job("update_labels");
     }
@@ -313,12 +314,13 @@ sub add_feed()
 sub edit_feed()
 {
     my ($self, $params) = @_;
-    my ($id, $label) = ($params =~ /^__(.*)__ __(.*)__/);
+    my ($id, $label, $title) = ($params =~ /^__(.*?)__ __(.*?)__ __(.*?)__$/);
 
-    $self->log("edit feed $id -> label: $label");
-    my $result = $self->{'reader'}->edit_feed($id, $label);
+    $self->log("edit feed $id -> label: $label, text: $title");
+    my $result = $self->{'reader'}->edit_feed($id, $label, $title);
     if($result eq 'OK')
     {
+        $self->subscription_list();
         return $self->add_gui_job("update_status feed $id added");
         return $self->add_gui_job("update_labels");
     }
