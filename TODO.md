@@ -1,4 +1,4 @@
-* Remove subscription (MAIN FEATURE)
+* Read all key (MAIN FEATURE)
 * Separate perl tor api with a new github project and use it a sub-module
 * Remove old cache files (ENHANCEMENT) older than a number of (configuable) x days
 * Put some variables in the configuration file like "update rate", "label column width" (ENHANCEMENT)
