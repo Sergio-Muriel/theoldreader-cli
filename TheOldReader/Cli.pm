@@ -51,7 +51,7 @@ sub new
 sub help()
 {
     my ($self) = @_;
-    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | rename_label | add_comment | disable_label ]");
+    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | edit_feed | unsubscribe_feed | rename_label | add_comment | disable_label ]");
     $self->output_string("");
 
     $self->output_string(gettext("Available commands:"));
@@ -486,6 +486,15 @@ sub edit_feed()
 
     my $result = $self->{'reader'}->edit_feed($id, $label, $name);
     $self->output_string("Edit feed $id. Result: $result");
+}
+
+sub unsubscribe_feed()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+
+    my $result = $self->{'reader'}->unsubscribe_feed($id);
+    $self->output_string("Unsubscribe feed $id. Result: $result");
 }
 
 sub disable_label()

@@ -523,6 +523,17 @@ sub edit_feed()
     return $self->req(POST($url, \%form), 'raw_result') || '';
 }
 
+sub unsubscribe_feed()
+{
+    my ($self,$id) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::FEED_EDIT;
+    my %form = ();
+    $form{'ac'} = 'unsubscribe';
+    $form{'s'} = $id;
+    return $self->req(POST($url, \%form), 'raw_result') || '';
+}
+
 sub disable_label()
 {
     my ($self,$label) = @_;
