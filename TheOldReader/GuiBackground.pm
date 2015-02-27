@@ -328,7 +328,27 @@ sub edit_feed()
     }
     else
     {
-        return $self->add_gui_job("error Cannot edit feed $id ".$$result{'error'});
+        return $self->add_gui_job("error Cannot edit feed $id ");
+    }
+}
+
+sub unsubscribe_feed()
+{
+    my ($self, $id) = @_;
+
+    $self->log("unsubscribe_feed $id");
+    my $result = $self->{'reader'}->unsubscribe_feed($id);
+    if($result eq 'OK')
+    {
+        # adding feed need to update subscription list AND labels
+        $self->subscription_list();
+        $self->labels();
+        return $self->add_gui_job("update_status feed $id added");
+        return $self->add_gui_job("update_labels");
+    }
+    else
+    {
+        return $self->add_gui_job("error Cannot unsubscribe feed $id ");
     }
 }
 

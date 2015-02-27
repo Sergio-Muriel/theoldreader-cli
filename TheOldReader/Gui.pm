@@ -846,6 +846,7 @@ sub left_container_onselchange()
     elsif($id=~ /feed/)
     {
         $text.="r:".gettext("Edit feed")."  ";
+        $text.="d:".gettext("Unsubscribe feed")."  ";
     }
     
     $text.=" l:".gettext("Switch display labels or feeds")."  u:".gettext("Update");
@@ -990,6 +991,17 @@ sub left_container_delete()
         else
         {
             $self->update_status(gettext("Cancel delete feed"));
+        }
+    }
+    elsif($id=~/feed/)
+    {
+        $self->{'cui'}->leave_curses();
+        my $confirm = prompt(gettext("Are you sure you want to delete this label?")." [o/N] : ");
+        $self->{'cui'}->reset_curses();
+        $self->{'cui'}->draw();
+        if($confirm=~ /o/i)
+        {
+            $self->add_background_job("unsubscribe_feed $id",gettext("Unsubscribe feed")." ($id)");
         }
     }
 }
