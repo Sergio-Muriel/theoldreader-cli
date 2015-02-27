@@ -301,7 +301,9 @@ sub add_feed()
     {
         my $id = $$result{'streamId'};
         $self->{'reader'}->edit_feed($id,$label);
+        # adding feed need to update subscription list AND labels
         $self->subscription_list();
+        $self->labels();
         return $self->add_gui_job("update_status feed $url added");
         return $self->add_gui_job("update_labels");
     }
