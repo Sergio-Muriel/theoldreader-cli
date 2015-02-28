@@ -1046,7 +1046,7 @@ sub right_container_onchange()
 sub right_container_focus()
 {
     my ($self) = @_;
-    $self->{'helptext'}->text("?:".gettext("Help")."  x:".gettext("Switch display only unread or all items")."  u:".gettext("Update")."  s:".gettext("Star item")." r:".gettext("Mark an item as read")." R:".gettext("Unread item")." l:".gettext("Like item")." b:".gettext("Share item")."  Enter:".gettext("Display item fullscreen")." o:".gettext("Open item in the browser"));
+    $self->{'helptext'}->text("?:".gettext("Help")."  x:".gettext("Switch display only unread or all items")."  u:".gettext("Update"));
 }
 
 
@@ -1071,7 +1071,7 @@ sub display_item()
     my ($self,$id) = @_;
     $self->{'item_displayed'}=1;
 
-    $self->{'helptext'}->text("?:".gettext("Help")." r:".gettext("Mark as read an item")." R:".gettext("Unread item")." l:".gettext("Like item")." b:".gettext("Share item")."  Enter:".gettext("Display item fullscreen")." o:".gettext("Open item in the browser"));
+    $self->{'helptext'}->text("?:".gettext("Help")." n:".gettext("Display next item")." p:".gettext("Display previous item"));
     if($id eq 'load_more' or $id eq "loading")
     {
         $self->update_list("noclear",$self->{'next_list'});
