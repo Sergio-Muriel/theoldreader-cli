@@ -136,7 +136,7 @@ msgid "Display item fullscreen"
 msgstr "Muestra un elemento a pantalla completa"
 
 msgid "Star item"
-msgstr "Marca un elemento"
+msgstr "Marca un elemento como destacado"
 
 msgid "Like item"
 msgstr "Marca como 'me gusta'"
