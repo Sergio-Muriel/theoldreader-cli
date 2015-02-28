@@ -1,5 +1,11 @@
 ## 0.2
 
+### Bug fix:
+
+- Select item pressing KEY_ENTER on the label list
+
+### Enhancement:
+
 - Translation mechanism gui and cli
 - Add spanish translation
 - Remove label/category
