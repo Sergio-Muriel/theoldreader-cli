@@ -716,7 +716,7 @@ sub update_list()
         $next_list="";
     }
 
-    my $id = $self->{'left_container'}->get_active_value();
+    my $id = $self->{'left_container'}->get();
     if($self->{'loading_feed_list'} and $clear eq 'noclear')
     {
         $self->log("Still loading list. no update") if($self->{'debug'});
@@ -889,17 +889,13 @@ sub clear_right()
     $self->{'list_data'} = $gui_list;
 }
 
-sub left_container_onchange()
-{
-    my ($self) = @_;
-    $self->log("New list update");
-    $self->clear_right();
-    $self->{'right_container'}->focus();
-}
 sub left_container_load()
 {
     my ($self) = @_;
-    $self->left_container_onchange();
+    $self->log("New list update");
+    $self->{'left_container'}->set_selection($self->{'left_container'}->get_active_id());
+    $self->clear_right();
+    $self->{'right_container'}->focus();
     $self->update_list("clear");
 }
 
