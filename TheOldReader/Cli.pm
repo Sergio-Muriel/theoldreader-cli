@@ -51,7 +51,7 @@ sub new
 sub help()
 {
     my ($self) = @_;
-    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | edit_feed | unsubscribe_feed | rename_label | add_comment | disable_label ]");
+    $self->output_string("Use: $0 [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds  | watch | mark_like | unmark_like | mark_broadcast | unmark_broadcast | friends | add_feed | edit_feed | unsubscribe_feed | rename_label | add_comment | disable_label | mark_all_read ]");
     $self->output_string("");
 
     $self->output_string(gettext("Available commands:"));
@@ -504,6 +504,16 @@ sub disable_label()
 
     my $result = $self->{'reader'}->disable_label($label);
     $self->output_string("Disable label $label. Result: $result");
+}
+
+sub mark_all_read()
+{
+    my ($self, @params) = @_;
+    my $id = shift(@params);
+    my $ts = shift(@params);
+
+    my $result = $self->{'reader'}->mark_all_read($id, $ts);
+    $self->output_string("Mark all as read $id, older than $ts. Result: $result");
 }
 
 sub log()

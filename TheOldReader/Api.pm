@@ -544,6 +544,19 @@ sub disable_label()
     return $self->req(POST($url, \%form), 'raw_result') || '';
 }
 
+sub mark_all_read()
+{
+    my ($self,$id, $time) = @_;
+
+    my $url = $self->{'host'}.TheOldReader::Constants::MARK_ALL_READ;
+    my %form = ();
+    $form{'s'} = $id;
+    $form{'ts'} = $time + 1000000;
+    print "OK $id /$time\n";
+    print Dumper \%form;
+    return $self->req(POST($url, \%form), 'raw_result') || '';
+}
+
 
 sub log()
 {
