@@ -292,3 +292,6 @@ msgstr "Editar feed"
 msgid "Unsubscribe feed"
 msgstr "Borrar feed"
 
+msgid "Marking all as read"
+msgstr "Marcando todo como leido"
+

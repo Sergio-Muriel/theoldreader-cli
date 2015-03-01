@@ -304,7 +304,7 @@ sub add_feed()
         # adding feed need to update subscription list AND labels
         $self->subscription_list();
         $self->labels();
-        return $self->add_gui_job("update_status feed $url added");
+        $self->add_gui_job("update_status feed $url added");
         return $self->add_gui_job("update_labels");
     }
     else
@@ -323,7 +323,7 @@ sub edit_feed()
     if($result eq 'OK')
     {
         $self->subscription_list();
-        return $self->add_gui_job("update_status feed $id added");
+        $self->add_gui_job("update_status feed $id added");
         return $self->add_gui_job("update_labels");
     }
     else
@@ -343,8 +343,29 @@ sub unsubscribe_feed()
         # adding feed need to update subscription list AND labels
         $self->subscription_list();
         $self->labels();
-        return $self->add_gui_job("update_status feed $id added");
+        $self->add_gui_job("update_status feed $id added");
         return $self->add_gui_job("update_labels");
+    }
+    else
+    {
+        return $self->add_gui_job("error Cannot unsubscribe feed $id ");
+    }
+}
+
+sub read_all()
+{
+    my ($self, $params) = @_;
+    my ($id, $timestamp) = split(/\s+/,$params);
+
+    $self->log("read all ($params) $id / $timestamp");
+    my $result = $self->{'reader'}->mark_all_read($id, $timestamp);
+    $self->log("Result ".Dumper $result);
+    if($result eq 'OK')
+    {
+        # adding feed need to update subscription list AND labels
+        $self->add_gui_job("update_status feed $id marked as read");
+        $self->unread_feeds();
+        return $self->add_gui_job("update_list clear");
     }
     else
     {

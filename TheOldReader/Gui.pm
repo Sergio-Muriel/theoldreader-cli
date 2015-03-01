@@ -372,7 +372,6 @@ sub display_labels()
 
     if($#friends>0)
     {
-        $self->log("Add friends ");
         my $key = TheOldReader::Constants::STATE_FRIENDS;
         $gui_labels->{'display_labels'}{$key} = (gettext("Friends"));
         $gui_labels->{'labels'}{$key} = (gettext("Friends"));
@@ -1273,6 +1272,25 @@ sub open_all()
     }
 }
 
+sub read_all()
+{
+    my ($self) = @_;
+    my $label = $self->{'left_container'}->get();
+    my @values = @{$self->{'right_container'}->values()};
+    my $id =$values[0];
+    my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+    if($id eq 'load_more' or $id eq "loading")
+    {
+        return;
+    }
+    if(!$feed)
+    {
+        $self->error(gettext("Cannot find feed")." $id");
+        return;
+    }
+    $self->add_background_job("read_all $label ".$feed->{'crawlTimeMsec'}*1000, gettext("Marking all as read")." (".$label.")");
+}
+
 sub next_item()
 {
     my ($self,$id) = @_;
@@ -1490,6 +1508,7 @@ sub bind_keys()
     $self->{'right_container'}->set_binding(sub { $self->right_container_unread(); }, "R");
     $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");
     $self->{'right_container'}->set_binding(sub { $self->open_all(); }, "O");
+    $self->{'right_container'}->set_binding(sub { $self->read_all(); }, "A");
 
     $self->{'content_container'}->set_binding(sub { $self->close_content(); }, "q");
     $self->{'content_container'}->set_binding(sub { $self->next_item(); }, "n");
