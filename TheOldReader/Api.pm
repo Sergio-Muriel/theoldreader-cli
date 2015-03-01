@@ -552,8 +552,6 @@ sub mark_all_read()
     my %form = ();
     $form{'s'} = $id;
     $form{'ts'} = $time + 1000000;
-    print "OK $id /$time\n";
-    print Dumper \%form;
     return $self->req(POST($url, \%form), 'raw_result') || '';
 }
 
