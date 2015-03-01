@@ -11,6 +11,7 @@
 - Remove label/category
 - Edit feed title and label/category
 - Delete feed
+- Mark all as read on category/feed by pressing "A" key
 
 ## 0.1 (2015-02-26)
 

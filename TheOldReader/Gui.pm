@@ -679,6 +679,7 @@ r           ".gettext("Read item")."
 R           ".gettext("Unread item")."
 o           ".gettext("Open item in the browser")."
 O           ".gettext("Open ALL unread items in the browser")."
+A           ".gettext("Mark all as read")."
 
 ".gettext("Displaying item:")."
 n           ".gettext("Display next item")."
