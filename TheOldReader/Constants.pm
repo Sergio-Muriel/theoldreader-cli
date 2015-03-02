@@ -14,6 +14,7 @@ use constant WAIT_WATCH => 10;
 use constant CACHE_DIR => './cache/';
 use constant DEFAULT_HOST => 'https://theoldreader.com';
 use constant DEFAULT_CONFIG => 'global.conf';
+use constant CACHE_DELETE_DAYS => 2;
 
 use constant LOGIN_PATH => '/accounts/ClientLogin';
 use constant STATUS => '/reader/api/0/status?output=json';

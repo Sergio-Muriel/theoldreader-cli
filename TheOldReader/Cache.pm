@@ -30,6 +30,27 @@ sub new
     return $self;
 }
 
+sub clean()
+{
+    my ($self) = @_;
+    $self->log("cleaning cache files older than ".TheOldReader::Constants::CACHE_DELETE_DAYS." days.");
+    if(-d $self->{'dir'})
+    {
+        opendir(my $dh, $self->{'dir'});
+        my @dots = grep { /^(item|last)/ && -f $self->{'dir'}."/$_" } readdir($dh);
+        foreach my $file(@dots)
+        {
+            if(-M $self->{'dir'}."/$file" > TheOldReader::Constants::CACHE_DELETE_DAYS)
+            {
+                if(!unlink($self->{'dir'}."/$file"))
+                {
+                    $self->log("Error deleting cache file: ".$self->{'dir'}."/$file");
+                }
+            }
+        }
+    }
+}
+
 sub save_cache()
 {
     my ($self,$name,$hash_ref) = @_;

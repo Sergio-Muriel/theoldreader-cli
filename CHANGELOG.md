@@ -12,6 +12,7 @@
 - Edit feed title and label/category
 - Delete feed
 - Mark all as read on category/feed by pressing "A" key
+- Delete old cache files (older than X days)
 
 ## 0.1 (2015-02-26)
 

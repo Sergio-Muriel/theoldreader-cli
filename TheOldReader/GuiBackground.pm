@@ -51,6 +51,12 @@ sub error()
 
 
 
+sub clean_cache()
+{
+    my ($self, @params) = @_;
+    $self->{'cache'}->clean();
+}
+
 sub unread_feeds()
 {
     my ($self, @params) = @_;

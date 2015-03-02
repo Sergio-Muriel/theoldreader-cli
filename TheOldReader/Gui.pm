@@ -72,6 +72,13 @@ sub call_count
     $self->update_list("noclear");
 }
 
+sub call_clean
+{
+    my ($self, @params) = @_;
+    $self->add_background_job("clean_cache");
+    $self->update_list("noclear");
+}
+
 
 sub update_loading_list()
 {
@@ -480,6 +487,7 @@ sub build_gui()
                 if(!$self->{'quit'})
                 {
                     $self->call_count();
+                    $self->call_clean();
                     $_[HEAP]->{next_count_event}= int(time())+TheOldReader::Constants::GUI_UPDATE;
                     $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
                 }
@@ -704,7 +712,10 @@ sub run_gui()
 sub add_background_job()
 {
     my ($self, $job, $status_txt) = @_;
-    $self->update_status($status_txt);
+    if($status_txt)
+    {
+        $self->update_status($status_txt);
+    }
 
     $self->{'share'}->add("background_job", $job);
 }
