@@ -671,9 +671,9 @@ q           ".gettext("Exit this help window")."
 q           ".gettext("Exit")."
 u           ".gettext("Update selected label")."
 x           ".gettext("Switch display only unread or all items")."
-l           ".gettext("Switch display labels or feeds on the left column")."
 
 ".gettext("Label list:")."
+l           ".gettext("Switch display labels or feeds on the left column")."
 r           ".gettext("Rename label")."
 d           ".gettext("Delete label")."
 Enter       ".gettext("Display selected label items")."
@@ -1504,9 +1504,9 @@ sub bind_keys()
 
     $self->{'container'}->set_binding(sub { $self->update_list("clear"); }, "u");
     $self->{'container'}->set_binding(sub { $self->switch_unread_all(); }, "x");
-    $self->{'container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
     $self->{'container'}->set_binding($exit_ref, "q");
 
+    $self->{'left_container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
     $self->{'left_container'}->set_binding(sub { $self->left_container_load(); }, KEY_ENTER);
     $self->{'left_container'}->set_binding(sub { $self->left_container_rename(); }, "r");
     $self->{'left_container'}->set_binding(sub { $self->left_container_delete(); }, "d");
