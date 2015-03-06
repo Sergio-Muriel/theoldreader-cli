@@ -1,4 +1,3 @@
-* Follow users who liked/broadcast a feed (MAIN FEATURE)
 * Separate perl tor api with a new github project and use it a sub-module
 * Put some variables in the configuration file like "update rate", "label column width" (ENHANCEMENT)
 * Add an auto-function on certain keywords to auto mark feeds as starred/shared/broadcasted, or auto open  feed in browser, or send desktop notify, etc... (ENHANCEMENT)
