@@ -3,6 +3,7 @@
 ### Bug fix:
 
 - Select item pressing KEY_ENTER on the label list
+- Bind "l" key only on left panel to switch between labels and feeds
 
 ### Enhancement:
 
