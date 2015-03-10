@@ -394,7 +394,10 @@ sub display_labels()
             my $num = " (".$counts{$labelid}.")";
             my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length($gui_labels->{'original_labels'}{$labelid})-length($num));
             $gui_labels->{'labels'}{$labelid} = substr($gui_labels->{'original_labels'}{$labelid},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
-            push(@{$gui_labels->{'values'}}, $labelid);
+            if(!grep(/$labelid/, @{$gui_labels->{'values'}}))
+            {
+                push(@{$gui_labels->{'values'}}, $labelid);
+            }
         }
     }
 
