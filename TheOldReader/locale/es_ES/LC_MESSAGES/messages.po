@@ -298,3 +298,5 @@ msgstr "Marca todo como leido"
 msgid "Marking all as read"
 msgstr "Marcando todo como leido"
 
+msgid "Switch display labels with no unread items"
+msgstr "Muestra etiquetas que contienen elementos no leidos"

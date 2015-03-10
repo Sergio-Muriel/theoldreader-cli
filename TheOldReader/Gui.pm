@@ -222,7 +222,6 @@ sub update_count()
         return;
     }
 
-    my $update=0;
     foreach my $ref(@{$$cache_unread_feeds{'unreadcounts'}})
     {
         my $id = $$ref{'id'};
@@ -230,33 +229,16 @@ sub update_count()
         if(!$counts{$id} or $counts{$id} !=$count)
         {
             $counts{$id} = $count;
-            $update=1;
         }
     }
-    foreach my $ref(keys %{$labels->{'labels'}})
-    {
-        my $length = length($labels->{'labels'}{$ref});
-        if(!$counts{$ref})
-        {
-            $counts{$ref}=0;
-        }
-        my $num = " (".$counts{$ref}.")";
-        my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length($labels->{'original_labels'}{$ref})-length($num));
-        $labels->{'labels'}{$ref} = substr($labels->{'original_labels'}{$ref},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
-    }
-
-    $self->{'left_container'}->labels($labels->{'labels'});
     $self->{'counts'} = \%counts;
-    $self->{'cui'}->draw();
-
-    $self->update_status(gettext("Count updated"));
 }
 
-sub update_labels()
+sub redraw_labels()
 {
     my ($self, @params) = @_;
-
     my $previous_selected = $self->{'left_container'}{'-ypos'};
+    $self->update_count();
     if($self->{'display_feeds'})
     {
         $self->display_feeds();
@@ -267,8 +249,14 @@ sub update_labels()
     }
 
     $self->{'left_container'}{'-ypos'} = $previous_selected;
+}
 
-    $self->update_count();
+sub update_labels_and_list()
+{
+    my ($self, @params) = @_;
+    $self->redraw_labels();
+
+
     $self->update_list("noclear");
 }
 
@@ -370,12 +358,20 @@ sub display_labels()
     {
         return;
     }
+    $self->log("UPDATE LABELS!");
 
     my @labels = @{$labels};
     my @friends = $friends ? @{$friends} : ();
     my %counts = ();
 
     my $gui_labels = $self->default_label();
+    my $saved_pos = $self->{'left_container'}{'-ypos'};
+    my $saved_id = $self->{'left_container'}->id();
+
+    if($self->{'counts'})
+    {
+        %counts = %{$self->{'counts'}};
+    }
 
     if($#friends>0)
     {
@@ -390,11 +386,14 @@ sub display_labels()
     {
         my $labelid = $label->{'id'};
         my ($labelname) = ($labelid =~ /label\/(.*)$/);
-        if($labelname)
+        if($labelname && (!$self->{'labels_unread'} || ($counts{$labelid} && $counts{$labelid}>0)))
         {
             $gui_labels->{'display_labels'}{$labelid} = $labelname;
-            $gui_labels->{'labels'}{$labelid} = " > ".$labelname;
             $gui_labels->{'original_labels'}{$labelid} = " > ".$labelname;
+
+            my $num = " (".$counts{$labelid}.")";
+            my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length($gui_labels->{'original_labels'}{$labelid})-length($num));
+            $gui_labels->{'labels'}{$labelid} = substr($gui_labels->{'original_labels'}{$labelid},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
             push(@{$gui_labels->{'values'}}, $labelid);
         }
     }
@@ -404,8 +403,12 @@ sub display_labels()
 
     $self->{'left_container'}->values(@{$gui_labels->{'values'}});
     $self->{'left_container'}->labels($gui_labels->{'labels'});
-
-    if(!defined($self->{'left_container'}->get()))
+    $self->{'left_container'}{'-ypos'} = $saved_pos;
+    if($saved_id)
+    {
+        $self->{'left_container'}->set_selection($saved_id);
+    }
+    elsif(!defined($self->{'left_container'}->get()))
     {
         $self->{'left_container'}->set_selection((0));
     }
@@ -438,7 +441,7 @@ sub init
     $self->bind_keys();
 
     # Update labels/friend list
-    $self->update_labels();
+    $self->update_labels_and_list();
 
     #Force draw of gui before loading labels and friends
     $self->{'cui'}->draw();
@@ -670,16 +673,17 @@ q           ".gettext("Exit this help window")."
 ".gettext("Main window:")."
 q           ".gettext("Exit")."
 u           ".gettext("Update selected label")."
-x           ".gettext("Switch display only unread or all items")."
 
 ".gettext("Label list:")."
 l           ".gettext("Switch display labels or feeds on the left column")."
 r           ".gettext("Rename label")."
 d           ".gettext("Delete label")."
+x           ".gettext("Switch display labels with no unread items")."
 Enter       ".gettext("Display selected label items")."
 
 ".gettext("Feed list:")."
 Enter       ".gettext("Display item fullscreen")."
+x           ".gettext("Switch display only unread or all items")."
 s           ".gettext("Star item")."
 l           ".gettext("Like item")."
 b           ".gettext("Share item")."
@@ -860,7 +864,7 @@ sub left_container_onselchange()
         $text.="d:".gettext("Unsubscribe feed")."  ";
     }
     
-    $text.=" l:".gettext("Switch display labels or feeds")."  u:".gettext("Update");
+    $text.=" x:".gettext("Switch display labels with no unread items")."  l:".gettext("Switch display labels or feeds")."  u:".gettext("Update");
     $self->{'helptext'}->text($text);
 }
 
@@ -1353,12 +1357,20 @@ sub log()
     close WRITE;
 }
 
-sub switch_unread_all()
+sub switch_unread_feeds()
 {
     my ($self) = @_;
     $self->{'only_unread'} = !$self->{'only_unread'};
     $self->save_config();
     $self->update_list("clear");
+}
+
+sub switch_unread_labels()
+{
+    my ($self) = @_;
+    $self->{'labels_unread'} = !$self->{'labels_unread'};
+    $self->save_config();
+    $self->update_labels_and_list();
 }
 
 sub switch_labels_feeds()
@@ -1503,7 +1515,6 @@ sub bind_keys()
     $self->{'cui'}->set_binding($exit_ref, "\cQ");
 
     $self->{'container'}->set_binding(sub { $self->update_list("clear"); }, "u");
-    $self->{'container'}->set_binding(sub { $self->switch_unread_all(); }, "x");
     $self->{'container'}->set_binding($exit_ref, "q");
 
     $self->{'left_container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
@@ -1511,6 +1522,7 @@ sub bind_keys()
     $self->{'left_container'}->set_binding(sub { $self->left_container_rename(); }, "r");
     $self->{'left_container'}->set_binding(sub { $self->left_container_delete(); }, "d");
     $self->{'left_container'}->set_binding(sub { $self->left_container_add(); }, "a");
+    $self->{'left_container'}->set_binding(sub { $self->switch_unread_labels(); }, "x");
 
     $self->{'right_container'}->set_binding(sub { $self->right_container_onchange(); }, KEY_ENTER);
     $self->{'right_container'}->set_binding(sub { $self->right_container_star(); }, "s");
@@ -1521,6 +1533,7 @@ sub bind_keys()
     $self->{'right_container'}->set_binding(sub { $self->open_item(); }, "o");
     $self->{'right_container'}->set_binding(sub { $self->open_all(); }, "O");
     $self->{'right_container'}->set_binding(sub { $self->read_all(); }, "A");
+    $self->{'right_container'}->set_binding(sub { $self->switch_unread_feeds(); }, "x");
 
     $self->{'content_container'}->set_binding(sub { $self->close_content(); }, "q");
     $self->{'content_container'}->set_binding(sub { $self->next_item(); }, "n");

@@ -65,7 +65,7 @@ sub unread_feeds()
     if($unread)
     {
         $self->{'cache'}->save_cache("unread_feeds", $unread);
-        $self->add_gui_job("update_count");
+        $self->add_gui_job("redraw_labels");
     }
     else
     {
@@ -96,7 +96,7 @@ sub subscription_list()
     {
         return $self->add_gui_job("error Cannot get friend list.");
     }
-    $self->add_gui_job("update_labels");
+    $self->add_gui_job("redraw_labels");
 }
 
 sub labels()
@@ -120,7 +120,7 @@ sub labels()
     {
         return $self->add_gui_job("error Cannot get friend list.");
     }
-    $self->add_gui_job("update_labels");
+    $self->add_gui_job("redraw_labels");
 
 }
 
@@ -269,13 +269,13 @@ sub unfollow()
 {
     my ($self, $id) = @_;
     my $result = $self->{'reader'}->unfollow($id);
-    $self->add_gui_job("update_labels");
+    $self->add_gui_job("redraw_labels");
 }
 sub follow()
 {
     my ($self, $id) = @_;
     my $result = $self->{'reader'}->follow($id);
-    $self->add_gui_job("update_labels");
+    $self->add_gui_job("redraw_labels");
 }
 
 sub rename_label()
@@ -311,7 +311,7 @@ sub add_feed()
         $self->subscription_list();
         $self->labels();
         $self->add_gui_job("update_status feed $url added");
-        return $self->add_gui_job("update_labels");
+        return $self->add_gui_job("redraw_labels");
     }
     else
     {
@@ -330,7 +330,7 @@ sub edit_feed()
     {
         $self->subscription_list();
         $self->add_gui_job("update_status feed $id added");
-        return $self->add_gui_job("update_labels");
+        return $self->add_gui_job("redraw_labels");
     }
     else
     {
@@ -350,7 +350,7 @@ sub unsubscribe_feed()
         $self->subscription_list();
         $self->labels();
         $self->add_gui_job("update_status feed $id added");
-        return $self->add_gui_job("update_labels");
+        return $self->add_gui_job("redraw_labels");
     }
     else
     {
