@@ -14,6 +14,7 @@
 - Delete feed
 - Mark all as read on category/feed by pressing "A" key
 - Delete old cache files (older than X days)
+- Hide/Show labels with no new items
 
 ## 0.1 (2015-02-26)
 
