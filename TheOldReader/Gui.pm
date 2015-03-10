@@ -848,6 +848,10 @@ sub left_container_onselchange()
 {
     my ($self) = @_;
     my $id = $self->{'left_container'}->get_active_value();
+    if(!$id)
+    {
+        return;
+    }
 
     my $text = "?:".gettext("Help")." ";
     
@@ -1512,7 +1516,7 @@ sub bind_keys()
     $self->{'cui'}->set_binding($exit_ref, "\cC");
     $self->{'cui'}->set_binding($exit_ref, "\cQ");
 
-    $self->{'container'}->set_binding(sub { $self->update_list("clear"); }, "u");
+    $self->{'container'}->set_binding(sub { $self->call_count(); $self->update_list("clear"); }, "u");
     $self->{'container'}->set_binding($exit_ref, "q");
 
     $self->{'left_container'}->set_binding(sub { $self->switch_labels_feeds(); }, "l");
