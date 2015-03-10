@@ -224,12 +224,7 @@ sub update_count()
 
     foreach my $ref(@{$$cache_unread_feeds{'unreadcounts'}})
     {
-        my $id = $$ref{'id'};
-        my $count = $$ref{'count'};
-        if(!$counts{$id} or $counts{$id} !=$count)
-        {
-            $counts{$id} = $count;
-        }
+        $counts{$$ref{'id'}} = $$ref{'count'};
     }
     $self->{'counts'} = \%counts;
 }
@@ -358,7 +353,6 @@ sub display_labels()
     {
         return;
     }
-    $self->log("UPDATE LABELS!");
 
     my @labels = @{$labels};
     my @friends = $friends ? @{$friends} : ();
@@ -407,7 +401,7 @@ sub display_labels()
     $self->{'left_container'}->values(@{$gui_labels->{'values'}});
     $self->{'left_container'}->labels($gui_labels->{'labels'});
     $self->{'left_container'}{'-ypos'} = $saved_pos;
-    if($saved_id)
+    if($saved_id && grep(/$saved_id/, @{$gui_labels->{'values'}}))
     {
         $self->{'left_container'}->set_selection($saved_id);
     }
