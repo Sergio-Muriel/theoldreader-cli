@@ -358,9 +358,10 @@ sub display_labels()
     my @friends = $friends ? @{$friends} : ();
     my %counts = ();
 
-    my $gui_labels = $self->default_label();
     my $saved_pos = $self->{'left_container'}{'-ypos'};
-    my $saved_id = $self->{'left_container'}->id();
+    my $selected_pos = $self->{'left_container'}->id();
+
+    my $gui_labels = $self->default_label();
 
     if($self->{'counts'})
     {
@@ -401,9 +402,9 @@ sub display_labels()
     $self->{'left_container'}->values(@{$gui_labels->{'values'}});
     $self->{'left_container'}->labels($gui_labels->{'labels'});
     $self->{'left_container'}{'-ypos'} = $saved_pos;
-    if($saved_id && grep(/$saved_id/, @{$gui_labels->{'values'}}))
+    if($selected_pos)
     {
-        $self->{'left_container'}->set_selection($saved_id);
+        $self->{'left_container'}->set_selection($selected_pos);
     }
     elsif(!defined($self->{'left_container'}->get()))
     {
