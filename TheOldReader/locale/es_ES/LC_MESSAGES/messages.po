@@ -2,7 +2,7 @@ msgid "Available commands:"
 msgstr "Comandos disponibles"
 
 msgid "Creating configuration:"
-msgstr "Comandos disponibles"
+msgstr "Creación del fichero de configuración:"
 
 msgid "Email"
 msgstr "Correo electrónico"
@@ -300,3 +300,7 @@ msgstr "Marcando todo como leido"
 
 msgid "Switch display labels with no unread items"
 msgstr "Muestra etiquetas que contienen elementos no leidos"
+
+msgid "Display labels with no unread items"
+msgstr "Mostrar etiquetas que no contienen elementos sin leer"
+

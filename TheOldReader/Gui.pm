@@ -471,7 +471,7 @@ sub build_gui()
                 $_[HEAP]->{next_loop_event} = int(time());
                 $_[KERNEL]->alarm(loop_event_tick => $_[HEAP]->{next_loop_event});
 
-                $_[HEAP]->{next_count_event} = int(time()) + TheOldReader::Constants::GUI_UPDATE;
+                $_[HEAP]->{next_count_event} = int(time()) + $self->{'refresh_rate'};
                 $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
             },
 
@@ -489,7 +489,7 @@ sub build_gui()
                 {
                     $self->call_count();
                     $self->call_clean();
-                    $_[HEAP]->{next_count_event}= int(time())+TheOldReader::Constants::GUI_UPDATE;
+                    $_[HEAP]->{next_count_event}= int(time())+$self->{'refresh_rate'};
                     $_[KERNEL]->alarm(count_event_tick => $_[HEAP]->{next_count_event});
                 }
             },

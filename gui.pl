@@ -16,6 +16,7 @@ my $debug;
 my $command;
 my $id;
 my @params;
+my $client;
 
 # Grab options and commands
 GetOptions (
@@ -41,9 +42,17 @@ if(!$config)
     $config = TheOldReader::Constants::DEFAULT_CONFIG;
 }
 
+
+# No conf file, create new one
 if(!-f $config)
 {
-    croak("No configuration file found. Run ./reader.pl create_config to create one.");
+    my $client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config);
+    $client->create_config();
+}
+
+if(!-f $config)
+{
+    croak("No configuration file found.");
 }
 
 my $obj = TheOldReader::GuiShared->new(
@@ -58,7 +67,9 @@ my $bg =threads->create(sub {
 });
 $bg->detach();
 
-my $client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config, 'share' => $obj);
+
+# Init gui
+$client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config, 'share' => $obj);
 $client->init();
 
 

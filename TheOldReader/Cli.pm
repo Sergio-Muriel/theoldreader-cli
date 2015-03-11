@@ -69,33 +69,6 @@ sub help()
     $self->output_string("");
 }
 
-sub create_config()
-{
-    my ($self) = @_;
-    $self->output_string("");
-    $self->output_string(gettext("Creating configuration:"));
-
-    my $username = prompt(gettext('Email').': ');
-    my $password = prompt(gettext('Password').': ', -e => '*');
-
-    $self->{'reader'} = TheOldReader::Api->new(
-       'host' => TheOldReader::Constants::DEFAULT_HOST
-    );
-    my $token = $self->{'reader'}->auth($username, $password);
-    if(!$token)
-    {
-        return $self->output_error(gettext("Error: invalid username / password."));
-    }
-
-    my $max_items_displayed = 20;
-    my $browser = prompt(gettext('Default browser').' [x-www-browser]:') || 'x-www-browser';
-    $self->{'token'} = $token;
-    $self->{'browser'} = $browser;
-    $self->{'max_items_displayed'} = $max_items_displayed;
-
-    $self->save_config();
-    $self->output_string(gettext("Configuration file created"));
-}
 
 
 sub output_list()

@@ -6,7 +6,7 @@ use parent qw(Exporter);
 
 use constant GUI_CATEGORIES_WIDTH => 35;
 use constant GUI_CATEGORIES_WIDTHSMALL => 15;
-use constant GUI_UPDATE => 120;
+use constant DEFAULT_REFRESH_RATE => 120;
 
 use constant MAX_BG_THREADS => 3;
 use constant DEFAULT_MAX => 10;
