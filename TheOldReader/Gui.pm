@@ -821,7 +821,7 @@ sub display_list()
     {
         $gui_list->{'labels'}{'load_more'} = ' '.gettext('No items found');
     }
-    if(!$self->{'next_list'})
+    elsif(!$self->{'next_list'})
     {
         $gui_list->{'labels'}{'load_more'} = '    [ '.gettext('Select to update').' ]';
     }
