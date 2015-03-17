@@ -3,9 +3,11 @@
 ### Bug fix:
 
 - Decode html entities in title and feed content
+- Do not log if -debug is not set
 
 ### Enhancement:
 
+- Add triggers: auto open or read items depending on label or title
 
 ## 0.2
 
