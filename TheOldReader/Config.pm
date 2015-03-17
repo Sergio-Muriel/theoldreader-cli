@@ -41,8 +41,7 @@ sub read_config()
         /^display_feeds:(\d*)$/ and $self->{'display_feeds'}=$1;
         /^refresh_rate:(\d*)$/ and $self->{'refresh_rate'}=$1;
         /^browser:(.*)$/ and $self->{'browser'}=$1;
-
-        /^trigger:"(.*?)","(.*)?"$/ and push(@{$self->{'triggers'}}, [ $1, $2]);
+        /^trigger:"(.*?)","(.*?)","(.*)?"$/ and push(@{$self->{'triggers'}}, [ $1, $2, $3]);
     }
     close(CONFIG);
 }

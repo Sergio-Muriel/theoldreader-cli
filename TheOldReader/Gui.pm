@@ -844,6 +844,22 @@ sub display_list()
     $self->{'right_container'}->labels($gui_list->{'labels'});
     $self->{'cui'}->draw(1);
     $self->update_status(gettext("Loaded new list")." ($id)");
+
+    $self->run_triggers();
+}
+
+sub run_triggers()
+{
+    my ($self, $params) = @_;
+    # Run triggers
+    if($self->{'triggers'})
+    {
+        foreach my $trigger(@{$self->{'triggers'}})
+        {
+            my @trigger_data = @{$trigger};
+            #if($trigger_data
+        }
+    }
 }
 
 sub left_container_onselchange()
