@@ -476,10 +476,10 @@ sub thread_init()
     while($continue)
     {
         my $received;
-        $self->log("Waiting for command.") if ($self->{'debug'});
+        #$self->log("Waiting for command.");
         while($received = $self->{'share'}->shift('background_job'))
         {
-            $self->log("Received ".$received) if($self->{'debug'});
+            $self->log("Received ".$received);
             # Close finisehed
             my @joinable = threads->list(threads::joinable);
             foreach(@joinable)
@@ -492,13 +492,13 @@ sub thread_init()
             while ($#threadlist>TheOldReader::Constants::MAX_BG_THREADS)
             {
                 select(undef,undef,undef,0.5);
-                $self->log("Waiting for some threads to close (".$#threadlist.")") if($self->{'debug'});
+                $self->log("Waiting for some threads to close (".$#threadlist.")");
                 @threadlist = threads->list(threads::running);
                 $was_waiting=1;
             }
             if($was_waiting)
             {
-                $self->log("OK, we can run new thread! (".$#threadlist.")") if($self->{'debug'});
+                $self->log("OK, we can run new thread! (".$#threadlist.")");
             }
 
             if($received eq "quit")
@@ -524,11 +524,14 @@ sub thread_init()
 
 sub log()
 {
-    my $date = strftime "%m/%d/%Y %H:%I:%S", localtime;
     my ($self, $command) = @_;
-    open(WRITE,">>log"),
-    print WRITE "$date BG: $command\n";
-    close WRITE;
+    if($self->{'debug'})
+    {
+        my $date = strftime "%m/%d/%Y %H:%I:%S", localtime;
+        open(WRITE,">>log"),
+        print WRITE "$date BG: $command\n";
+        close WRITE;
+    }
 }
 
 sub output_error()

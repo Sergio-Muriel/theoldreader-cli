@@ -431,19 +431,20 @@ sub init
 
 
     # Build gui
-    $self->log("Starting build gui") if ($self->{'debug'});
+    $self->log("Starting build gui");
     $self->build_gui();
-    $self->log("Starting build content") if ($self->{'debug'});
+    $self->log("Starting build content");
     $self->build_content();
-    $self->log("Starting build help") if ($self->{'debug'});
+    $self->log("Starting build help");
     $self->build_help();
-    $self->log("Starting bind keys") if ($self->{'debug'});
+    $self->log("Starting bind keys");
     $self->bind_keys();
 
     # Update labels/friend list
     $self->update_labels_and_list();
 
     $self->{'triggers_runned'} = ();
+
     #Force draw of gui before loading labels and friends
     $self->{'cui'}->draw();
 
@@ -457,7 +458,7 @@ sub init
     }
 
     # Loo gui
-    $self->log("Starting fetch friends") if ($self->{'debug'});
+    $self->log("Starting fetch friends");
     $self->run_gui();
 }
 
@@ -604,7 +605,7 @@ sub build_gui()
 sub build_content()
 {
     my ($self) = @_;
-    $self->log("Building content") if ($self->{'debug'});
+    $self->log("Building content");
 
     $self->{'content_container'} = $self->{'window'}->add(
         'content_container',
@@ -735,12 +736,12 @@ sub update_list()
     my $id = $self->{'left_container'}->get();
     if($self->{'loading_feed_list'} and $clear eq 'noclear')
     {
-        $self->log("Still loading list. no update") if($self->{'debug'});
+        $self->log("Still loading list. no update");
         return;
     }
     if($id eq 'load_more' or $id eq "loading")
     {
-        $self->log("Not loading list $id") if($self->{'debug'});
+        $self->log("Not loading list $id");
         return;
     }
 
@@ -1382,10 +1383,10 @@ sub loop_event()
     my ($self, @params) = @_;
     
     my $received;
-    $self->log("Waiting for command.") if ($self->{'debug'});
+    #$self->log("Waiting for command.");
     while($received = $self->{'share'}->shift('gui_job'))
     {
-        $self->log("Received command $received") if($self->{'debug'});
+        $self->log("Received command $received");
         my ($command, $params)  = ($received=~ /^(\S+)\s*(.*?)$/);
         if($command)
         {
@@ -1403,12 +1404,14 @@ sub loop_event()
 
 sub log()
 {
-    my $date = strftime "%m/%d/%Y %H:%I:%S", localtime;
-
     my ($self, $command) = @_;
-    open(WRITE,">>log"),
-    print WRITE "$date GUI: $command\n";
-    close WRITE;
+    if($self->{'debug'})
+    {
+        my $date = strftime "%m/%d/%Y %H:%I:%S", localtime;
+        open(WRITE,">>log"),
+        print WRITE "$date GUI: $command\n";
+        close WRITE;
+    }
 }
 
 sub switch_unread_feeds()
