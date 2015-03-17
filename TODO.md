@@ -4,4 +4,5 @@
 * Full webpage of project with simple tutorial. Maybe a video?  (ENHANCEMENT)
 * Customizable gui (ENHANCEMENT)
 * Bind [1-9] keys to open feed links
+* Auto clean read items
 
