@@ -1,3 +1,12 @@
+## 0.3
+
+### Bug fix:
+
+- Decode html entities in title and feed content
+
+### Enhancement:
+
+
 ## 0.2
 
 ### Bug fix:
