@@ -4,6 +4,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use Text::Iconv;
 use utf8;
 use IO::Prompt;
+use HTML::Entities;
 use Locale::gettext;
 
 $VERSION     = 1.00;
@@ -141,6 +142,7 @@ sub get_title()
         $title = $feed->{'title'};
     }
     utf8::decode($title);
+    $title = decode_entities($title);
     return $title;
 }
 
@@ -1185,10 +1187,13 @@ sub display_item()
         # Inline tags and unclosed block tags
         $content =~ s/<\/?[^>]+>//isg;
 
+        # Replace html entities
+        $content = decode_entities($content);
+
         # Get url
         my @canonical = @{$item->{'canonical'}};
 
-        $intro =gettext("Feed").":\t".$$item{'origin'}{'title'}."\n";
+        $intro =gettext("Feed").":\t".decode_entities($$item{'origin'}{'title'})."\n";
         $intro.=gettext("Title").":\t".$$item{'title'}."\n";
         $intro.=gettext("Author").":\t".$$item{'author'}."\n";
         $intro.=gettext("Date").":\t".$dt."\n";
