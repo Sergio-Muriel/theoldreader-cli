@@ -1257,17 +1257,17 @@ sub display_item()
             foreach(@urls)
             {
                 $num++;
-                $text.="\t[$num]: $_\n";
+                $text.="[$num]: $_\n";
             }
         }
         if(@images)
         {
             $num=0;
-            $text.=gettext("Images")."\n";
+            $text.=gettext("Images").":\n";
             foreach(@images)
             {
                 $num++;
-                $text.="\t[$num]: $_\n";
+                $text.="[$num]: $_\n";
             }
         }
 
