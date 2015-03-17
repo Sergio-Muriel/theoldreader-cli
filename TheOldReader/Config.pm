@@ -28,6 +28,9 @@ sub read_config()
     {
         return $self->output_error("Error: cannot read file ".$self->{'config'});
     }
+
+    $self->{'triggers'} = ();
+
     open(CONFIG, $self->{'config'});
     while(<CONFIG>)
     {
@@ -38,6 +41,8 @@ sub read_config()
         /^display_feeds:(\d*)$/ and $self->{'display_feeds'}=$1;
         /^refresh_rate:(\d*)$/ and $self->{'refresh_rate'}=$1;
         /^browser:(.*)$/ and $self->{'browser'}=$1;
+
+        /^trigger:"(.*?)","(.*)?"$/ and push(@{$self->{'triggers'}}, [ $1, $2]);
     }
     close(CONFIG);
 }
