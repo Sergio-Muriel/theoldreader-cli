@@ -443,6 +443,7 @@ sub init
     # Update labels/friend list
     $self->update_labels_and_list();
 
+    $self->{'triggers_runned'} = ();
     #Force draw of gui before loading labels and friends
     $self->{'cui'}->draw();
 
@@ -813,6 +814,7 @@ sub display_list()
             my $id = $_->{'id'};
             if(!grep(/$id/,@{$gui_list->{'values'}}))
             {
+                $self->run_triggers($id);
                 push(@new_values, $id);
                 push(@{$gui_list->{'values'}}, $id);
             }
@@ -845,19 +847,46 @@ sub display_list()
     $self->{'cui'}->draw(1);
     $self->update_status(gettext("Loaded new list")." ($id)");
 
-    $self->run_triggers();
 }
 
 sub run_triggers()
 {
-    my ($self, $params) = @_;
+    my ($self, $id) = @_;
     # Run triggers
-    if($self->{'triggers'})
+    if($self->{'triggers'} && !$self->{'triggers_runned'}{$id})
     {
-        foreach my $trigger(@{$self->{'triggers'}})
+        my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+        $self->log("Run trigger $id");
+        if($feed)
         {
-            my @trigger_data = @{$trigger};
-            #if($trigger_data
+            foreach my $trigger(@{$self->{'triggers'}})
+            {
+                my ($trigger_type, $match, $run) = @{$trigger};
+                $match =~ s/([^\w])/\\$1/g;
+
+                $self->log("Check trigger $trigger_type / $match -> $run");
+                if(
+                    ($trigger_type eq 'label' && grep(/user\/-\/label\/$match/i,@{$feed->{'categories'}})) ||
+                    ($trigger_type eq 'title' && $feed->{'title'} =~ /$match/i)
+                )
+                {
+                    $self->log("OK match $id");
+                    if($run eq 'read')
+                    {
+                        $self->log("Run read");
+                        $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
+                        $self->update_loading_list($id);
+                    }
+                    elsif($run eq 'open')
+                    {
+                        $self->log("Run open");
+                        $self->open_item($id);
+                        $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
+                        $self->update_loading_list($id);
+                    }
+                }
+            }
+            $self->{'triggers_runned'}{$id}=1;
         }
     }
 }
@@ -1269,16 +1298,18 @@ sub prev_item()
 }
 sub open_item()
 {
-    my ($self) = @_;
+    my ($self,$id) = @_;
     my @items = @{$self->{'right_container'}->values()};
-    my $id;
-    if($self->{'item_displayed'})
+    if(!$id)
     {
-        $id  = $items[$self->{'item_idx'}];
-    }
-    else
-    {
-        $id = $self->{'right_container'}->get_active_value();
+        if($self->{'item_displayed'})
+        {
+            $id  = $items[$self->{'item_idx'}];
+        }
+        else
+        {
+            $id = $self->{'right_container'}->get_active_value();
+        }
     }
 
     my $item = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
@@ -1287,7 +1318,7 @@ sub open_item()
         my @canonical = @{$item->{'canonical'}};
         open CMD, "| ".($self->{'browser'}||"x-www-browser") ." '".$canonical[0]{'href'}."' 2>/dev/null";
         close CMD;
-        $self->right_container_read();
+        $self->right_container_read($id);
     }
 }
 
@@ -1501,8 +1532,11 @@ sub right_container_broadcast()
 
 sub right_container_read()
 {
-    my ($self) = @_;
-    my $id = $self->{'right_container'}->get_active_value();
+    my ($self,$id) = @_;
+    if(!$id)
+    {
+        $id = $self->{'right_container'}->get_active_value();
+    }
 
     $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
     $self->update_loading_list($id);
