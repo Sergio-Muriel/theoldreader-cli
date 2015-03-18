@@ -8,7 +8,7 @@
 
 ### Enhancement:
 
-- Add triggers: auto open or read items depending on label or title
+- Add triggers: auto open or read items depending on label and/or title
 - Some gui improvement
 
 ## 0.2

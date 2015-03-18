@@ -58,6 +58,7 @@ Use tab to switch between windows, and press enter to select an item.
 
 You can also press:
 
+- ?: display help
 - x: to switch from all items to only unread items
 - u: to update the right column items
 - s: to switch the star flag of the current selected item
