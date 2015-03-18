@@ -734,6 +734,10 @@ sub update_list()
     }
 
     my $id = $self->{'left_container'}->get();
+    if(!$id)
+    {
+        return;
+    }
     if($self->{'loading_feed_list'} and $clear eq 'noclear')
     {
         $self->log("Still loading list. no update");
