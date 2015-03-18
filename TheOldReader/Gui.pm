@@ -862,33 +862,43 @@ sub run_triggers()
     if($self->{'triggers'} && !$self->{'triggers_runned'}{$id})
     {
         my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
-        $self->log("Run trigger $id");
+        $self->log("Running triggers for feed $id");
         if($feed)
         {
             foreach my $trigger(@{$self->{'triggers'}})
             {
-                my ($trigger_type, $match, $run) = @{$trigger};
-                $match =~ s/([^\w])/\\$1/g;
-
-                $self->log("Check trigger $trigger_type / $match -> $run");
-                if(
-                    ($trigger_type eq 'label' && grep(/user\/-\/label\/$match/i,@{$feed->{'categories'}})) ||
-                    ($trigger_type eq 'title' && $feed->{'title'} =~ /$match/i)
-                )
+                my $valid = 1;
+                my %check  = @{$$trigger{'check'}};
+                my @run  = @{$$trigger{'run'}};
+                foreach my $trigger_type(keys %check)
                 {
-                    $self->log("OK match $id");
-                    if($run eq 'read')
+                    my $match = $check{$trigger_type};
+                    $match =~ s/([^\w])/\\$1/g;
+                    if(
+                        ($trigger_type eq 'label' && !grep(/user\/-\/label\/$match/i,@{$feed->{'categories'}})) ||
+                        ($trigger_type eq 'title' && $feed->{'title'} !~ /$match/i)
+                    )
                     {
-                        $self->log("Run read");
-                        $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
-                        $self->update_loading_list($id);
+                        $valid=0;
                     }
-                    elsif($run eq 'open')
+                }
+                if($valid)
+                {
+                    foreach my $run(@run)
                     {
-                        $self->log("Run open");
-                        $self->open_item($id);
-                        $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
-                        $self->update_loading_list($id);
+                        if($run eq 'read')
+                        {
+                            $self->log("Run read");
+                            $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
+                            $self->update_loading_list($id);
+                        }
+                        elsif($run eq 'open')
+                        {
+                            $self->log("Run open");
+                            $self->open_item($id);
+                            $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
+                            $self->update_loading_list($id);
+                        }
                     }
                 }
             }

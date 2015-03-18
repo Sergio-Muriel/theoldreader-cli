@@ -41,7 +41,19 @@ sub read_config()
         /^display_feeds:(\d*)$/ and $self->{'display_feeds'}=$1;
         /^refresh_rate:(\d*)$/ and $self->{'refresh_rate'}=$1;
         /^browser:(.*)$/ and $self->{'browser'}=$1;
-        /^trigger:"(.*?)","(.*?)","(.*)?"$/ and push(@{$self->{'triggers'}}, [ $1, $2, $3]);
+        /^trigger:(.*?)$/ and do {
+            my %trigger = ();
+            $trigger{'raw'} = $1;
+            $trigger{'check'} = [];
+            $trigger{'run'} = [];
+            if($trigger{'raw'} =~ /^"(.*?)","(.*?)"$/)
+            {
+                my ($checks,$runs) = ($1,$2);
+                push(@{$trigger{'check'}}, split(/[=,]/, $checks));
+                push(@{$trigger{'run'}}, split(/[=,]/, $runs));
+            }
+            push(@{$self->{'triggers'}}, \%trigger);
+        };
     }
     close(CONFIG);
 }
@@ -52,7 +64,7 @@ sub save_config()
     print WRITE "token:".$self->{'token'}."\n";
     print WRITE "max_items_displayed:".$self->{'max_items_displayed'}."\n";
 
-    if($self->{'display_feeds'})
+    if(defined($self->{'display_feeds'}))
     {
         print WRITE "display_feeds:".$self->{'display_feeds'}."\n";
     }
@@ -60,7 +72,7 @@ sub save_config()
     {
         print WRITE "display_feeds:0\n";
     }
-    if($self->{'only_unread'})
+    if(defined($self->{'only_unread'}))
     {
         print WRITE "only_unread:".$self->{'only_unread'}."\n";
     }
@@ -68,7 +80,7 @@ sub save_config()
     {
         print WRITE "only_unread:1\n";
     }
-    if($self->{'labels_unread'})
+    if(defined($self->{'labels_unread'}))
     {
         print WRITE "labels_unread:".$self->{'labels_unread'}."\n";
     }
@@ -77,7 +89,7 @@ sub save_config()
         print WRITE "labels_unread:1\n";
     }
 
-    if($self->{'browser'})
+    if(defined($self->{'browser'}))
     {
         print WRITE "browser:".$self->{'browser'}."\n";
     }
@@ -85,9 +97,20 @@ sub save_config()
     {
         print WRITE "browser:x-www-browser\n";
     }
-    if($self->{'refresh_rate'})
+    if(defined($self->{'refresh_rate'}))
     {
         print WRITE "refresh_rate:".$self->{'refresh_rate'}."\n";
+    }
+    else
+    {
+        print WRITE "refresh_rate:".TheOldReader::Constants::DEFAULT_REFRESH_RATE."\n";
+    }
+    if(defined($self->{'triggers'}))
+    {
+        foreach my $trigger(@{$self->{'triggers'}})
+        {
+            print WRITE "trigger:".$$trigger{'raw'}."\n";
+        }
     }
     else
     {
