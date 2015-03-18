@@ -383,7 +383,7 @@ sub display_labels()
     {
         my $labelid = $label->{'id'};
         my ($labelname) = ($labelid =~ /label\/(.*)$/);
-        if($labelname && (!$self->{'labels_unread'} || ($counts{$labelid} && $counts{$labelid}>0)))
+        if($labelname)
         {
             $gui_labels->{'display_labels'}{$labelid} = $labelname;
             $gui_labels->{'original_labels'}{$labelid} = " > ".$labelname;
@@ -391,7 +391,8 @@ sub display_labels()
             my $num = " (".$counts{$labelid}.")";
             my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length($gui_labels->{'original_labels'}{$labelid})-length($num));
             $gui_labels->{'labels'}{$labelid} = substr($gui_labels->{'original_labels'}{$labelid},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
-            if(!grep(/$labelid/, @{$gui_labels->{'values'}}))
+
+            if((!$self->{'labels_unread'} || ($counts{$labelid} && $counts{$labelid}>0)) && !grep(/$labelid/, @{$gui_labels->{'values'}}))
             {
                 push(@{$gui_labels->{'values'}}, $labelid);
             }
