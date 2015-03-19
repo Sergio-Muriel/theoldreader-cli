@@ -905,6 +905,24 @@ sub run_triggers()
                             $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
                             $self->update_loading_list($id);
                         }
+                        elsif($run eq 'star')
+                        {
+                            $self->log("Run star");
+                            $self->update_loading_list($id);
+                            $self->add_background_job("mark_starred ".$id, gettext("Marking starred"));
+                        }
+                        elsif($run eq 'like')
+                        {
+                            $self->log("Run like");
+                            $self->update_loading_list($id);
+                            $self->add_background_job("mark_like ".$id, gettext("Marking as liked"));
+                        }
+                        elsif($run eq 'share')
+                        {
+                            $self->log("Run share");
+                            $self->update_loading_list($id);
+                            $self->add_background_job("mark_broadcast ".$id." ", gettext("Marking as shared"));
+                        }
                     }
                 }
             }
