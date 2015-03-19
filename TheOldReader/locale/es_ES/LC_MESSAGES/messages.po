@@ -304,3 +304,6 @@ msgstr "Muestra etiquetas que contienen elementos no leidos"
 msgid "Display labels with no unread items"
 msgstr "Mostrar etiquetas que no contienen elementos sin leer"
 
+msgid "Refresh rate"
+msgstr "Tiempo de refresco (en segundos)"
+
