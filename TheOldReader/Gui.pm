@@ -868,6 +868,7 @@ sub run_triggers()
             foreach my $trigger(@{$self->{'triggers'}})
             {
                 my $valid = 1;
+                $self->log("Trigger data ".$$trigger{'raw'});
                 my %check  = @{$$trigger{'check'}};
                 my @run  = @{$$trigger{'run'}};
                 foreach my $trigger_type(keys %check)
@@ -877,8 +878,8 @@ sub run_triggers()
 
                     # Check conditions
                     if(
-                        ($trigger_type eq 'unread' && $match && grep(/user\/-\/state\/com\.google\/read/i,@{$feed->{'categories'}})) ||
-                        ($trigger_type eq 'unread' && !$match && !grep(/user\/-\/state\/com\.google\/read/i,@{$feed->{'categories'}})) ||
+                        ($trigger_type eq 'unread' && $match && !grep(/user\/-\/state\/com\.google\/read/i,@{$feed->{'categories'}})) ||
+                        ($trigger_type eq 'unread' && !$match && grep(/user\/-\/state\/com\.google\/read/i,@{$feed->{'categories'}})) ||
 
                         ($trigger_type eq 'label' && !grep(/user\/-\/label\/$match/i,@{$feed->{'categories'}})) ||
 
@@ -886,10 +887,16 @@ sub run_triggers()
                     )
                     {
                         $valid=0;
+                        $self->log("Not valid ".$feed->{'title'}." with ".$trigger_type." / $match");
+                    }
+                    else
+                    {
+                        $self->log("Valid trigger! ".$feed->{'title'});
                     }
                 }
                 if($valid)
                 {
+                    $self->log("Final validated. Running! ".join(", ",@run));
                     foreach my $run(@run)
                     {
                         if($run eq 'read')

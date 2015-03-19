@@ -3,6 +3,7 @@
 ### Bug fix:
 
 - Remove log message of cache class
+- Trigger condition fix for unread
 
 ### Enhancement:
 
