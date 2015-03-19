@@ -5,6 +5,7 @@
 - Decode html entities in title and feed content
 - Do not log if -debug is not set
 - Fix label names on feed list
+- Fix save configuration for some values when = 0
 
 ### Enhancement:
 
