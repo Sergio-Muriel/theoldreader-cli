@@ -1,3 +1,12 @@
+## 0.4
+
+### Bug fix:
+
+- Remove log message of cache class
+
+### Enhancement:
+
+
 ## 0.3
 
 ### Bug fix:
