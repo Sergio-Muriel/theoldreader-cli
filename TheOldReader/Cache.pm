@@ -33,7 +33,6 @@ sub new
 sub clean()
 {
     my ($self) = @_;
-    $self->log("cleaning cache files older than ".TheOldReader::Constants::CACHE_DELETE_DAYS." days.");
     if(-d $self->{'dir'})
     {
         opendir(my $dh, $self->{'dir'});
