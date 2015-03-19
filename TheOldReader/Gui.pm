@@ -874,8 +874,14 @@ sub run_triggers()
                 {
                     my $match = $check{$trigger_type};
                     $match =~ s/([^\w])/\\$1/g;
+
+                    # Check conditions
                     if(
+                        ($trigger_type eq 'unread' && $match && grep(/user\/-\/state\/com\.google\/read/i,@{$feed->{'categories'}})) ||
+                        ($trigger_type eq 'unread' && !$match && !grep(/user\/-\/state\/com\.google\/read/i,@{$feed->{'categories'}})) ||
+
                         ($trigger_type eq 'label' && !grep(/user\/-\/label\/$match/i,@{$feed->{'categories'}})) ||
+
                         ($trigger_type eq 'title' && $feed->{'title'} !~ /$match/i)
                     )
                     {
