@@ -31,16 +31,16 @@ On debian you can install the packages using the apt command:
     $ brew install cpanm
     $ sudo perl -MCPAN -e 'install JSON,LWP::UserAgent,IO::Prompt,Curses::UI,Curses::UI::POE,Mozilla::CA'
 
-## Create configuration file
+## First run and creation of configuration file
 
-Use reader.pl script to create a configuration that contains the auth token. No username/password will be stored.
+When running for the first time, the gui will ask you to create a configuration file.
 
-    $ ./reader.pl create_config
+
+    $ ./gui.pl
     Creating configuration:
     Username: my@mail
     Password: ************
-    Max items displayed: 10
-    File global.conf created.
+    ....
 
 ## GUI
 
@@ -56,119 +56,34 @@ When loaded, you will find a list of labels (on the left), and a list of associa
 
 Use tab to switch between windows, and press enter to select an item.
 
-You can also press:
+Press ? key at any time to display the shortcuts you can use.
 
-- ?: display help
-- x: to switch from all items to only unread items
-- u: to update the right column items
-- s: to switch the star flag of the current selected item
-- r: to mark the item as read
-- R: to unmark the item as read
-- Enter: to display the summary
+### Triggers
 
-Displaying feeds instead of labels
-![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli7.png)
+A list of automatic commands can be runned using triggers.
 
+You will need to edit the configuration file manually since there is no gui (for now) to edit them.
 
-Displaying content of a feed
+The syntax is simple, there is one trigger per line, and a trigger must have 2 parts:
 
-![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli5.png)
+- Condition(s)
+- Action(s)
 
+Example:
+    # Default structure is:
+    # trigger:"conditions","run actions"
 
-### Commands
+    # This trigger auto open on browser all the items displayed that have the label "Download"
+    trigger:"label=Download","open"
 
-## Console client
+    # This trigger auto flag to read all the unread items
+    trigger:"unread=0","read"
 
-Once you have created the configuration file, you can use one of the following commands:
+    # This trigger auto open on browser all the items which title contains the word video
+    trigger:"title=video","open"
 
-### Help
+    # You can also mix all them together:
+    # Auto open and read  the unread items that are on label "News", and which title contains the word video
+    trigger:"unread=0,label=News,title=video","open,read"
 
-Use help command to display the list of commands you can use.
-
-    $ ./reader.pl help
-    Use: ./reader.pl [ create_config | unread | last | labels | mark_read | subscription_list | unread_feeds ]
-    ...
-
-
-
-### Last unread items
-
-To display last unread items, just use the unread command:
-
-    $ ./reader.pl unread
-    tag:google.com,2005:reader/item/54ce6c62b88035d71a002a63
-    "Amigos del @ppmadrid. Lo de la foto no es Auschwitz, es Burgos. Me parece que os queda más cerca"
-    http://meneame.feedsportal.com/c/34737/f/639540/s/42ed29b3/sc/7/l/0M0Smeneame0Bnet0Cstory0Camigos0Eppmadrid0Efoto0Eno0Eauschwitz0Eburgos0Eparece0Eos0Equeda0Emas/story01.htm
-
-    Mark items as read? [O/n]:
-
-When displaying unread items, you will be asked if you want to mark them as read.
-
-### Last items
-
-You can display already read items by using the 'last' command.
-
-    $ ./reader.pl last
-
-
-#### Filter by labels/category
-
-If you have many feeds ordered by categories, you may want to display only the feeds that are in one category.
-
-Just use the 'labels' command to get a list of the categories you have:
-
-    $ ./reader.pl labels
-    List of labels:
-     - user/-/label/web dev : web dev
-     - user/-/label/news-big : news-big
-     - ...
-
-You can use the 'last' or 'unread' commands, followed by the label to display only the items of that label:
-
-    $ ./reader.pl last user/-/label/news-big
-
-### Watch / Wait for new items
-
-You can wait for new items to by using the 'watch' command. Basically it is loop that never ends, until you press CTRL+C.
-
-    $ ./reader.pl watch
-    ... unread items  displayed as they arrived
-
-### List unread feeds
-
-To display the name of the feeds that have unread items:
-
-    ./reader.pl unread_feeds
-    Unread items:
-      - feed/52e1659d091452dd37000e44 : Menme: publicadas (1)
-
-    ./reader.pl unread feed/52e1659d091452dd37000e44
-    ...
-
-### Mark and unmark like flag
-
-    ./reader mark_like tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
-    ./reader unmark_like tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
-
-### Mark and unmark broadcast flag
-
-    ./reader mark_broadcast tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d mymessage
-    ./reader unmark_broadcast tag:google.com,2005:reader/item/54e30bc0175ad6affa003b4d
-
-### Get list of friends
-
-    ./reader friends
-
-### Add feed
-
-    ./reader.pl add_feed http://rss.lemonde.fr/c/205/f/3050/index.rss
-    Added feed/54e4b255fea0e7ed4a0000a7: http://rss.lemonde.fr/c/205/f/3050/index.rss
-
-### Rename label
-
-    ./reader.pl rename_label My_tag New_Tag_Name
-
-### Add comment
-
-    ./reader.pl add_comment tag:google.com,2005:reader/item/54eda62e315adec5b5007e2 "My text"
 
