@@ -112,10 +112,6 @@ sub save_config()
             print WRITE "trigger:".$$trigger{'raw'}."\n";
         }
     }
-    else
-    {
-        print WRITE "refresh_rate:".TheOldReader::Constants::DEFAULT_REFRESH_RATE."\n";
-    }
     close WRITE;
 }
 
@@ -143,7 +139,11 @@ sub create_config()
     my $refresh_rate="";
     while($refresh_rate !~ /^\d+/)
     {
-        $refresh_rate = prompt(gettext('Refresh rate').' ['.TheOldReader::Constants::DEFAULT_REFRESH_RATE.']:') | TheOldReader::Constants::DEFAULT_REFRESH_RATE;
+        $refresh_rate = prompt(gettext('Refresh rate').' ['.TheOldReader::Constants::DEFAULT_REFRESH_RATE.']:');
+        if($refresh_rate eq '')
+        {
+            $refresh_rate = TheOldReader::Constants::DEFAULT_REFRESH_RATE;
+        }
     }
 
     my $labels_unread="";
