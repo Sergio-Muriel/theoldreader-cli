@@ -34,7 +34,7 @@ sub read_config()
     $self->{'max_items_displayed'}=TheOldReader::Constants::DEFAULT_MAX;
     $self->{'only_unread'}=1;
     $self->{'labels_unread'}=1;
-    $self->{'display_feeds'}=0;
+    $self->{'display_feeds'}="";
     $self->{'refresh_rate'}=TheOldReader::Constants::DEFAULT_REFRESH_RATE;
     $self->{'browser'}='x-www-browser';
     $self->{'unread_desktop_notification'}=1;
