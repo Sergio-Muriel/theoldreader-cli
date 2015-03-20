@@ -18,7 +18,7 @@ On debian you can install the packages using the apt command:
 
 ### If you want the gui
 
-    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl
+    $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl libnotify-bin
 
     $ cpan -i Curses::UI::POE
 
@@ -71,21 +71,22 @@ The syntax is simple, there is one trigger per line, and a trigger must have 2 p
 
 Available conditions:
 
-    - title=value # Check for title containing value
-    - label=value # Check for feed containing this label
-    - unread=1 # Check for item not read already
-    - unread=0 # Check for item read already
+- title=value # Check for title containing value
+- label=value # Check for feed containing this label
+- unread=1 # Check for item not read already
+- unread=0 # Check for item read already
 
 Available actions:
 
-    - open # Auto open on browser
-    - read # Mark item as read
-    - star # Mark item as  starred
-    - like # Mark item as liked
-    - share # Mark item as shared (without message)
-
+- open # Auto open on browser
+- read # Mark item as read
+- star # Mark item as  starred
+- like # Mark item as liked
+- share # Mark item as shared (without message)
+- notify # Display a desktop notification with the feed title
 
 Example:
+
     # Default structure is:
     # trigger:"conditions","run actions"
 
@@ -98,7 +99,8 @@ Example:
     # This trigger auto open on browser all the items which title contains the word video
     trigger:"title=video","open"
 
-    trigger:"unread=0,label=News,title=video","open,read"
+    # This trigger send a desktop notification of each new item displayed
+    trigger:"unread=1","notify"
 
     # You can also mix all them together:
     # Auto open and read  the unread items that are on label "News", and which title contains the word video

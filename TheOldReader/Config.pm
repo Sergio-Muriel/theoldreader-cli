@@ -29,7 +29,17 @@ sub read_config()
         return $self->output_error("Error: cannot read file ".$self->{'config'});
     }
 
+    # Default values
+    $self->{'token'}="";
+    $self->{'max_items_displayed'}=TheOldReader::Constants::DEFAULT_MAX;
+    $self->{'only_unread'}=1;
+    $self->{'labels_unread'}=1;
+    $self->{'display_feeds'}=0;
+    $self->{'refresh_rate'}=TheOldReader::Constants::DEFAULT_REFRESH_RATE;
+    $self->{'browser'}='x-www-browser';
+    $self->{'unread_desktop_notification'}=1;
     $self->{'triggers'} = ();
+
 
     open(CONFIG, $self->{'config'});
     while(<CONFIG>)
@@ -41,6 +51,7 @@ sub read_config()
         /^display_feeds:(\d*)$/ and $self->{'display_feeds'}=$1;
         /^refresh_rate:(\d*)$/ and $self->{'refresh_rate'}=$1;
         /^browser:(.*)$/ and $self->{'browser'}=$1;
+        /^unread_desktop_notification:(.*)$/ and $self->{'unread_desktop_notification'}=$1;
         /^trigger:(.*?)$/ and do {
             my %trigger = ();
             $trigger{'raw'} = $1;
@@ -153,11 +164,19 @@ sub create_config()
     }
     $labels_unread = ($labels_unread =~ /y/i) ? 1 : 0;
 
+    my $unread_desktop_notification="";
+    while($unread_desktop_notification !~ /^[YN]/i)
+    {
+        $labels_unread = prompt(gettext('Display unread desktop notifications').' [Y/n]:') | 'Y';
+    }
+    $unread_desktop_notification = ($unread_desktop_notification =~ /y/i) ? 1 : 0;
+
     $self->{'token'} = $token;
     $self->{'browser'} = $browser;
     $self->{'refresh_rate'} = $refresh_rate;
     $self->{'labels_unread'} = $labels_unread;
     $self->{'max_items_displayed'} = $max_items_displayed;
+    $self->{'unread_desktop_notification'} = $unread_desktop_notification;
 
     $self->save_config();
     $self->output_string(gettext("Configuration file created"));

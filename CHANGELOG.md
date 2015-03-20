@@ -1,12 +1,19 @@
+## 0.5
+
+### Bug fix:
+
+
+### Enhancement:
+
+- Add Desktop notification trigger for each item
+- Add unread count desktop notification
+
 ## 0.4
 
 ### Bug fix:
 
 - Remove log message of cache class
 - Trigger condition fix for unread
-
-### Enhancement:
-
 
 ## 0.3
 

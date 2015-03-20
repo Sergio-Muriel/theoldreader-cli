@@ -307,3 +307,8 @@ msgstr "Mostrar etiquetas que no contienen elementos sin leer"
 msgid "Refresh rate"
 msgstr "Tiempo de refresco (en segundos)"
 
+msgid "Display unread desktop notifications"
+msgstr "Mostrar notificaciones del número de elementos no leidos"
+
+msgid "items not read"
+msgstr "elementos no leidos"

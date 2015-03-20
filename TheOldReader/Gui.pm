@@ -42,6 +42,7 @@ sub new
         $self->{'config'} = TheOldReader::Constants::DEFAULT_CONFIG;
     }
     $self->{'debug'} = $params{'debug'};
+    $self->{'path'} = $params{'path'};
 
     $self->read_config();
 
@@ -229,6 +230,12 @@ sub update_count()
         $counts{$$ref{'id'}} = $$ref{'count'};
     }
     $self->{'counts'} = \%counts;
+
+    if(!$self->{'old_counts'} || $self->{'old_counts'} != $$cache_unread_feeds{'max'})
+    {
+        $self->{'old_counts'} = $$cache_unread_feeds{'max'};
+        $self->notify($$cache_unread_feeds{'max'}." ".gettext("items not read."));
+    }
 }
 
 sub redraw_labels()
@@ -925,6 +932,11 @@ sub run_triggers()
                             $self->update_loading_list($id);
                             $self->add_background_job("mark_broadcast ".$id." ", gettext("Marking as shared"));
                         }
+                        elsif($run eq 'notify')
+                        {
+                            $self->log("Run notify");
+                            $self->notify($id, $feed->{'title'});
+                        }
                     }
                 }
             }
@@ -1602,6 +1614,12 @@ sub right_container_unread()
 
     $self->add_background_job("mark_unread ".$id, gettext("Unmarking as read"));
     $self->update_loading_list($id);
+}
+
+sub notify()
+{
+    my ($self,$text) = @_;
+    system(TheOldReader::Constants::NOTIFY_BIN,'-i',$self->{'path'}.'images/logo.png', $text);
 }
 
 sub bind_keys()

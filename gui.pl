@@ -9,8 +9,11 @@ use TheOldReader::GuiBackground;
 use TheOldReader::Gui;
 use threads;
 use threads::shared;
+use Cwd 'abs_path';
+use File::Basename;
 
 
+my $path = dirname(abs_path($0))."/";
 my $config;
 my $debug;
 my $command;
@@ -46,7 +49,7 @@ if(!$config)
 # No conf file, create new one
 if(!-f $config)
 {
-    my $client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config);
+    my $client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config, 'path' => $path);
     $client->create_config();
 }
 
@@ -61,7 +64,7 @@ my $obj = TheOldReader::GuiShared->new(
 );
 
 my $bg =threads->create(sub {
-    my $background = TheOldReader::GuiBackground->new('debug' => $debug, 'config' => $config, 'share' => $obj);
+    my $background = TheOldReader::GuiBackground->new('debug' => $debug, 'config' => $config, 'share' => $obj, 'path' => $path);
     $background->thread_init();
     $background->log("DONE thread bg ! ");
 });
@@ -69,7 +72,7 @@ $bg->detach();
 
 
 # Init gui
-$client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config, 'share' => $obj);
+$client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config, 'share' => $obj, 'path' => $path);
 $client->init();
 
 
