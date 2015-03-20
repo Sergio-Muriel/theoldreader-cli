@@ -938,7 +938,7 @@ sub run_triggers()
                         elsif($run eq 'notify')
                         {
                             $self->log("Run notify");
-                            $self->notify($id, $feed->{'title'});
+                            $self->notify($feed->{'title'});
                         }
                     }
                 }
