@@ -231,7 +231,7 @@ sub update_count()
     }
     $self->{'counts'} = \%counts;
 
-    if(!$self->{'old_counts'} || $self->{'old_counts'} != $$cache_unread_feeds{'max'})
+    if($self->{'unread_desktop_notification'} && (!$self->{'old_counts'} || $self->{'old_counts'} != $$cache_unread_feeds{'max'}))
     {
         $self->{'old_counts'} = $$cache_unread_feeds{'max'};
         if($$cache_unread_feeds{'max'} ne "0")
