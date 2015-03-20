@@ -234,7 +234,10 @@ sub update_count()
     if(!$self->{'old_counts'} || $self->{'old_counts'} != $$cache_unread_feeds{'max'})
     {
         $self->{'old_counts'} = $$cache_unread_feeds{'max'};
-        $self->notify($$cache_unread_feeds{'max'}." ".gettext("items not read."));
+        if($$cache_unread_feeds{'max'} ne "0")
+        {
+            $self->notify($$cache_unread_feeds{'max'}." ".gettext("items not read."));
+        }
     }
 }
 
