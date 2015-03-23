@@ -7,6 +7,7 @@
 
 - Add Desktop notification trigger for each item
 - Add unread count desktop notification
+- Add notify images
 
 ## 0.4
 
