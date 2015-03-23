@@ -90,8 +90,12 @@ Example:
     # Default structure is:
     # trigger:"conditions","run actions"
 
+    # Auto mark as read sponsored feeds
+    trigger:"title=[Sponsored]","read"
+
     # This trigger auto open on browser all the items displayed that have the label "Download"
     trigger:"label=Download","open"
+
 
     # This trigger auto flag to read all the unread items
     trigger:"unread=0","read"
