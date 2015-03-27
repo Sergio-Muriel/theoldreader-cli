@@ -145,7 +145,11 @@ sub create_config()
     }
 
     my $max_items_displayed = 20;
-    my $browser = prompt(gettext('Default browser').' [x-www-browser]:') | 'x-www-browser';
+    my $browser = prompt(gettext('Default browser').' [x-www-browser]:');
+    if($browser eq '')
+    {
+        $browser = 'x-www-browser';
+    }
 
     my $refresh_rate="";
     while($refresh_rate !~ /^\d+/)
@@ -160,14 +164,22 @@ sub create_config()
     my $labels_unread="";
     while($labels_unread !~ /^[YN]/i)
     {
-        $labels_unread = prompt(gettext('Display labels with no unread items').' [Y/n]:') | 'Y';
+        $labels_unread = prompt(gettext('Display labels with no unread items').' [Y/n]:');
+        if($labels_unread eq '')
+        {
+            $labels_unread = "Y";
+        }
     }
     $labels_unread = ($labels_unread =~ /y/i) ? 1 : 0;
 
     my $unread_desktop_notification="";
     while($unread_desktop_notification !~ /^[YN]/i)
     {
-        $labels_unread = prompt(gettext('Display unread desktop notifications').' [Y/n]:') | 'Y';
+        $unread_desktop_notification = prompt(gettext('Display unread desktop notifications').' [Y/n]:');
+        if($unread_desktop_notification eq '')
+        {
+            $unread_desktop_notification = "Y";
+        }
     }
     $unread_desktop_notification = ($unread_desktop_notification =~ /y/i) ? 1 : 0;
 
