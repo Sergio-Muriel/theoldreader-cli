@@ -1,3 +1,9 @@
+## 0.6
+
+### Bug fix:
+
+- Fix utf8 character on notifications
+
 ## 0.5
 
 ### Bug fix:

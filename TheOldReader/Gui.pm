@@ -1622,6 +1622,7 @@ sub right_container_unread()
 sub notify()
 {
     my ($self,$text) = @_;
+    utf8::decode($text);
     system(TheOldReader::Constants::NOTIFY_BIN,'-i',$self->{'path'}.'images/logo.png', $text);
 }
 
