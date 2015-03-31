@@ -39,20 +39,21 @@ sub read_config()
     $self->{'browser'}='x-www-browser';
     $self->{'unread_desktop_notification'}=1;
     $self->{'triggers'} = ();
+    $self->{'config_comments'} = ();
 
 
     open(CONFIG, $self->{'config'});
     while(<CONFIG>)
     {
-        /^token:(.*)$/ and $self->{'token'}=$1;
-        /^max_items_displayed:(\d+)$/ and $self->{'max_items_displayed'}=$1;
-        /^only_unread:(\d*)$/ and $self->{'only_unread'}=$1;
-        /^labels_unread:(\d*)$/ and $self->{'labels_unread'}=$1;
-        /^display_feeds:(\d*)$/ and $self->{'display_feeds'}=$1;
-        /^refresh_rate:(\d*)$/ and $self->{'refresh_rate'}=$1;
-        /^browser:(.*)$/ and $self->{'browser'}=$1;
-        /^unread_desktop_notification:(.*)$/ and $self->{'unread_desktop_notification'}=$1;
-        /^trigger:(.*?)$/ and do {
+        if(/^token:(.*)$/) { $self->{'token'}=$1; }
+        elsif(/^max_items_displayed:(\d+)$/) {  $self->{'max_items_displayed'}=$1; }
+        elsif(/^only_unread:(\d*)$/) {  $self->{'only_unread'}=$1; }
+        elsif(/^labels_unread:(\d*)$/){ $self->{'labels_unread'}=$1; }
+        elsif(/^display_feeds:(\d*)$/){ $self->{'display_feeds'}=$1; }
+        elsif(/^refresh_rate:(\d*)$/) { $self->{'refresh_rate'}=$1; }
+        elsif(/^browser:(.*)$/) { $self->{'browser'}=$1; }
+        elsif(/^unread_desktop_notification:(.*)$/) { $self->{'unread_desktop_notification'}=$1; }
+        elsif(/^trigger:(.*?)$/) {
             my %trigger = ();
             $trigger{'raw'} = $1;
             $trigger{'check'} = [];
@@ -64,10 +65,15 @@ sub read_config()
                 push(@{$trigger{'run'}}, split(/[=,]/, $runs));
             }
             push(@{$self->{'triggers'}}, \%trigger);
-        };
+        }
+        else
+        {
+            push(@{$self->{'config_comments'}}, $_);
+        }
     }
     close(CONFIG);
 }
+
 sub save_config()
 {
     my ($self) = @_;
@@ -122,6 +128,10 @@ sub save_config()
         {
             print WRITE "trigger:".$$trigger{'raw'}."\n";
         }
+    }
+    foreach(@{$self->{'config_comments'}})
+    {
+        print WRITE $_;
     }
     close WRITE;
 }

@@ -4,6 +4,7 @@
 
 - Fix utf8 character on notifications
 - Remove warning adding a feed
+- Preserve comments on configuration files when updating
 
 ### Enhancement:
 
