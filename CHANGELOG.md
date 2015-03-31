@@ -1,3 +1,10 @@
+## 0.7
+
+### Bug fix:
+
+
+### Enhancement:
+
 ## 0.6
 
 ### Bug fix:

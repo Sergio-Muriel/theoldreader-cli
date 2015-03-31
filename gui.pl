@@ -6,7 +6,7 @@ use Data::Dumper;
 use Carp qw(croak);
 use TheOldReader::GuiShared;
 use TheOldReader::GuiBackground;
-use TheOldReader::Gui;
+use TheOldReader::GuiTickit;
 use threads;
 use threads::shared;
 use Cwd 'abs_path';
@@ -49,7 +49,7 @@ if(!$config)
 # No conf file, create new one
 if(!-f $config)
 {
-    my $client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config, 'path' => $path);
+    my $client = TheOldReader::GuiTickit->new('debug' => $debug, 'config' => $config, 'path' => $path);
     $client->create_config();
 }
 
@@ -72,7 +72,7 @@ $bg->detach();
 
 
 # Init gui
-$client = TheOldReader::Gui->new('debug' => $debug, 'config' => $config, 'share' => $obj, 'path' => $path);
+$client = TheOldReader::GuiTickit->new('debug' => $debug, 'config' => $config, 'share' => $obj, 'path' => $path);
 $client->init();
 
 

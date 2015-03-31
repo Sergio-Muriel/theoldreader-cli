@@ -20,7 +20,7 @@ On debian you can install the packages using the apt command:
 
     $ apt-get install libjson-perl libwww-perl libio-prompt-perl libcurses-ui-perl libnotify-bin
 
-    $ cpan -i Curses::UI::POE
+    $ cpan -i Tickit POEx::Tickit POE
 
 ### If you don't want the gui, just install
 
