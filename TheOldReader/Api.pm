@@ -508,7 +508,7 @@ sub edit_feed()
     my %form = ();
     $form{'ac'} = 'edit';
     $form{'s'} = $id;
-    if($name=~ /\S/)
+    if(defined($name) and $name=~ /\S/)
     {
         $form{'t'} = $name;
     }
