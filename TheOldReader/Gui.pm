@@ -398,7 +398,11 @@ sub display_labels()
             $gui_labels->{'display_labels'}{$labelid} = $labelname;
             $gui_labels->{'original_labels'}{$labelid} = " > ".$labelname;
 
-            my $num = " (".$counts{$labelid}.")";
+            my $num="";
+            if($counts{$labelid})
+            {
+                $num = " (".$counts{$labelid}.")";
+            }
             my $spaces = " "x(TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1-length($gui_labels->{'original_labels'}{$labelid})-length($num));
             $gui_labels->{'labels'}{$labelid} = substr($gui_labels->{'original_labels'}{$labelid},0, (TheOldReader::Constants::GUI_CATEGORIES_WIDTH-1)-length($num)).$spaces.$num;
 
@@ -907,15 +911,13 @@ sub run_triggers()
                         if($run eq 'read')
                         {
                             $self->log("Run read");
-                            $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
-                            $self->update_loading_list($id);
+                            $self->mark_as_read($id);
                         }
                         elsif($run eq 'open')
                         {
                             $self->log("Run open");
                             $self->open_item($id);
-                            $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
-                            $self->update_loading_list($id);
+                            $self->mark_as_read($id);
                         }
                         elsif($run eq 'star')
                         {
@@ -1205,8 +1207,7 @@ sub display_item()
     my $text="";
     if($item)
     {
-        $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
-        $self->update_loading_list($id);
+        $self->mark_as_read($id);
 
         # Date
         my ($S,$M,$H,$d,$m,$Y) = localtime($$item{'published'});
@@ -1589,6 +1590,27 @@ sub right_container_broadcast()
     }
 }
 
+sub mark_as_read()
+{
+    my ($self,$id) = @_;
+
+    my $feed = $self->{'cache'}->load_cache("item tag:google.com,2005:reader_item_".$id);
+    if(!$feed)
+    {
+        $self->log(gettext("Cannot find feed")." $id");
+        return;
+    }
+    if(grep(/user\/-\/state\/com.google\/fresh/,@{$feed->{'categories'}}))
+    {
+        $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
+        $self->update_loading_list($id);
+    }
+    else
+    {
+        $self->log("Not marking $id as read: already read!");
+    }
+}
+
 sub right_container_read()
 {
     my ($self,$id) = @_;
@@ -1597,8 +1619,7 @@ sub right_container_read()
         $id = $self->{'right_container'}->get_active_value();
     }
 
-    $self->add_background_job("mark_read ".$id, gettext("Marking as read"));
-    $self->update_loading_list($id);
+    $self->mark_as_read($id);
     $self->goto_next();
 }
 
