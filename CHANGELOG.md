@@ -4,6 +4,10 @@
 
 - Fix utf8 character on notifications
 
+### Enhancement:
+
+- Do not put as read item that are already read
+
 ## 0.5
 
 ### Bug fix:
