@@ -122,6 +122,16 @@ sub save_config()
     {
         print WRITE "refresh_rate:".TheOldReader::Constants::DEFAULT_REFRESH_RATE."\n";
     }
+
+    if(defined($self->{'unread_desktop_notification'}))
+    {
+        print WRITE "unread_desktop_notification:".$self->{'unread_desktop_notification'}."\n";
+    }
+    else
+    {
+        print WRITE "unread_desktop_notification:1\n";
+    }
+
     if(defined($self->{'triggers'}))
     {
         foreach my $trigger(@{$self->{'triggers'}})
