@@ -3,10 +3,12 @@
 ![The Old Reader GUI](http://tfeserver.be/dl/theoldreader_client/theoldreader-cli6.png)
 
 ## Unofficial program
+
 This is an unofficial perl client/gui  based on the documentation found at https://github.com/theoldreader/api.
 
 
 ## Dependencies
+
 The following modules are used by the package:
 
 * JSON
